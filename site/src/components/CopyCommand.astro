@@ -7,38 +7,42 @@ interface Props {
 const { command, class: className } = Astro.props;
 ---
 
-<div
-  class:list={[
-    'copy-cmd group flex min-w-0 items-center gap-3 rounded-xl border border-line bg-paper-raised py-2 pr-2 pl-4 font-mono text-[0.86rem]',
-    className,
-  ]}
->
-  <span class="select-none text-ink-faint" aria-hidden="true">$</span>
-  <code class="min-w-0 flex-1 overflow-x-auto whitespace-nowrap text-ink [scrollbar-width:none]">{command}</code>
+<div class:list={['flex min-w-0 items-center gap-3 rounded-full border border-line-strong bg-surface py-1.5 pr-1.5 pl-5 font-mono text-[0.84rem]', className]}>
+  <span class="select-none text-faint" aria-hidden="true">$</span>
+  <code class="min-w-0 flex-1 overflow-x-auto whitespace-nowrap text-fg [scrollbar-width:none]">{command}</code>
   <button
     type="button"
     data-copy={command}
-    class="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-elephant px-3 font-sans text-sm font-semibold text-paper transition-colors hover:bg-elephant-strong"
+    aria-label="Copy command"
+    class="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-fg"
   >
-    <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <svg data-icon="copy" viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <rect x="9" y="9" width="13" height="13" rx="2"></rect>
       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
     </svg>
-    <span data-label>Copy</span>
+    <svg data-icon="done" viewBox="0 0 24 24" class="hidden size-4 text-green" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5"></path>
+    </svg>
   </button>
 </div>
 
 <script>
   for (const btn of document.querySelectorAll<HTMLButtonElement>('button[data-copy]')) {
     btn.addEventListener('click', async () => {
-      const label = btn.querySelector('[data-label]');
       try {
         await navigator.clipboard.writeText(btn.dataset.copy ?? '');
-        if (label) label.textContent = 'Copied';
       } catch {
-        if (label) label.textContent = 'Press ⌘C';
+        return;
       }
-      setTimeout(() => label && (label.textContent = 'Copy'), 1600);
+      const [copy, done] = [btn.querySelector('[data-icon=copy]'), btn.querySelector('[data-icon=done]')];
+      copy?.classList.add('hidden');
+      done?.classList.remove('hidden');
+      btn.setAttribute('aria-label', 'Copied');
+      setTimeout(() => {
+        copy?.classList.remove('hidden');
+        done?.classList.add('hidden');
+        btn.setAttribute('aria-label', 'Copy command');
+      }, 1600);
     });
   }
 </script>
