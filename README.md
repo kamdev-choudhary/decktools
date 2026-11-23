@@ -181,8 +181,8 @@ edited.
 ## Development
 
 ```bash
-git clone https://github.com/kamdev-bharatai/project-db.git
-cd project-db
+git clone https://github.com/kamdev-bharatai/pgdeck.git
+cd pgdeck
 pnpm install
 
 # API on :47615 (no login) + Vite UI with hot reload on :47616

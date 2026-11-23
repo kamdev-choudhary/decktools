@@ -8,12 +8,13 @@ import { useMemo, useSyncExternalStore } from 'react';
  *   #/<db>                     → database overview
  *   #/<db>/sql                 → SQL editor
  *   #/<db>/t/<schema>/<table>  → table
+ *   …/<table>?col=value        → table pre-filtered with col = value (used by FK links)
  */
 export type Route =
   | { view: 'root' }
   | { view: 'home'; db: string }
   | { view: 'sql'; db: string }
-  | { view: 'table'; db: string; schema: string; table: string };
+  | { view: 'table'; db: string; schema: string; table: string; eq: Record<string, string> };
 
 function decode(s: string): string {
   try {
@@ -24,17 +25,26 @@ function decode(s: string): string {
 }
 
 export function parseRoute(hash: string): Route {
-  const [db, section, schema, table] = hash.replace(/^#\/?/, '').split('/').map(decode);
+  const raw = hash.replace(/^#\/?/, '');
+  const q = raw.indexOf('?');
+  const path = q >= 0 ? raw.slice(0, q) : raw;
+  const query = q >= 0 ? raw.slice(q + 1) : '';
+  const [db, section, schema, table] = path.split('/').map(decode);
   if (!db) return { view: 'root' };
   if (section === 'sql') return { view: 'sql', db };
-  if (section === 't' && schema && table) return { view: 'table', db, schema, table };
+  if (section === 't' && schema && table) {
+    return { view: 'table', db, schema, table, eq: Object.fromEntries(new URLSearchParams(query)) };
+  }
   return { view: 'home', db };
 }
 
 const enc = encodeURIComponent;
 export const dbHref = (db: string) => `#/${enc(db)}`;
 export const sqlHref = (db: string) => `#/${enc(db)}/sql`;
-export const tableHref = (db: string, schema: string, table: string) => `#/${enc(db)}/t/${enc(schema)}/${enc(table)}`;
+export const tableHref = (db: string, schema: string, table: string, eq?: Record<string, string>) => {
+  const qs = eq && Object.keys(eq).length ? `?${new URLSearchParams(eq)}` : '';
+  return `#/${enc(db)}/t/${enc(schema)}/${enc(table)}${qs}`;
+};
 
 const subscribe = (cb: () => void) => {
   window.addEventListener('hashchange', cb);

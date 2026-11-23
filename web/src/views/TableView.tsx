@@ -14,6 +14,8 @@ interface TableViewProps {
   db: string;
   schema: string;
   table: string;
+  /** Initial equality filters from the URL (FK navigation). */
+  eq: Record<string, string>;
   readonly: boolean;
 }
 
@@ -22,7 +24,7 @@ interface TableViewProps {
  * nearly all of the vertical space. The table name itself is in the header
  * breadcrumb, so it isn't repeated here.
  */
-export function TableView({ db, schema, table, readonly }: TableViewProps) {
+export function TableView({ db, schema, table, eq, readonly }: TableViewProps) {
   const meta = useMeta(db, schema, table);
   const [tab, setTab] = useState('data');
   // The Data tab renders its filter chips and actions into this slot.
@@ -76,10 +78,10 @@ export function TableView({ db, schema, table, readonly }: TableViewProps) {
       </div>
 
       <TabsContent value="data" className="flex min-h-0 flex-col data-[state=inactive]:hidden">
-        <DataTab db={db} meta={m} actionsSlot={tab === 'data' ? actionsSlot : null} />
+        <DataTab db={db} meta={m} initialEq={eq} actionsSlot={tab === 'data' ? actionsSlot : null} />
       </TabsContent>
       <TabsContent value="structure" className="min-h-0 overflow-y-auto data-[state=inactive]:hidden">
-        <StructureTab meta={m} />
+        <StructureTab db={db} meta={m} />
       </TabsContent>
     </Tabs>
   );

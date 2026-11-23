@@ -26,11 +26,24 @@ import { cn } from '@/lib/utils';
 
 type EditorState = { mode: 'insert' } | { mode: 'edit'; index: number; focusField: string };
 
-export function DataTab({ db, meta, actionsSlot }: { db: string; meta: TableMeta; actionsSlot: HTMLElement | null }) {
+interface DataTabProps {
+  db: string;
+  meta: TableMeta;
+  /** Equality filters to start with (from an FK link). Unknown columns are ignored. */
+  initialEq: Record<string, string>;
+  actionsSlot: HTMLElement | null;
+}
+
+export function DataTab({ db, meta, initialEq, actionsSlot }: DataTabProps) {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(100);
   const [sort, setSort] = useState<{ col: string; dir: SortDir } | null>(null);
-  const [filterState, setFilterState] = useState<FilterState>({ filters: [], match: 'and' });
+  const [filterState, setFilterState] = useState<FilterState>(() => ({
+    filters: Object.entries(initialEq)
+      .filter(([col]) => meta.columns.some((c) => c.name === col))
+      .map(([col, val]) => ({ col, op: '=' as const, val })),
+    match: 'and',
+  }));
   const { filters, match } = filterState;
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [editor, setEditor] = useState<EditorState | null>(null);

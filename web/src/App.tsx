@@ -77,7 +77,14 @@ function Shell({ db, session }: { db: string; session: SessionInfo }) {
   if (route.view === 'sql') content = <SqlView db={db} />;
   else if (route.view === 'table')
     content = (
-      <TableView key={`${route.schema}.${route.table}`} db={db} schema={route.schema} table={route.table} readonly={info.data?.readonly ?? false} />
+      <TableView
+        key={`${route.schema}.${route.table}?${new URLSearchParams(route.eq)}`}
+        db={db}
+        schema={route.schema}
+        table={route.table}
+        eq={route.eq}
+        readonly={info.data?.readonly ?? false}
+      />
     );
   else content = <OverviewView db={db} />;
 
