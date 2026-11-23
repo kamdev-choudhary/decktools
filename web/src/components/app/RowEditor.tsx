@@ -3,11 +3,11 @@ import { useRef, useState } from 'react';
 import type { Cell, Column, TableMeta } from '@shared/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { errorMessage, Kbd, Spinner } from './feedback';
 import { FieldInput } from './FieldInput';
+import { TruncatedText } from './TruncatedText';
 
 interface FieldState {
   text: string;
@@ -34,6 +34,24 @@ function initialState(col: Column, mode: RowEditorProps['mode'], row?: Record<st
   // Omitting a column with a default, identity, or that accepts NULL is the
   // safest starting point; an empty string would fail for most non-text types.
   return { text: '', isNull: false, useDefault: !!col.default || col.identity || col.nullable };
+}
+
+/** Small on/off button for NULL / Default, sized to sit beside a 36px input. */
+function ToggleChip({ pressed, onToggle, title, children }: { pressed: boolean; onToggle: (on: boolean) => void; title: string; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      title={title}
+      onClick={() => onToggle(!pressed)}
+      className={
+        'h-9 shrink-0 rounded-md border px-2.5 font-mono text-[11px] transition-colors ' +
+        (pressed ? 'border-primary bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground')
+      }
+    >
+      {children}
+    </button>
+  );
 }
 
 export function RowEditor({ meta, mode, row, focusField, onClose, onSave }: RowEditorProps) {
@@ -79,7 +97,7 @@ export function RowEditor({ meta, mode, row, focusField, onClose, onSave }: RowE
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="flex max-h-[calc(100dvh-4rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
+        className="flex max-h-[calc(100dvh-4rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl"
         onOpenAutoFocus={(e) => {
           // Focus the cell that was double-clicked rather than the first control.
           e.preventDefault();
@@ -114,49 +132,59 @@ export function RowEditor({ meta, mode, row, focusField, onClose, onSave }: RowE
               const placeholder = st.isNull ? 'NULL' : st.useDefault ? (c.default ?? (c.identity ? 'identity' : 'NULL')) : '';
               const id = `field-${c.name}`;
               return (
-                <div key={c.name} className="space-y-2 py-3.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Label id={`${id}-label`} htmlFor={id} className="font-mono text-[13px]">
-                      {pk.has(c.name) && <KeyRound className="size-3 text-warning" />}
-                      {c.name}
+                <div
+                  key={c.name}
+                  className="grid gap-x-5 gap-y-1.5 py-3 sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] sm:items-start"
+                >
+                  {/* Left: name, type, flags */}
+                  <div className="min-w-0 sm:pt-1.5">
+                    <Label id={`${id}-label`} htmlFor={id} className="flex min-w-0 items-center gap-1.5 font-mono text-[13px]">
+                      {pk.has(c.name) && <KeyRound className="size-3 shrink-0 text-warning" aria-label="Primary key" />}
+                      <TruncatedText text={c.name} side="left" />
                     </Label>
-                    <span className="font-mono text-[11px] text-muted-foreground">{c.type}</span>
-                    {c.generated && <Badge variant="secondary">generated</Badge>}
-                    {isChanged(c.name) && (
-                      <Badge variant="outline" className="border-warning/40 text-warning">
-                        modified
-                      </Badge>
-                    )}
-                    <div className="ml-auto flex items-center gap-4">
-                      {mode === 'insert' && (
-                        <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
-                          <Checkbox
-                            checked={st.useDefault}
-                            onCheckedChange={(v) => update(c.name, { useDefault: v === true, isNull: false })}
-                          />
-                          Default
-                        </label>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                      <TruncatedText text={c.type} side="left" className="font-mono text-[11px] text-muted-foreground" />
+                      {c.generated && (
+                        <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
+                          generated
+                        </Badge>
                       )}
-                      {c.nullable && !c.generated && (
-                        <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
-                          <Checkbox
-                            checked={st.isNull}
-                            onCheckedChange={(v) => update(c.name, { isNull: v === true, useDefault: false })}
-                          />
-                          NULL
-                        </label>
+                      {isChanged(c.name) && (
+                        <Badge variant="outline" className="border-warning/40 px-1.5 py-0 text-[10px] text-warning">
+                          modified
+                        </Badge>
                       )}
                     </div>
                   </div>
-                  <FieldInput
-                    id={id}
-                    column={c}
-                    value={st.isNull ? '' : st.text}
-                    placeholder={placeholder}
-                    disabled={c.generated || st.isNull}
-                    changed={isChanged(c.name)}
-                    onChange={(text) => update(c.name, { text, useDefault: false })}
-                  />
+
+                  {/* Right: the editor, with NULL / Default toggles beside it */}
+                  <div className="flex min-w-0 items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <FieldInput
+                        id={id}
+                        column={c}
+                        value={st.isNull ? '' : st.text}
+                        placeholder={placeholder}
+                        disabled={c.generated || st.isNull}
+                        changed={isChanged(c.name)}
+                        onChange={(text) => update(c.name, { text, useDefault: false })}
+                      />
+                    </div>
+                    {mode === 'insert' && !c.generated && (
+                      <ToggleChip
+                        pressed={st.useDefault}
+                        onToggle={(on) => update(c.name, { useDefault: on, isNull: false })}
+                        title={c.default ? `Use default: ${c.default}` : 'Leave out so Postgres applies its default'}
+                      >
+                        Default
+                      </ToggleChip>
+                    )}
+                    {c.nullable && !c.generated && (
+                      <ToggleChip pressed={st.isNull} onToggle={(on) => update(c.name, { isNull: on, useDefault: false })} title="Set to NULL">
+                        NULL
+                      </ToggleChip>
+                    )}
+                  </div>
                 </div>
               );
             })}

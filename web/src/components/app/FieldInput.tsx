@@ -1,4 +1,5 @@
 import { Braces, Clock, Shuffle } from 'lucide-react';
+import { useState } from 'react';
 import type { Column } from '@shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,8 +73,11 @@ interface FieldInputProps {
 /** A type-appropriate editor for one column value. Values stay Postgres text literals. */
 export function FieldInput({ id, column, value, disabled, placeholder, changed, onChange }: FieldInputProps) {
   // Single-line fields fall back to a textarea for unusually long or multi-line values.
+  // Decided once from the initial value, so typing past the limit doesn't swap
+  // the element (and steal focus) mid-edit.
+  const [startsLong] = useState(() => value.length > 60 || value.includes('\n'));
   const baseKind = fieldKind(column);
-  const kind: FieldKind = baseKind === 'line' && (value.length > 120 || value.includes('\n')) ? 'text' : baseKind;
+  const kind: FieldKind = baseKind === 'line' && startsLong ? 'text' : baseKind;
   const ring = changed && 'border-warning/60 focus-visible:border-warning';
   const common = { id, 'data-field': column.name, disabled, spellCheck: false } as const;
 
@@ -133,7 +137,7 @@ export function FieldInput({ id, column, value, disabled, placeholder, changed, 
           type="date"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={cn('w-48 font-mono text-[13px]', ring)}
+          className={cn('w-full font-mono text-[13px] sm:w-56', ring)}
         />
       );
 
@@ -148,7 +152,7 @@ export function FieldInput({ id, column, value, disabled, placeholder, changed, 
             onChange={(e) => onChange(e.target.value)}
             className={cn('font-mono text-[13px]', ring)}
           />
-          <Button type="button" variant="outline" size="sm" className="h-9" disabled={disabled} onClick={() => onChange(nowLiteral(column))}>
+          <Button type="button" variant="outline" size="sm" className="h-9 shrink-0" disabled={disabled} onClick={() => onChange(nowLiteral(column))}>
             <Clock /> Now
           </Button>
         </div>
@@ -164,7 +168,7 @@ export function FieldInput({ id, column, value, disabled, placeholder, changed, 
             onChange={(e) => onChange(e.target.value)}
             className={cn('font-mono text-[13px]', ring)}
           />
-          <Button type="button" variant="outline" size="sm" className="h-9" disabled={disabled} onClick={() => onChange(crypto.randomUUID())}>
+          <Button type="button" variant="outline" size="sm" className="h-9 shrink-0" disabled={disabled} onClick={() => onChange(crypto.randomUUID())}>
             <Shuffle /> Generate
           </Button>
         </div>
@@ -179,7 +183,7 @@ export function FieldInput({ id, column, value, disabled, placeholder, changed, 
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
           aria-invalid={value !== '' && !/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$|^[-+]?(Infinity|NaN)$/.test(value.trim())}
-          className={cn('w-full max-w-64 text-right font-mono text-[13px] tabular-nums', ring)}
+          className={cn('w-full font-mono text-[13px] tabular-nums', ring)}
         />
       );
 

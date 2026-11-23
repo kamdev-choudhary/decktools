@@ -2,11 +2,11 @@ import { Download, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
-import type { Cell, Filter, RowKey, SortDir, TableMeta } from '@shared/types';
+import type { Cell, RowKey, SortDir, TableMeta } from '@shared/types';
 import { useRowMutations, useRows } from '@/api/hooks';
 import { DataGrid } from '@/components/app/DataGrid';
 import { ErrorAlert, errorMessage } from '@/components/app/feedback';
-import { FilterControl } from '@/components/app/FilterBar';
+import { FilterControl, type FilterState } from '@/components/app/FilterBar';
 import { Pagination } from '@/components/app/Pagination';
 import { RowEditor } from '@/components/app/RowEditor';
 import {
@@ -30,7 +30,8 @@ export function DataTab({ db, meta, actionsSlot }: { db: string; meta: TableMeta
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(100);
   const [sort, setSort] = useState<{ col: string; dir: SortDir } | null>(null);
-  const [filters, setFilters] = useState<Filter[]>([]);
+  const [filterState, setFilterState] = useState<FilterState>({ filters: [], match: 'and' });
+  const { filters, match } = filterState;
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -43,6 +44,7 @@ export function DataTab({ db, meta, actionsSlot }: { db: string; meta: TableMeta
     sort: sort?.col,
     dir: sort?.dir,
     filters,
+    match,
   });
   const { insert, update, remove } = useRowMutations(db, meta.schema, meta.table);
   const data = rows.data;
@@ -122,9 +124,9 @@ export function DataTab({ db, meta, actionsSlot }: { db: string; meta: TableMeta
 
       <FilterControl
         columns={meta.columns}
-        value={filters}
+        value={filterState}
         onChange={(f) => {
-          setFilters(f);
+          setFilterState(f);
           setPage(0);
         }}
       />
