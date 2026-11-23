@@ -1,0 +1,164 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/schibsted-grotesk';
+@import '@fontsource-variable/geist-mono';
+
+/*
+ * pgdeck site tokens. The palette comes from Postgres itself: the elephant's
+ * slate blue on cool paper, navy ink, and one amber borrowed from the app's
+ * primary-key icon. Dark mode gets its own steps, not an inversion.
+ */
+:root {
+  color-scheme: light;
+  --paper: #f7f9fb;
+  --paper-raised: #ffffff;
+  --ink: #0e1a2b;
+  --ink-soft: #46566c;
+  --ink-faint: #6b7a8f;
+  --elephant: #336791;
+  --elephant-strong: #24506f;
+  --tide: #dde8f2;
+  --tide-soft: #edf3f8;
+  --line: #d3dde8;
+  --amber: #c98411;
+  --term: #0e1a2b;
+  --term-ink: #d6e2ef;
+  --term-dim: #7f93ab;
+  --term-ok: #6fcf97;
+  --term-link: #8fc1ec;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --paper: #0a1320;
+    --paper-raised: #0f1b2b;
+    --ink: #e5edf6;
+    --ink-soft: #a9b8ca;
+    --ink-faint: #7d8ea4;
+    --elephant: #86b3dc;
+    --elephant-strong: #a9cbea;
+    --tide: #16263b;
+    --tide-soft: #111f31;
+    --line: #22354e;
+    --amber: #f0b34e;
+    --term: #060c15;
+    --term-ink: #d6e2ef;
+    --term-dim: #71849c;
+  }
+}
+
+@theme inline {
+  --font-sans: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-elephant: var(--elephant);
+  --color-elephant-strong: var(--elephant-strong);
+  --color-tide: var(--tide);
+  --color-tide-soft: var(--tide-soft);
+  --color-line: var(--line);
+  --color-amber: var(--amber);
+  --color-term: var(--term);
+  --color-term-ink: var(--term-ink);
+  --color-term-dim: var(--term-dim);
+  --color-term-ok: var(--term-ok);
+  --color-term-link: var(--term-link);
+}
+
+@layer base {
+  html {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 106.25%; /* 17px body */
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    min-height: 100dvh;
+    line-height: 1.55;
+    font-feature-settings: 'ss01', 'tnum' 0;
+  }
+  ::selection {
+    background: var(--tide);
+    color: var(--ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--elephant);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Display type: heavy, tight, slightly condensed by tracking. */
+  .display {
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
+    text-wrap: balance;
+  }
+  .h2 {
+    font-weight: 750;
+    font-size: clamp(2rem, 1.4rem + 2.4vw, 3.15rem);
+    letter-spacing: -0.035em;
+    line-height: 1;
+    text-wrap: balance;
+  }
+  .lede {
+    font-size: 1.18rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 58ch;
+    text-wrap: pretty;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .wrap {
+      padding-inline: 2rem;
+    }
+  }
+  /* The browser chrome around product screenshots. */
+  .frame {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--paper-raised);
+    overflow: hidden;
+  }
+  .frame-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 2.5rem;
+    padding-inline: 0.9rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--tide-soft);
+  }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.7;
+  }
+}
