@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
@@ -8,9 +9,12 @@ export default defineConfig({
   root: here('.'),
   // Relative asset URLs so the built UI works under any proxy path prefix.
   base: './',
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
-    alias: { '@shared': here('../src/shared') },
+    alias: {
+      '@': here('./src'),
+      '@shared': here('../src/shared'),
+    },
   },
   build: {
     outDir: here('../dist/web'),

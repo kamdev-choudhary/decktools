@@ -5,6 +5,8 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "types": ["node"],
+    // Only here so the shadcn CLI can resolve components.json aliases.
+    "paths": { "@/*": ["./web/src/*"] },
     "strict": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,

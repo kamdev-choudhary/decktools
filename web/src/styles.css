@@ -1,0 +1,155 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Vercel / Geist palette: neutral greys, near-black and white, one blue accent
+ * used sparingly. Primary actions are the inverse of the page (black on light,
+ * white on dark).
+ */
+:root {
+  --radius: 0.5rem;
+  --background: #ffffff;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #171717;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f2f2;
+  --secondary-foreground: #171717;
+  --muted: #f2f2f2;
+  --muted-foreground: #666666;
+  --accent: #ebebeb;
+  --accent-foreground: #171717;
+  --destructive: #e5484d;
+  --border: #ebebeb;
+  --input: #e0e0e0;
+  --ring: #a1a1a1;
+  --link: #0070f3;
+  --warning: #ab570a;
+  --success: #28a948;
+  --grid-header: #fafafa;
+  --row-hover: #fafafa;
+  --row-selected: #f0f6ff;
+  --null: #a8a8a8;
+  --sidebar: #fafafa;
+  --sidebar-foreground: #171717;
+  --sidebar-border: #ebebeb;
+  --sidebar-accent: #ebebeb;
+  --sidebar-accent-foreground: #171717;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #0a0a0a;
+  --card-foreground: #ededed;
+  --popover: #0a0a0a;
+  --popover-foreground: #ededed;
+  --primary: #ededed;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ededed;
+  --muted: #1a1a1a;
+  --muted-foreground: #a1a1a1;
+  --accent: #1f1f1f;
+  --accent-foreground: #ededed;
+  --destructive: #e5484d;
+  --border: #242424;
+  --input: #2e2e2e;
+  --ring: #525252;
+  --link: #52a8ff;
+  --warning: #ffb224;
+  --success: #3dd68c;
+  --grid-header: #0f0f0f;
+  --row-hover: #111111;
+  --row-selected: #0d1a2e;
+  --null: #575757;
+  --sidebar: #000000;
+  --sidebar-foreground: #ededed;
+  --sidebar-border: #1f1f1f;
+  --sidebar-accent: #1a1a1a;
+  --sidebar-accent-foreground: #ededed;
+}
+
+@theme inline {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-grid-header: var(--grid-header);
+  --color-row-hover: var(--row-hover);
+  --color-row-selected: var(--row-selected);
+  --color-null: var(--null);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+  ::selection {
+    @apply bg-link/25;
+  }
+}
+
+/* CodeMirror: blend into the theme instead of its own palette. */
+@layer components {
+  .sql-editor .cm-editor {
+    @apply h-full bg-transparent text-[13px];
+  }
+  .sql-editor .cm-editor.cm-focused {
+    outline: none;
+  }
+  .sql-editor .cm-scroller {
+    @apply font-mono;
+  }
+  .sql-editor .cm-gutters {
+    @apply border-r border-border bg-transparent text-muted-foreground;
+  }
+  .sql-editor .cm-activeLine,
+  .sql-editor .cm-activeLineGutter {
+    @apply bg-muted/50;
+  }
+}
