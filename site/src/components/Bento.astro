@@ -1,74 +1,102 @@
 ---
+import Corners from './Corners.astro';
+import Cross from './Cross.astro';
+
 // A deterministic "live" series for the sparkline, shaped like the app's chart.
 const N = 64;
 let seed = 7;
-const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 const values = Array.from({ length: N }, (_, i) => 190 + 55 * Math.sin(i / 6) + 30 * Math.sin(i / 2.3) + (rand() - 0.5) * 40);
 const W = 640;
 const H = 170;
-const max = 320;
 const x = (i: number) => (i / (N - 1)) * W;
-const y = (v: number) => H - (v / max) * H;
+const y = (v: number) => H - (v / 320) * H;
 const line = values.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
 const area = `${line} L${W} ${H} L0 ${H} Z`;
 const last = values.at(-1)!;
+
+const icon = {
+  key: '<path d="M2.6 18.4 9 12"/><circle cx="15" cy="9" r="5"/><path d="M15 9h.01"/><path d="m5 16 2 2"/>',
+  exact: '<path d="M4 7h16M4 12h10M4 17h6"/><path d="m16 15 2 2 4-4"/>',
+  actions: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/>',
+  backup: '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  heart: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+  proxy: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  keys: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/>',
+  theme: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+};
+
+const cells = [
+  ['key', 'Foreign keys you can follow', 'Preview the referenced row from any cell, jump to it, or see every table pointing back.'],
+  ['exact', 'Values stay exact', 'Everything travels as Postgres text: timestamps keep their zone, numeric and bigint never lose a digit.'],
+  ['actions', 'Table actions', 'Rename, duplicate, truncate, vacuum, analyze, refresh, drop, or copy the CREATE statement.'],
+  ['backup', 'Backups that restore', 'Consistent pg_dump-style backups out; plain, gzipped or custom-format dumps back in.'],
+  ['heart', 'Health checks that act', 'Never-analyzed tables, dead rows, missing indexes, with a button that fixes them.'],
+  ['lock', 'Read-only when it matters', 'Start with --readonly and every session is read-only and editing disappears.'],
+  ['proxy', 'Works behind any proxy', 'Relative URLs, an optional base path, and WebSockets that pass through nginx or Caddy.'],
+  ['keys', 'Fast from the keyboard', '⌘K to switch databases, ⌘Enter to run SQL or save a row, Esc to close.'],
+  ['theme', 'Light and dark', 'Follows your system, or pick one. Charts and code are tuned for both.'],
+] as const;
 ---
 
-<section id="features" class="py-20 md:py-28">
-  <div class="wrap">
+<section id="features" class="section">
+  <Corners />
+  <div class="pad py-20 md:py-28">
     <div class="max-w-2xl">
       <h2 class="h2">Built for the work you actually do in a database.</h2>
-      <p class="lede mt-5">Small things, done carefully. Nothing here needs a plugin, a config file or a second tool.</p>
+      <p class="lede mt-5">Not a stripped-down viewer. Editing, schema changes, imports, backups and monitoring, in one tab.</p>
     </div>
 
-    <div class="bento mt-12 grid gap-4 md:grid-cols-6">
+    <div class="mt-12 grid gap-3 md:grid-cols-6">
       <!-- Live overview -->
-      <article class="tile flex flex-col md:col-span-4 md:row-span-1">
+      <article class="tile md:col-span-4">
         <div class="p-6 pb-0 md:p-8 md:pb-0">
-          <h3 class="text-xl font-bold tracking-tight">Live overview</h3>
-          <p class="mt-1.5 max-w-[46ch] text-ink-soft">Transactions and rows per second streamed every two seconds, with sessions, storage and health checks that fix what they find.</p>
+          <h3 class="tile-title">Live overview</h3>
+          <p class="tile-body max-w-[46ch]">Transactions and rows per second streamed every two seconds, with sessions, storage and health checks.</p>
         </div>
         <div class="mt-auto px-6 pt-8 md:px-8">
           <div class="flex flex-wrap items-end gap-x-8 gap-y-2">
             <div>
-              <div class="text-[0.8rem] text-ink-faint">Transactions / s</div>
-              <div class="text-4xl font-extrabold tracking-tight tabular-nums">{Math.round(last)}</div>
+              <div class="text-xs text-faint">Transactions / s</div>
+              <div class="text-4xl font-semibold tracking-tight tabular-nums">{Math.round(last)}</div>
             </div>
-            <div class="flex items-center gap-4 pb-1.5 text-[0.82rem] text-ink-soft">
-              <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-sm bg-[var(--chart-a)]"></span>Commits</span>
-              <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-sm bg-[var(--chart-b)]"></span>Rollbacks</span>
+            <div class="flex items-center gap-4 pb-1.5 text-xs text-muted">
+              <span class="flex items-center gap-1.5"><span class="size-2 rounded-sm bg-blue"></span>Commits</span>
+              <span class="flex items-center gap-1.5"><span class="size-2 rounded-sm bg-pink"></span>Rollbacks</span>
             </div>
-            <span class="ml-auto mb-1.5 inline-flex items-center gap-2 rounded-full border border-line px-2.5 py-1 text-xs font-medium">
-              <span class="relative flex size-2"><span class="absolute inline-flex size-full animate-ping rounded-full bg-[#30a46c] opacity-60"></span><span class="relative inline-flex size-2 rounded-full bg-[#30a46c]"></span></span>
+            <span class="mb-1.5 ml-auto inline-flex items-center gap-2 rounded-full border border-line-strong px-2.5 py-1 text-xs">
+              <span class="relative flex size-2"><span class="absolute inline-flex size-full animate-ping rounded-full bg-green opacity-60"></span><span class="relative inline-flex size-2 rounded-full bg-green"></span></span>
               Live
             </span>
           </div>
-          <svg viewBox={`0 0 ${W} ${H + 10}`} class="spark mt-4 block h-auto w-full" aria-label="A line chart of transactions per second, rising and falling around 200" role="img">
+          <svg viewBox={`0 0 ${W} ${H + 10}`} class="mt-4 block h-auto w-full" role="img" aria-label="A line chart of transactions per second, rising and falling around 200">
             <defs>
               <linearGradient id="spark-fill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0" stop-color="var(--chart-a)" stop-opacity="0.22"></stop>
-                <stop offset="1" stop-color="var(--chart-a)" stop-opacity="0"></stop>
+                <stop offset="0" stop-color="#3291ff" stop-opacity="0.3"></stop>
+                <stop offset="1" stop-color="#3291ff" stop-opacity="0"></stop>
               </linearGradient>
             </defs>
-            {[0.25, 0.5, 0.75].map((f) => <line x1="0" x2={W} y1={H * f} y2={H * f} stroke="var(--line)" stroke-dasharray="3 5"></line>)}
-            <path d={area} fill="url(#spark-fill)" class="spark-area"></path>
-            <path d={line} fill="none" stroke="var(--chart-a)" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round" pathLength="1" class="spark-line"></path>
-            <line x1="0" x2={W} y1={H - 2} y2={H - 2} stroke="var(--chart-b)" stroke-width="2"></line>
-            <circle cx={W} cy={y(last)} r="4.5" fill="var(--chart-a)" stroke="var(--paper-raised)" stroke-width="2"></circle>
+            {[0.25, 0.5, 0.75].map((f) => <line x1="0" x2={W} y1={H * f} y2={H * f} stroke="#1f1f1f" stroke-dasharray="3 5" />)}
+            <path d={area} fill="url(#spark-fill)"></path>
+            <path d={line} fill="none" stroke="#3291ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" pathLength="1" class="spark-line"></path>
+            <line x1="0" x2={W} y1={H - 1} y2={H - 1} stroke="#e5489e" stroke-width="2"></line>
+            <circle cx={W - 3} cy={y(last)} r="4.5" fill="#3291ff" stroke="#0a0a0a" stroke-width="2"></circle>
           </svg>
         </div>
       </article>
 
       <!-- Database switcher -->
-      <article class="tile flex flex-col md:col-span-2">
+      <article class="tile md:col-span-2">
         <div class="p-6 md:p-7">
-          <h3 class="text-xl font-bold tracking-tight">Every database, one ⌘K away</h3>
-          <p class="mt-1.5 text-ink-soft">Switch without restarting. Create, copy, rename and drop databases.</p>
+          <h3 class="tile-title">Every database, one ⌘K away</h3>
+          <p class="tile-body">Switch without restarting. Create, copy, rename and drop databases.</p>
         </div>
-        <div class="mx-6 mt-auto mb-6 overflow-hidden rounded-xl border border-line bg-paper text-[0.85rem] md:mx-7" aria-hidden="true">
-          <div class="flex items-center gap-2 border-b border-line px-3 py-2.5 text-ink-faint">
+        <div class="mx-6 mt-auto mb-6 overflow-hidden rounded-xl border border-line-strong bg-bg text-[0.84rem] md:mx-7" aria-hidden="true">
+          <div class="flex items-center gap-2 border-b border-line px-3 py-2.5 text-faint">
             <svg viewBox="0 0 24 24" class="size-3.5" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
             Find a database…
+            <span class="ml-auto rounded border border-line px-1 font-mono text-[0.65rem]">⌘K</span>
           </div>
           {
             [
@@ -77,134 +105,158 @@ const last = values.at(-1)!;
               ['staging', '640 MB', false],
               ['auth', '24 MB', false],
             ].map(([name, size, on]) => (
-              <div class:list={['flex items-center gap-2 px-3 py-2', on && 'bg-tide']}>
-                <span class:list={['w-3.5 text-elephant', !on && 'opacity-0']}>✓</span>
-                <span class="flex-1 font-medium">{name}</span>
-                {on && <span class="rounded bg-paper-raised px-1.5 text-[0.68rem] text-ink-soft">default</span>}
-                <span class="text-[0.75rem] text-ink-faint tabular-nums">{size}</span>
+              <div class:list={['flex items-center gap-2 px-3 py-2', on && 'bg-surface-2']}>
+                <span class:list={['w-3.5 text-blue', !on && 'opacity-0']}>✓</span>
+                <span class="flex-1">{name}</span>
+                {on && <span class="rounded border border-line-strong px-1.5 text-[0.65rem] text-muted">default</span>}
+                <span class="text-[0.72rem] text-faint tabular-nums">{size}</span>
               </div>
             ))
           }
-          <div class="border-t border-line px-3 py-2 text-[0.8rem] font-semibold text-elephant">+ New database</div>
+          <div class="border-t border-line px-3 py-2 text-[0.8rem] font-medium">+ New database</div>
         </div>
       </article>
 
       <!-- Type-aware editing -->
-      <article class="tile flex flex-col md:col-span-2">
+      <article class="tile md:col-span-2">
         <div class="p-6 md:p-7">
-          <h3 class="text-xl font-bold tracking-tight">Editors that know the type</h3>
-          <p class="mt-1.5 text-ink-soft">Menus for enums, a calendar for timestamps, checked JSON, and UUIDs in the version you already use.</p>
+          <h3 class="tile-title">Editors that know the type</h3>
+          <p class="tile-body">Menus for enums, a calendar for timestamps, checked JSON, UUIDs in the version you already use.</p>
         </div>
-        <div class="mx-6 mt-auto mb-6 space-y-2.5 text-[0.82rem] md:mx-7" aria-hidden="true">
+        <div class="mx-6 mt-auto mb-6 space-y-2 text-[0.8rem] md:mx-7" aria-hidden="true">
           <div class="flex items-center gap-2">
-            <span class="w-16 shrink-0 font-mono text-ink-faint">status</span>
-            <span class="flex h-8 flex-1 items-center justify-between rounded-lg border border-line bg-paper px-2.5">delivered <span class="text-ink-faint">▾</span></span>
+            <span class="w-[4.5rem] shrink-0 font-mono text-[0.72rem] text-faint">status</span>
+            <span class="field justify-between">delivered <span class="text-faint">▾</span></span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="w-16 shrink-0 font-mono text-ink-faint">placed_at</span>
-            <span class="flex h-8 flex-1 items-center rounded-lg border border-line bg-paper px-2.5 font-mono text-[0.75rem]">2026-08-03 14:15:58+05:30</span>
+            <span class="w-[4.5rem] shrink-0 font-mono text-[0.72rem] text-faint">placed_at</span>
+            <span class="field font-mono text-[0.72rem]">2026-08-03 14:15:58+05:30</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="w-16 shrink-0 font-mono text-ink-faint">id</span>
-            <span class="flex h-8 min-w-0 flex-1 items-center truncate rounded-lg border border-elephant/60 bg-paper px-2.5 font-mono text-[0.75rem] ring-3 ring-elephant/15">01a207ae-9328-7dab…</span>
-            <span class="flex h-8 shrink-0 items-center rounded-lg border border-line px-2 font-semibold">v7</span>
+            <span class="w-[4.5rem] shrink-0 font-mono text-[0.72rem] text-faint"><span class="text-amber">⚿</span> id</span>
+            <span class="field min-w-0 truncate border-blue/60 font-mono text-[0.72rem] ring-3 ring-blue/15">01a207ae-9328-7dab…</span>
+            <span class="field w-auto shrink-0 font-medium">v7</span>
           </div>
         </div>
       </article>
 
       <!-- Filters -->
-      <article class="tile flex flex-col md:col-span-2">
+      <article class="tile md:col-span-2">
         <div class="p-6 md:p-7">
-          <h3 class="text-xl font-bold tracking-tight">Filters that combine</h3>
-          <p class="mt-1.5 text-ink-soft">Equals, contains, in, like, is null and more, joined with AND or OR, without writing SQL.</p>
+          <h3 class="tile-title">Filters that combine</h3>
+          <p class="tile-body">Equals, contains, in, like, is null and more, joined with AND or OR. No SQL needed.</p>
         </div>
         <div class="mx-6 mt-auto mb-6 flex flex-wrap items-center gap-2 md:mx-7" aria-hidden="true">
-          <span class="chip"><span class="font-mono">status</span><span class="text-ink-faint">=</span>delivered</span>
-          <span class="inline-flex h-7 overflow-hidden rounded-full border border-line text-[0.72rem] font-bold">
-            <span class="bg-elephant px-2.5 leading-7 text-paper">AND</span><span class="px-2.5 leading-7 text-ink-faint">OR</span>
+          <span class="chip"><span class="font-mono text-blue">status</span><span class="text-faint">=</span>delivered</span>
+          <span class="inline-flex h-7 overflow-hidden rounded-full border border-line-strong text-[0.7rem] font-semibold">
+            <span class="bg-fg px-2.5 leading-7 text-bg">AND</span><span class="px-2.5 leading-7 text-faint">OR</span>
           </span>
-          <span class="chip"><span class="font-mono">total</span><span class="text-ink-faint">&gt;</span>100</span>
-          <span class="chip"><span class="font-mono">country</span><span class="text-ink-faint">in</span>DE, NL, SE</span>
-          <span class="chip border-dashed text-ink-faint">+ Add filter</span>
-        </div>
-      </article>
-
-      <!-- Foreign keys -->
-      <article class="tile flex flex-col md:col-span-2">
-        <div class="p-6 md:p-7">
-          <h3 class="text-xl font-bold tracking-tight">Foreign keys you can follow</h3>
-          <p class="mt-1.5 text-ink-soft">Preview the referenced row from any cell, jump to it, or see who points back.</p>
-        </div>
-        <div class="relative mx-6 mt-auto mb-6 grid grid-cols-2 gap-10 text-[0.78rem] md:mx-7" aria-hidden="true">
-          <svg class="pointer-events-none absolute inset-0 h-full w-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-            <path d="M44 58 C 52 58, 50 30, 58 30" fill="none" stroke="var(--elephant)" stroke-width="1.4" vector-effect="non-scaling-stroke" stroke-dasharray="4 3" class="fk-flow"></path>
-          </svg>
-          {
-            [
-              ['orders', [['id', 'bigint', true], ['customer_id', 'uuid', false, true], ['total', 'numeric', false]]],
-              ['customers', [['id', 'uuid', true, false, true], ['full_name', 'text', false], ['country', 'char(2)', false]]],
-            ].map(([table, cols]) => (
-              <div class="relative overflow-hidden rounded-xl border border-line bg-paper">
-                <div class="border-b border-line bg-tide-soft px-2.5 py-1.5 font-semibold">{table as string}</div>
-                {(cols as [string, string, boolean, boolean?, boolean?][]).map(([c, t, pk, fk, target]) => (
-                  <div class:list={['flex items-center gap-1.5 px-2.5 py-1.5', (fk || target) && 'bg-tide']}>
-                    {pk ? <span class="text-amber">⚿</span> : <span class="w-[0.6rem]" />}
-                    <span class="font-mono">{c}</span>
-                    <span class="ml-auto font-mono text-[0.68rem] text-ink-faint">{t}</span>
-                  </div>
-                ))}
-              </div>
-            ))
-          }
+          <span class="chip"><span class="font-mono text-blue">total</span><span class="text-faint">&gt;</span>100</span>
+          <span class="chip"><span class="font-mono text-blue">country</span><span class="text-faint">in</span>DE, NL, SE</span>
+          <span class="chip border-dashed text-faint">+ Add filter</span>
         </div>
       </article>
 
       <!-- Import -->
-      <article class="tile flex flex-col md:col-span-3">
-        <div class="p-6 md:p-8">
-          <h3 class="text-xl font-bold tracking-tight">Imports measured in gigabytes</h3>
-          <p class="mt-1.5 max-w-[48ch] text-ink-soft">Drop CSV, TSV or JSON Lines, gzipped or not. Files match their tables by name and stream through COPY in one transaction: a bad row rolls back and tells you the line.</p>
+      <article class="tile md:col-span-2">
+        <div class="p-6 md:p-7">
+          <h3 class="tile-title">Imports in gigabytes</h3>
+          <p class="tile-body">CSV, TSV or JSON Lines, gzipped or not, streamed through COPY. A bad row rolls back and names the line.</p>
         </div>
-        <div class="mx-6 mt-auto mb-6 rounded-xl border border-line bg-paper p-4 md:mx-8 md:mb-8" aria-hidden="true">
-          <div class="flex flex-wrap items-center gap-2 text-[0.85rem]">
-            <span class="font-mono font-medium">orders_2026.csv.gz</span>
-            <span class="chip h-6 text-[0.72rem]">→ public.orders</span>
-            <span class="ml-auto text-[0.78rem] text-ink-faint tabular-nums">1.2 GB</span>
+        <div class="mx-6 mt-auto mb-6 rounded-xl border border-line-strong bg-bg p-4 md:mx-7" aria-hidden="true">
+          <div class="flex items-center gap-2 text-[0.8rem]">
+            <span class="truncate font-mono">orders_2026.csv.gz</span>
+            <span class="ml-auto shrink-0 text-[0.72rem] text-faint">→ orders</span>
           </div>
-          <div class="mt-3 h-2 overflow-hidden rounded-full bg-tide">
-            <div class="progress h-full rounded-full bg-elephant"></div>
+          <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-2">
+            <div class="progress h-full rounded-full bg-[image:var(--brand)]"></div>
           </div>
-          <div class="mt-2.5 flex justify-between text-[0.75rem] text-ink-faint tabular-nums">
-            <span>61 MB/s</span><span>4,812,330 rows</span><span>about 9 s left</span>
+          <div class="mt-2 flex justify-between text-[0.7rem] text-faint tabular-nums">
+            <span>61 MB/s</span><span>4.8M rows</span><span>9 s left</span>
           </div>
         </div>
       </article>
 
       <!-- Schema -->
-      <article class="tile flex flex-col md:col-span-3">
-        <div class="p-6 md:p-8">
-          <h3 class="text-xl font-bold tracking-tight">Schema changes you can read first</h3>
-          <p class="mt-1.5 max-w-[48ch] text-ink-soft">Create tables, change columns, build indexes concurrently. Every dialog shows the exact SQL it will run.</p>
+      <article class="tile md:col-span-6 md:flex-row">
+        <div class="p-6 md:w-[38%] md:p-8">
+          <h3 class="tile-title">Schema changes you read before they run</h3>
+          <p class="tile-body">Create tables, add and retype columns, build indexes concurrently with sort order and partial predicates. Every dialog shows the exact SQL first.</p>
         </div>
-        <pre class="code mx-6 mt-auto mb-6 overflow-x-auto rounded-xl bg-term p-4 text-[0.74rem] text-term-ink md:mx-8 md:mb-8" aria-label="Example SQL preview"><span class="text-[#f4a6c8]">ALTER TABLE</span> <span class="text-term-link">"public"."customers"</span>
-  <span class="text-[#f4a6c8]">ADD COLUMN</span> "points" <span class="text-term-ok">integer</span> <span class="text-[#f4a6c8]">DEFAULT</span> 0 <span class="text-[#f4a6c8]">NOT NULL</span>;
-<span class="text-[#f4a6c8]">CREATE INDEX CONCURRENTLY ON</span> <span class="text-term-link">"public"."orders"</span>
-  ("placed_at" <span class="text-[#f4a6c8]">DESC</span>) <span class="text-[#f4a6c8]">WHERE</span> status &lt;&gt; <span class="text-[#f2c86b]">'refunded'</span>;</pre>
+        <pre class="code m-6 mt-0 overflow-x-auto rounded-xl border border-line-strong bg-bg p-5 text-[0.76rem] md:m-8 md:ml-0 md:flex-1" aria-label="Example SQL preview"><span class="text-pink">CREATE TABLE</span> <span class="text-blue">"public"."invoices"</span> (
+  "id" <span class="text-green">bigint</span> <span class="text-pink">GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY</span>,
+  "customer_id" <span class="text-green">uuid</span> <span class="text-pink">NOT NULL</span>,
+  "total" <span class="text-green">numeric(12,2)</span> <span class="text-pink">DEFAULT</span> 0,
+  "created_at" <span class="text-green">timestamptz</span> <span class="text-pink">DEFAULT</span> now() <span class="text-pink">NOT NULL</span>,
+  <span class="text-pink">FOREIGN KEY</span> ("customer_id") <span class="text-pink">REFERENCES</span> <span class="text-blue">"public"."customers"</span> ("id")
+);
+<span class="text-pink">CREATE INDEX CONCURRENTLY ON</span> <span class="text-blue">"public"."invoices"</span> ("created_at" <span class="text-pink">DESC</span>);</pre>
       </article>
     </div>
+  </div>
+
+  <!-- The details: a ruled grid of cells with markers where lines cross. -->
+  <div class="relative grid border-t border-line sm:grid-cols-2 lg:grid-cols-3">
+    {
+      cells.map(([ic, title, body], i) => (
+        <div class:list={['cell relative border-line p-7 md:p-9', 'border-b', i % 3 !== 2 && 'lg:border-r', i % 2 === 0 && 'sm:max-lg:border-r', i >= 6 && 'lg:border-b-0', i >= 8 && 'sm:max-lg:border-b-0']}>
+          {i % 3 !== 0 && i >= 3 && <Cross class="-top-[7px] -left-[7px] hidden lg:block" />}
+          <svg viewBox="0 0 24 24" class="size-5 text-muted" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={icon[ic]} />
+          <h3 class="mt-4 font-medium">{title}</h3>
+          <p class="mt-1.5 text-[0.92rem] text-muted">{body}</p>
+        </div>
+      ))
+    }
   </div>
 </section>
 
 <style>
-  .bento {
-    --chart-a: #0070f3;
-    --chart-b: #d6409f;
+  .tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    border-radius: 18px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface) 45%);
   }
-  @media (prefers-color-scheme: dark) {
-    .bento {
-      --chart-a: #3291ff;
-      --chart-b: #e5489e;
-    }
+  .tile-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .tile-body {
+    margin-top: 0.4rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .field {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    height: 2rem;
+    padding-inline: 0.65rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--bg);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 1.85rem;
+    padding-inline: 0.7rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--bg);
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+  .cell {
+    transition: background-color 0.2s;
+  }
+  .cell:hover {
+    background: var(--surface);
   }
   .spark-line {
     stroke-dasharray: 1;
@@ -214,15 +266,11 @@ const last = values.at(-1)!;
     .spark-line {
       animation: draw linear both;
       animation-timeline: view();
-      animation-range: entry 20% cover 45%;
+      animation-range: entry 15% cover 40%;
     }
   }
   .progress {
-    width: 64%;
     animation: progress 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
-  .fk-flow {
-    animation: flow 1.2s linear infinite;
   }
   @keyframes draw {
     from {
@@ -230,24 +278,12 @@ const last = values.at(-1)!;
     }
   }
   @keyframes progress {
-    0% {
+    from {
       width: 4%;
     }
     85%,
-    100% {
-      width: 100%;
-    }
-  }
-  @keyframes flow {
     to {
-      stroke-dashoffset: -14;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .progress,
-    .fk-flow,
-    .spark-line {
-      animation: none !important;
+      width: 100%;
     }
   }
 </style>

@@ -1,0 +1,147 @@
+---
+import Corners from './Corners.astro';
+
+const steps = [
+  {
+    n: '1',
+    title: 'Point it at Postgres',
+    body: 'Pass a connection string, or let pgdeck read DATABASE_URL and the usual PG* variables.',
+  },
+  {
+    n: '2',
+    title: 'pgdeck starts a server',
+    body: 'One Node process on one port. It prints the address and a fresh login password.',
+  },
+  {
+    n: '3',
+    title: 'Open it from anywhere',
+    body: 'On the same machine, through an SSH tunnel, or behind nginx or Caddy with HTTPS.',
+  },
+];
+---
+
+<section id="how" class="section pad py-20 md:py-28">
+  <Corners />
+  <div class="mx-auto max-w-3xl text-center">
+    <h2 class="h2">From connection string to browser in one step.</h2>
+    <p class="lede mx-auto mt-5">No agent to install on the server, no desktop app, no account. pgdeck connects like any other Postgres client.</p>
+  </div>
+
+  <!-- database ── pgdeck ── browser -->
+  <div class="pipe mx-auto mt-14 grid max-w-5xl items-center gap-4 md:grid-cols-[1fr_auto_1.15fr_auto_1fr] md:gap-0" aria-hidden="true">
+    <div class="node rounded-2xl border border-line-strong bg-surface p-5">
+      <div class="flex items-center gap-2 text-sm font-medium">
+        <svg viewBox="0 0 24 24" class="size-4 text-blue" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path></svg>
+        Your PostgreSQL
+      </div>
+      <div class="mt-4 space-y-1.5 font-mono text-[0.72rem] text-muted">
+        <div class="truncate rounded-md border border-line bg-bg px-2 py-1.5">localhost:5432</div>
+        <div class="truncate rounded-md border border-line bg-bg px-2 py-1.5">db:5432 <span class="text-faint">(Docker)</span></div>
+        <div class="truncate rounded-md border border-line bg-bg px-2 py-1.5">db.example.com <span class="text-faint">(SSL)</span></div>
+      </div>
+    </div>
+
+    <div class="wire mx-auto h-10 w-px md:h-px md:w-16 lg:w-24"><span class="packet"></span></div>
+
+    <div class="node brand-border rounded-2xl bg-surface p-5">
+      <div class="flex items-center gap-2 text-sm font-medium">
+        <svg viewBox="0 0 32 32" class="size-4"><rect width="32" height="32" rx="8" fill="#ededed"></rect><g fill="#000"><rect x="8" y="8.5" width="16" height="3.5" rx="1.75"></rect><rect x="8" y="14.25" width="16" height="3.5" rx="1.75" opacity=".7"></rect><rect x="8" y="20" width="10" height="3.5" rx="1.75" opacity=".45"></rect></g></svg>
+        pgdeck
+        <span class="ml-auto flex items-center gap-1.5 text-[0.7rem] text-green"><span class="size-1.5 rounded-full bg-green"></span>running</span>
+      </div>
+      <div class="mt-4 grid grid-cols-3 gap-1.5 text-center text-[0.7rem]">
+        <div class="rounded-md border border-line bg-bg px-1 py-2"><div class="text-fg">pool</div><div class="mt-0.5 text-faint">per database</div></div>
+        <div class="rounded-md border border-line bg-bg px-1 py-2"><div class="text-fg">HTTP</div><div class="mt-0.5 text-faint">:47615</div></div>
+        <div class="rounded-md border border-line bg-bg px-1 py-2"><div class="text-fg">WebSocket</div><div class="mt-0.5 text-faint">live stats</div></div>
+      </div>
+      <div class="mt-1.5 rounded-md border border-line bg-bg px-2 py-1.5 font-mono text-[0.7rem] text-muted">login <span class="text-faint">·</span> admin / <span class="text-amber">••••••••</span></div>
+    </div>
+
+    <div class="wire mx-auto h-10 w-px md:h-px md:w-16 lg:w-24"><span class="packet" style="animation-delay:-1.1s"></span></div>
+
+    <div class="node rounded-2xl border border-line-strong bg-surface p-5">
+      <div class="flex items-center gap-2 text-sm font-medium">
+        <svg viewBox="0 0 24 24" class="size-4 text-pink" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M2 9h20"></path></svg>
+        Your browser
+      </div>
+      <div class="mt-4 space-y-1.5 font-mono text-[0.72rem] text-muted">
+        <div class="truncate rounded-md border border-line bg-bg px-2 py-1.5">127.0.0.1:47615</div>
+        <div class="truncate rounded-md border border-line bg-bg px-2 py-1.5">ssh -L 47615:…</div>
+        <div class="truncate rounded-md border border-line bg-bg px-2 py-1.5"><span class="text-green">https</span>://db.example.com/</div>
+      </div>
+    </div>
+  </div>
+
+  <ol class="mx-auto mt-14 grid max-w-5xl gap-8 md:grid-cols-3">
+    {
+      steps.map((s) => (
+        <li class="flex gap-4">
+          <span class="flex size-7 shrink-0 items-center justify-center rounded-full border border-line-strong font-mono text-xs text-muted">{s.n}</span>
+          <div>
+            <h3 class="font-medium">{s.title}</h3>
+            <p class="mt-1 text-[0.93rem] text-muted">{s.body}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .wire {
+    position: relative;
+    background: repeating-linear-gradient(to bottom, var(--line-strong) 0 4px, transparent 4px 8px);
+    overflow: visible;
+  }
+  @media (min-width: 768px) {
+    .wire {
+      background: repeating-linear-gradient(to right, var(--line-strong) 0 4px, transparent 4px 8px);
+    }
+  }
+  .packet {
+    position: absolute;
+    left: -3px;
+    top: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--brand);
+    box-shadow: 0 0 12px color-mix(in oklab, var(--blue) 80%, transparent);
+    animation: down 2.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  }
+  @media (min-width: 768px) {
+    .packet {
+      top: -3px;
+      left: 0;
+      animation-name: across;
+    }
+  }
+  @keyframes down {
+    from {
+      top: 0;
+      opacity: 0;
+    }
+    20%,
+    80% {
+      opacity: 1;
+    }
+    to {
+      top: calc(100% - 7px);
+      opacity: 0;
+    }
+  }
+  @keyframes across {
+    from {
+      left: 0;
+      opacity: 0;
+    }
+    20%,
+    80% {
+      opacity: 1;
+    }
+    to {
+      left: calc(100% - 7px);
+      opacity: 0;
+    }
+  }
+</style>
