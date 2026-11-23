@@ -79,11 +79,19 @@ export function alterSql(schema: string, table: string, a: AlterAction): string[
     }
     case 'alterColumn': {
       const col = quoteIdent(a.column);
+      const out: string[] = [];
       const clauses: string[] = [];
-      if (a.type !== undefined) clauses.push(`ALTER COLUMN ${col} TYPE ${a.type.trim()}${a.using?.trim() ? ` USING ${a.using.trim()}` : ''}`);
-      if (a.default !== undefined) clauses.push(a.default === null || !a.default.trim() ? `ALTER COLUMN ${col} DROP DEFAULT` : `ALTER COLUMN ${col} SET DEFAULT ${a.default.trim()}`);
+      if (a.type !== undefined) {
+        // An old default that can't be cast would block the type change: drop it first,
+        // change the type, then set the (new) default. Callers pass `default` along with `type`.
+        out.push(alter(`ALTER COLUMN ${col} DROP DEFAULT`));
+        out.push(alter(`ALTER COLUMN ${col} TYPE ${a.type.trim()}${a.using?.trim() ? ` USING ${a.using.trim()}` : ''}`));
+        if (a.default?.trim()) clauses.push(`ALTER COLUMN ${col} SET DEFAULT ${a.default.trim()}`);
+      } else if (a.default !== undefined) {
+        clauses.push(a.default === null || !a.default.trim() ? `ALTER COLUMN ${col} DROP DEFAULT` : `ALTER COLUMN ${col} SET DEFAULT ${a.default.trim()}`);
+      }
       if (a.nullable !== undefined) clauses.push(`ALTER COLUMN ${col} ${a.nullable ? 'DROP' : 'SET'} NOT NULL`);
-      const out = clauses.length ? [`ALTER TABLE ${rel}\n  ${clauses.join(',\n  ')};`] : [];
+      if (clauses.length) out.push(`ALTER TABLE ${rel}\n  ${clauses.join(',\n  ')};`);
       if (a.comment !== undefined) out.push(`COMMENT ON COLUMN ${rel}.${col} IS ${a.comment?.trim() ? quoteLiteral(a.comment.trim()) : 'NULL'};`);
       // RENAME can't be combined with other subcommands; do it last.
       if (a.newName !== undefined && a.newName !== a.column) out.push(alter(`RENAME COLUMN ${col} TO ${quoteIdent(a.newName)}`));
