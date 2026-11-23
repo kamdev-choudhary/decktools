@@ -163,6 +163,7 @@ function databaseRoutes() {
       const { pid, terminate } = parse(signalBody, await jsonBody(c.req));
       return c.json(await c.var.db.signalSession(pid, terminate));
     })
+    .get('/graph', async (c) => c.json(await c.var.db.graph()))
     .get('/catalog', async (c) => c.json(await c.var.db.catalog()))
     .post('/query', async (c) => {
       const { sql } = parse(queryBody, await jsonBody(c.req));

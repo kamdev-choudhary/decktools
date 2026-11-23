@@ -8,6 +8,7 @@ import {
   FileCode2,
   FileSpreadsheet,
   MoreHorizontal,
+  Network,
   PencilLine,
   RefreshCw,
   Sparkles,
@@ -40,7 +41,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { dbHref, navigate, parseRoute, tableHref } from '@/lib/router';
+import { dbHref, diagramHref, navigate, parseRoute, tableHref } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { errorMessage, Spinner } from './feedback';
 
@@ -139,6 +140,11 @@ export function TableActionsMenu({ db, schema, table, kind, variant = 'toolbar',
           <DropdownMenuItem onSelect={() => void copyDdl()}>
             <FileCode2 /> Copy CREATE statement
           </DropdownMenuItem>
+          {isTable && (
+            <DropdownMenuItem onSelect={() => navigate(diagramHref(db, `${schema}.${table}`))}>
+              <Network /> Show in ER diagram
+            </DropdownMenuItem>
+          )}
           {isTable && (
             <>
               <DropdownMenuItem onSelect={() => downloadUrl(dumpHref)}>

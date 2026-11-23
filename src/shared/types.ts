@@ -355,3 +355,39 @@ export interface StatementsResponse {
   statements: StatementStat[];
   totalMs: number;
 }
+
+/* ER diagram */
+
+export interface GraphColumn {
+  name: string;
+  type: string;
+  nullable: boolean;
+  /** Position in the primary key (1-based), or 0. */
+  pk: number;
+}
+
+export interface GraphTable {
+  schema: string;
+  name: string;
+  kind: RelKind;
+  columns: GraphColumn[];
+  /** Planner estimate, -1 when never analyzed. */
+  rows: number;
+  comment: string | null;
+}
+
+export interface GraphForeignKey {
+  name: string;
+  schema: string;
+  table: string;
+  columns: string[];
+  refSchema: string;
+  refTable: string;
+  refColumns: string[];
+  onDelete: string;
+}
+
+export interface SchemaGraph {
+  tables: GraphTable[];
+  foreignKeys: GraphForeignKey[];
+}

@@ -9,6 +9,7 @@ import { exportRows, importRows, type ExportRequest, type ImportRequest } from '
 import { dumpSql, type DumpOptions } from './dump.js';
 import { restoreScript, type RestoreOptions } from './restore.js';
 import { alterTable, createTable, getCatalog } from './create-table.js';
+import { getSchemaGraph } from './graph.js';
 import { enableStatements, explainQuery, listStatements, resetStatements, signalSession } from './perf.js';
 import type { StatementSort } from '../shared/types.js';
 import type { AlterAction } from '../shared/alter.js';
@@ -45,6 +46,8 @@ export function createDatabase(config: DbConfig) {
     maintenance: (action: 'analyze' | 'vacuum', tables: { schema: string; table: string }[]) => runMaintenance(ctx, action, tables),
     createTable: (spec: NewTable) => createTable(ctx, spec),
     catalog: () => getCatalog(ctx),
+    /** Tables, columns and foreign keys for the ER diagram. */
+    graph: () => getSchemaGraph(ctx),
     explain: (sql: string, analyze: boolean) => explainQuery(ctx, sql, analyze),
     statements: (sort: StatementSort, limit: number) => listStatements(ctx, sort, limit),
     enableStatements: () => enableStatements(ctx),

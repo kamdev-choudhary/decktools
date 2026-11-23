@@ -1,4 +1,4 @@
-import { ChevronRight, Eye, FileDown, FileUp, Layers, LayoutGrid, Plus, Search, SquareTerminal, Table2, type LucideIcon } from 'lucide-react';
+import { ChevronRight, Eye, FileDown, FileUp, Layers, LayoutGrid, Network, Plus, Search, SquareTerminal, Table2, type LucideIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { REL_KIND_LABEL, type RelKind, type TableRef } from '@shared/types';
 import { useInfo, useTables } from '@/api/hooks';
@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CreateTableDialog } from './CreateTableDialog';
 import { Input } from '@/components/ui/input';
-import { dbHref, exportHref, importHref, sqlHref, tableHref, type Route } from '@/lib/router';
+import { dbHref, diagramHref, exportHref, importHref, sqlHref, tableHref, type Route } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { ErrorAlert, Spinner } from './feedback';
 import { TableActionsMenu } from './TableActionsMenu';
@@ -67,6 +67,9 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
         </NavLink>
         <NavLink href={sqlHref(db)} active={route.view === 'sql'} icon={SquareTerminal}>
           SQL Editor
+        </NavLink>
+        <NavLink href={diagramHref(db)} active={route.view === 'diagram'} icon={Network}>
+          ER diagram
         </NavLink>
         <NavLink href={importHref(db)} active={route.view === 'import'} icon={FileUp}>
           Import data

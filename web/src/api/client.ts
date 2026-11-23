@@ -5,6 +5,7 @@ import type {
   DbStats,
   DbInfo,
   ExplainResponse,
+  SchemaGraph,
   StatementSort,
   StatementsResponse,
   LoginRequest,
@@ -98,6 +99,7 @@ export const api = {
   resetStatements: (database: string) => request<{ ok: true; message: string }>(db(database, 'statements/reset'), {}),
   signalSession: (database: string, pid: number, terminate: boolean) =>
     request<{ ok: true; message: string }>(db(database, 'sessions/signal'), { pid, terminate }),
+  graph: (database: string) => request<SchemaGraph>(db(database, 'graph')),
   catalog: (database: string) => request<{ schemas: string[]; types: { name: string; kind: string }[] }>(db(database, 'catalog')),
   ddl: (database: string, schema: string, table: string) =>
     request<{ sql: string }>(db(database, `ddl?${new URLSearchParams({ schema, table })}`)),

@@ -9,6 +9,7 @@ import { useMemo, useSyncExternalStore } from 'react';
  *   #/<db>/sql                 → SQL editor
  *   #/<db>/import              → import data from files
  *   #/<db>/export              → export tables / back up the database
+ *   #/<db>/diagram?focus=s.t   → ER diagram, optionally centred on one table
  *   #/<db>/t/<schema>/<table>  → table
  *   …/<table>?col=value        → table pre-filtered with col = value (used by FK links)
  */
@@ -18,6 +19,7 @@ export type Route =
   | { view: 'sql'; db: string }
   | { view: 'import'; db: string }
   | { view: 'export'; db: string }
+  | { view: 'diagram'; db: string; focus: string | null }
   | { view: 'table'; db: string; schema: string; table: string; eq: Record<string, string> };
 
 function decode(s: string): string {
@@ -38,6 +40,7 @@ export function parseRoute(hash: string): Route {
   if (section === 'sql') return { view: 'sql', db };
   if (section === 'import') return { view: 'import', db };
   if (section === 'export') return { view: 'export', db };
+  if (section === 'diagram') return { view: 'diagram', db, focus: new URLSearchParams(query).get('focus') };
   if (section === 't' && schema && table) {
     return { view: 'table', db, schema, table, eq: Object.fromEntries(new URLSearchParams(query)) };
   }
@@ -49,6 +52,7 @@ export const dbHref = (db: string) => `#/${enc(db)}`;
 export const sqlHref = (db: string) => `#/${enc(db)}/sql`;
 export const importHref = (db: string) => `#/${enc(db)}/import`;
 export const exportHref = (db: string) => `#/${enc(db)}/export`;
+export const diagramHref = (db: string, focus?: string | null) => `#/${enc(db)}/diagram${focus ? `?${new URLSearchParams({ focus })}` : ''}`;
 export const tableHref = (db: string, schema: string, table: string, eq?: Record<string, string>) => {
   const qs = eq && Object.keys(eq).length ? `?${new URLSearchParams(eq)}` : '';
   return `#/${enc(db)}/t/${enc(schema)}/${enc(table)}${qs}`;

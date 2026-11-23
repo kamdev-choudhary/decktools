@@ -218,3 +218,33 @@
     }
   }
 }
+
+/* ER diagram (React Flow), matched to the app: borders, no shadows, theme colours. */
+:root {
+  --diagram-edge: #b4b4b4;
+}
+.dark {
+  --diagram-edge: #4d4d4d;
+}
+.pgdeck-flow .react-flow {
+  --xy-background-color: var(--background);
+  --xy-background-pattern-color: var(--border);
+  --xy-minimap-background-color: var(--card);
+  --xy-minimap-mask-background-color: color-mix(in oklab, var(--background) 70%, transparent);
+  --xy-minimap-node-background-color: var(--muted);
+  --xy-controls-button-background-color: var(--background);
+  --xy-controls-button-background-color-hover: var(--accent);
+  --xy-controls-button-color: var(--foreground);
+  --xy-controls-button-border-color: var(--border);
+  --xy-node-boxshadow-selected: none;
+}
+.pgdeck-flow .react-flow__controls,
+.pgdeck-flow .react-flow__minimap {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: none;
+}
+.pgdeck-flow .react-flow__node-table {
+  cursor: pointer;
+}
