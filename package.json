@@ -1,0 +1,66 @@
+{
+  "name": "pgdeck",
+  "version": "0.1.0",
+  "description": "Browse and manage a PostgreSQL database from a web UI. Run it with npx and proxy the port anywhere.",
+  "type": "module",
+  "bin": {
+    "pgdeck": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "pnpm clean && pnpm build:web && pnpm build:server",
+    "build:web": "vite build --config web/vite.config.ts",
+    "build:server": "tsup",
+    "dev": "concurrently -k -n api,web -c blue,magenta \"pnpm:dev:server\" \"pnpm:dev:web\"",
+    "dev:server": "tsx watch src/cli/index.ts --no-auth",
+    "dev:web": "vite --config web/vite.config.ts",
+    "typecheck": "tsc -p tsconfig.json && tsc -p web/tsconfig.json",
+    "start": "node dist/cli.js",
+    "prepublishOnly": "pnpm typecheck && pnpm build"
+  },
+  "keywords": [
+    "postgres",
+    "postgresql",
+    "database",
+    "admin",
+    "gui",
+    "web-ui",
+    "cli",
+    "npx"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@hono/node-server": "^2.1.11",
+    "commander": "^15.1.0",
+    "hono": "^4.13.20",
+    "open": "^11.0.4",
+    "pg": "^8.23.1",
+    "picocolors": "^1.1.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@codemirror/lang-sql": "^6.10.0",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
+    "@tanstack/react-query": "^5.108.3",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@uiw/react-codemirror": "^4.25.12",
+    "@vitejs/plugin-react": "^6.3.0",
+    "concurrently": "^10.0.7",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}
