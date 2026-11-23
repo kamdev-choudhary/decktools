@@ -11,6 +11,7 @@ import { storage } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 import { LoginView } from '@/views/LoginView';
 import { OverviewView } from '@/views/OverviewView';
+import { ImportView } from '@/views/ImportView';
 import { SqlView } from '@/views/SqlView';
 import { TableView } from '@/views/TableView';
 
@@ -69,12 +70,13 @@ function Shell({ db, session }: { db: string; session: SessionInfo }) {
   useEffect(() => setSidebarOpen(false), [route]);
 
   useEffect(() => {
-    const where = route.view === 'table' ? route.table : route.view === 'sql' ? 'SQL' : db;
+    const where = route.view === 'table' ? route.table : route.view === 'sql' ? 'SQL' : route.view === 'import' ? 'Import' : db;
     document.title = `${where} · pgdeck`;
   }, [route, db]);
 
   let content: React.ReactNode;
   if (route.view === 'sql') content = <SqlView db={db} />;
+  else if (route.view === 'import') content = <ImportView db={db} />;
   else if (route.view === 'table')
     content = (
       <TableView

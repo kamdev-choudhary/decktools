@@ -19,7 +19,7 @@ interface HeaderProps {
 }
 
 export function Header({ db, route, session, info, onToggleSidebar }: HeaderProps) {
-  const crumb = route.view === 'table' ? route.table : route.view === 'sql' ? 'SQL Editor' : null;
+  const crumb = route.view === 'table' ? route.table : route.view === 'sql' ? 'SQL Editor' : route.view === 'import' ? 'Import data' : null;
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-1 border-b bg-background px-3 md:px-4">

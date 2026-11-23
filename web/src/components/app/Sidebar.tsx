@@ -1,9 +1,9 @@
-import { ChevronRight, Eye, Layers, LayoutGrid, Search, SquareTerminal, Table2, type LucideIcon } from 'lucide-react';
+import { ChevronRight, Eye, FileUp, Layers, LayoutGrid, Search, SquareTerminal, Table2, type LucideIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { REL_KIND_LABEL, type RelKind, type TableRef } from '@shared/types';
 import { useTables } from '@/api/hooks';
 import { Input } from '@/components/ui/input';
-import { dbHref, sqlHref, tableHref, type Route } from '@/lib/router';
+import { dbHref, importHref, sqlHref, tableHref, type Route } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { ErrorAlert, Spinner } from './feedback';
 import { TruncatedText } from './TruncatedText';
@@ -61,6 +61,9 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
         </NavLink>
         <NavLink href={sqlHref(db)} active={route.view === 'sql'} icon={SquareTerminal}>
           SQL Editor
+        </NavLink>
+        <NavLink href={importHref(db)} active={route.view === 'import'} icon={FileUp}>
+          Import data
         </NavLink>
       </div>
 
