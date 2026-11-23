@@ -181,7 +181,7 @@ edited.
 ## Development
 
 ```bash
-git clone https://github.com/kamdev-bharatai/pgdeck.git
+git clone https://github.com/kamdev-choudhary/pgdeck.git
 cd pgdeck
 pnpm install
 

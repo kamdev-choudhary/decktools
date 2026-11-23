@@ -15,13 +15,13 @@
     "cli",
     "npx"
   ],
-  "homepage": "https://github.com/kamdev-bharatai/pgdeck#readme",
+  "homepage": "https://github.com/kamdev-choudhary/pgdeck#readme",
   "bugs": {
-    "url": "https://github.com/kamdev-bharatai/pgdeck/issues"
+    "url": "https://github.com/kamdev-choudhary/pgdeck/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kamdev-bharatai/pgdeck.git"
+    "url": "git+https://github.com/kamdev-choudhary/pgdeck.git"
   },
   "license": "MIT",
   "type": "module",
