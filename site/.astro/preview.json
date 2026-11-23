@@ -1,0 +1,14 @@
+{
+	"pid": 89390,
+	"port": 47618,
+	"url": "http://localhost:47618",
+	"urls": {
+		"local": [
+			"http://localhost:47618/pgdeck"
+		],
+		"network": [],
+		"networkInterfaceNames": []
+	},
+	"background": true,
+	"startedAt": "2026-11-23T09:25:29.343Z"
+}

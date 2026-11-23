@@ -1,0 +1,253 @@
+---
+// A deterministic "live" series for the sparkline, shaped like the app's chart.
+const N = 64;
+let seed = 7;
+const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const values = Array.from({ length: N }, (_, i) => 190 + 55 * Math.sin(i / 6) + 30 * Math.sin(i / 2.3) + (rand() - 0.5) * 40);
+const W = 640;
+const H = 170;
+const max = 320;
+const x = (i: number) => (i / (N - 1)) * W;
+const y = (v: number) => H - (v / max) * H;
+const line = values.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+const area = `${line} L${W} ${H} L0 ${H} Z`;
+const last = values.at(-1)!;
+---
+
+<section id="features" class="py-20 md:py-28">
+  <div class="wrap">
+    <div class="max-w-2xl">
+      <h2 class="h2">Built for the work you actually do in a database.</h2>
+      <p class="lede mt-5">Small things, done carefully. Nothing here needs a plugin, a config file or a second tool.</p>
+    </div>
+
+    <div class="bento mt-12 grid gap-4 md:grid-cols-6">
+      <!-- Live overview -->
+      <article class="tile flex flex-col md:col-span-4 md:row-span-1">
+        <div class="p-6 pb-0 md:p-8 md:pb-0">
+          <h3 class="text-xl font-bold tracking-tight">Live overview</h3>
+          <p class="mt-1.5 max-w-[46ch] text-ink-soft">Transactions and rows per second streamed every two seconds, with sessions, storage and health checks that fix what they find.</p>
+        </div>
+        <div class="mt-auto px-6 pt-8 md:px-8">
+          <div class="flex flex-wrap items-end gap-x-8 gap-y-2">
+            <div>
+              <div class="text-[0.8rem] text-ink-faint">Transactions / s</div>
+              <div class="text-4xl font-extrabold tracking-tight tabular-nums">{Math.round(last)}</div>
+            </div>
+            <div class="flex items-center gap-4 pb-1.5 text-[0.82rem] text-ink-soft">
+              <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-sm bg-[var(--chart-a)]"></span>Commits</span>
+              <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-sm bg-[var(--chart-b)]"></span>Rollbacks</span>
+            </div>
+            <span class="ml-auto mb-1.5 inline-flex items-center gap-2 rounded-full border border-line px-2.5 py-1 text-xs font-medium">
+              <span class="relative flex size-2"><span class="absolute inline-flex size-full animate-ping rounded-full bg-[#30a46c] opacity-60"></span><span class="relative inline-flex size-2 rounded-full bg-[#30a46c]"></span></span>
+              Live
+            </span>
+          </div>
+          <svg viewBox={`0 0 ${W} ${H + 10}`} class="spark mt-4 block h-auto w-full" aria-label="A line chart of transactions per second, rising and falling around 200" role="img">
+            <defs>
+              <linearGradient id="spark-fill" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="var(--chart-a)" stop-opacity="0.22"></stop>
+                <stop offset="1" stop-color="var(--chart-a)" stop-opacity="0"></stop>
+              </linearGradient>
+            </defs>
+            {[0.25, 0.5, 0.75].map((f) => <line x1="0" x2={W} y1={H * f} y2={H * f} stroke="var(--line)" stroke-dasharray="3 5"></line>)}
+            <path d={area} fill="url(#spark-fill)" class="spark-area"></path>
+            <path d={line} fill="none" stroke="var(--chart-a)" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round" pathLength="1" class="spark-line"></path>
+            <line x1="0" x2={W} y1={H - 2} y2={H - 2} stroke="var(--chart-b)" stroke-width="2"></line>
+            <circle cx={W} cy={y(last)} r="4.5" fill="var(--chart-a)" stroke="var(--paper-raised)" stroke-width="2"></circle>
+          </svg>
+        </div>
+      </article>
+
+      <!-- Database switcher -->
+      <article class="tile flex flex-col md:col-span-2">
+        <div class="p-6 md:p-7">
+          <h3 class="text-xl font-bold tracking-tight">Every database, one ⌘K away</h3>
+          <p class="mt-1.5 text-ink-soft">Switch without restarting. Create, copy, rename and drop databases.</p>
+        </div>
+        <div class="mx-6 mt-auto mb-6 overflow-hidden rounded-xl border border-line bg-paper text-[0.85rem] md:mx-7" aria-hidden="true">
+          <div class="flex items-center gap-2 border-b border-line px-3 py-2.5 text-ink-faint">
+            <svg viewBox="0 0 24 24" class="size-3.5" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            Find a database…
+          </div>
+          {
+            [
+              ['shop', '18.7 MB', true],
+              ['analytics', '1.2 GB', false],
+              ['staging', '640 MB', false],
+              ['auth', '24 MB', false],
+            ].map(([name, size, on]) => (
+              <div class:list={['flex items-center gap-2 px-3 py-2', on && 'bg-tide']}>
+                <span class:list={['w-3.5 text-elephant', !on && 'opacity-0']}>✓</span>
+                <span class="flex-1 font-medium">{name}</span>
+                {on && <span class="rounded bg-paper-raised px-1.5 text-[0.68rem] text-ink-soft">default</span>}
+                <span class="text-[0.75rem] text-ink-faint tabular-nums">{size}</span>
+              </div>
+            ))
+          }
+          <div class="border-t border-line px-3 py-2 text-[0.8rem] font-semibold text-elephant">+ New database</div>
+        </div>
+      </article>
+
+      <!-- Type-aware editing -->
+      <article class="tile flex flex-col md:col-span-2">
+        <div class="p-6 md:p-7">
+          <h3 class="text-xl font-bold tracking-tight">Editors that know the type</h3>
+          <p class="mt-1.5 text-ink-soft">Menus for enums, a calendar for timestamps, checked JSON, and UUIDs in the version you already use.</p>
+        </div>
+        <div class="mx-6 mt-auto mb-6 space-y-2.5 text-[0.82rem] md:mx-7" aria-hidden="true">
+          <div class="flex items-center gap-2">
+            <span class="w-16 shrink-0 font-mono text-ink-faint">status</span>
+            <span class="flex h-8 flex-1 items-center justify-between rounded-lg border border-line bg-paper px-2.5">delivered <span class="text-ink-faint">▾</span></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-16 shrink-0 font-mono text-ink-faint">placed_at</span>
+            <span class="flex h-8 flex-1 items-center rounded-lg border border-line bg-paper px-2.5 font-mono text-[0.75rem]">2026-08-03 14:15:58+05:30</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-16 shrink-0 font-mono text-ink-faint">id</span>
+            <span class="flex h-8 min-w-0 flex-1 items-center truncate rounded-lg border border-elephant/60 bg-paper px-2.5 font-mono text-[0.75rem] ring-3 ring-elephant/15">01a207ae-9328-7dab…</span>
+            <span class="flex h-8 shrink-0 items-center rounded-lg border border-line px-2 font-semibold">v7</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Filters -->
+      <article class="tile flex flex-col md:col-span-2">
+        <div class="p-6 md:p-7">
+          <h3 class="text-xl font-bold tracking-tight">Filters that combine</h3>
+          <p class="mt-1.5 text-ink-soft">Equals, contains, in, like, is null and more, joined with AND or OR, without writing SQL.</p>
+        </div>
+        <div class="mx-6 mt-auto mb-6 flex flex-wrap items-center gap-2 md:mx-7" aria-hidden="true">
+          <span class="chip"><span class="font-mono">status</span><span class="text-ink-faint">=</span>delivered</span>
+          <span class="inline-flex h-7 overflow-hidden rounded-full border border-line text-[0.72rem] font-bold">
+            <span class="bg-elephant px-2.5 leading-7 text-paper">AND</span><span class="px-2.5 leading-7 text-ink-faint">OR</span>
+          </span>
+          <span class="chip"><span class="font-mono">total</span><span class="text-ink-faint">&gt;</span>100</span>
+          <span class="chip"><span class="font-mono">country</span><span class="text-ink-faint">in</span>DE, NL, SE</span>
+          <span class="chip border-dashed text-ink-faint">+ Add filter</span>
+        </div>
+      </article>
+
+      <!-- Foreign keys -->
+      <article class="tile flex flex-col md:col-span-2">
+        <div class="p-6 md:p-7">
+          <h3 class="text-xl font-bold tracking-tight">Foreign keys you can follow</h3>
+          <p class="mt-1.5 text-ink-soft">Preview the referenced row from any cell, jump to it, or see who points back.</p>
+        </div>
+        <div class="relative mx-6 mt-auto mb-6 grid grid-cols-2 gap-10 text-[0.78rem] md:mx-7" aria-hidden="true">
+          <svg class="pointer-events-none absolute inset-0 h-full w-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+            <path d="M44 58 C 52 58, 50 30, 58 30" fill="none" stroke="var(--elephant)" stroke-width="1.4" vector-effect="non-scaling-stroke" stroke-dasharray="4 3" class="fk-flow"></path>
+          </svg>
+          {
+            [
+              ['orders', [['id', 'bigint', true], ['customer_id', 'uuid', false, true], ['total', 'numeric', false]]],
+              ['customers', [['id', 'uuid', true, false, true], ['full_name', 'text', false], ['country', 'char(2)', false]]],
+            ].map(([table, cols]) => (
+              <div class="relative overflow-hidden rounded-xl border border-line bg-paper">
+                <div class="border-b border-line bg-tide-soft px-2.5 py-1.5 font-semibold">{table as string}</div>
+                {(cols as [string, string, boolean, boolean?, boolean?][]).map(([c, t, pk, fk, target]) => (
+                  <div class:list={['flex items-center gap-1.5 px-2.5 py-1.5', (fk || target) && 'bg-tide']}>
+                    {pk ? <span class="text-amber">⚿</span> : <span class="w-[0.6rem]" />}
+                    <span class="font-mono">{c}</span>
+                    <span class="ml-auto font-mono text-[0.68rem] text-ink-faint">{t}</span>
+                  </div>
+                ))}
+              </div>
+            ))
+          }
+        </div>
+      </article>
+
+      <!-- Import -->
+      <article class="tile flex flex-col md:col-span-3">
+        <div class="p-6 md:p-8">
+          <h3 class="text-xl font-bold tracking-tight">Imports measured in gigabytes</h3>
+          <p class="mt-1.5 max-w-[48ch] text-ink-soft">Drop CSV, TSV or JSON Lines, gzipped or not. Files match their tables by name and stream through COPY in one transaction: a bad row rolls back and tells you the line.</p>
+        </div>
+        <div class="mx-6 mt-auto mb-6 rounded-xl border border-line bg-paper p-4 md:mx-8 md:mb-8" aria-hidden="true">
+          <div class="flex flex-wrap items-center gap-2 text-[0.85rem]">
+            <span class="font-mono font-medium">orders_2026.csv.gz</span>
+            <span class="chip h-6 text-[0.72rem]">→ public.orders</span>
+            <span class="ml-auto text-[0.78rem] text-ink-faint tabular-nums">1.2 GB</span>
+          </div>
+          <div class="mt-3 h-2 overflow-hidden rounded-full bg-tide">
+            <div class="progress h-full rounded-full bg-elephant"></div>
+          </div>
+          <div class="mt-2.5 flex justify-between text-[0.75rem] text-ink-faint tabular-nums">
+            <span>61 MB/s</span><span>4,812,330 rows</span><span>about 9 s left</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Schema -->
+      <article class="tile flex flex-col md:col-span-3">
+        <div class="p-6 md:p-8">
+          <h3 class="text-xl font-bold tracking-tight">Schema changes you can read first</h3>
+          <p class="mt-1.5 max-w-[48ch] text-ink-soft">Create tables, change columns, build indexes concurrently. Every dialog shows the exact SQL it will run.</p>
+        </div>
+        <pre class="code mx-6 mt-auto mb-6 overflow-x-auto rounded-xl bg-term p-4 text-[0.74rem] text-term-ink md:mx-8 md:mb-8" aria-label="Example SQL preview"><span class="text-[#f4a6c8]">ALTER TABLE</span> <span class="text-term-link">"public"."customers"</span>
+  <span class="text-[#f4a6c8]">ADD COLUMN</span> "points" <span class="text-term-ok">integer</span> <span class="text-[#f4a6c8]">DEFAULT</span> 0 <span class="text-[#f4a6c8]">NOT NULL</span>;
+<span class="text-[#f4a6c8]">CREATE INDEX CONCURRENTLY ON</span> <span class="text-term-link">"public"."orders"</span>
+  ("placed_at" <span class="text-[#f4a6c8]">DESC</span>) <span class="text-[#f4a6c8]">WHERE</span> status &lt;&gt; <span class="text-[#f2c86b]">'refunded'</span>;</pre>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bento {
+    --chart-a: #0070f3;
+    --chart-b: #d6409f;
+  }
+  @media (prefers-color-scheme: dark) {
+    .bento {
+      --chart-a: #3291ff;
+      --chart-b: #e5489e;
+    }
+  }
+  .spark-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+  @supports (animation-timeline: view()) {
+    .spark-line {
+      animation: draw linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 45%;
+    }
+  }
+  .progress {
+    width: 64%;
+    animation: progress 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  .fk-flow {
+    animation: flow 1.2s linear infinite;
+  }
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+  @keyframes progress {
+    0% {
+      width: 4%;
+    }
+    85%,
+    100% {
+      width: 100%;
+    }
+  }
+  @keyframes flow {
+    to {
+      stroke-dashoffset: -14;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .progress,
+    .fk-flow,
+    .spark-line {
+      animation: none !important;
+    }
+  }
+</style>

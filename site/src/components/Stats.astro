@@ -1,0 +1,22 @@
+---
+// Measured while building pgdeck, not marketing estimates.
+const stats = [
+  ['1M rows', 'imported from a CSV in about 3 seconds, with flat memory'],
+  ['1 command', 'to start. No install, no config file, no account'],
+  ['7 formats', 'to export a table, plus restorable SQL backups'],
+  ['12 and up', 'any PostgreSQL version, local or managed'],
+] as const;
+---
+
+<section aria-label="pgdeck in numbers" class="border-b border-line">
+  <dl class="wrap grid grid-cols-2 lg:grid-cols-4">
+    {
+      stats.map(([n, label], i) => (
+        <div class:list={['py-8 pr-6 md:py-10', i % 2 === 1 && 'border-l border-line pl-6', i === 2 && 'lg:border-l lg:pl-6', i >= 2 && 'border-t border-line lg:border-t-0']}>
+          <dt class="text-[clamp(1.6rem,1.1rem+1.6vw,2.4rem)] font-extrabold tracking-[-0.035em]">{n}</dt>
+          <dd class="mt-1 text-[0.93rem] leading-snug text-ink-soft">{label}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
