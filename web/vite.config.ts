@@ -18,8 +18,9 @@ export default defineConfig({
     chunkSizeWarningLimit: 1500,
   },
   server: {
-    port: 5173,
-    // `npm run dev` starts the API on 5050 with --no-auth.
-    proxy: { '/api': 'http://127.0.0.1:5050' },
+    port: 47616,
+    strictPort: true,
+    // `pnpm dev` starts the API on its default port 47615 with --no-auth.
+    proxy: { '/api': 'http://127.0.0.1:47615' },
   },
 });

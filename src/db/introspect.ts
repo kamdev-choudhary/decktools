@@ -8,7 +8,7 @@ export async function getInfo(ctx: DbContext): Promise<DbInfo> {
            current_database() as database,
            current_user as "user",
            pg_size_pretty(pg_database_size(current_database())) as size,
-           inet_server_addr()::text as host,
+           host(inet_server_addr()) as host,
            inet_server_port() as port`);
   return { ...rows[0]!, readonly: ctx.readonly };
 }

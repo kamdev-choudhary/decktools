@@ -7,6 +7,9 @@ import { startServer } from '../server/index.js';
 import { printBanner } from './banner.js';
 import { redact, resolveConfig, type CliOptions } from './config.js';
 
+/** Deliberately uncommon so it doesn't collide with typical dev servers. */
+const DEFAULT_PORT = 47615;
+
 function parsePort(value: string): number {
   const n = Number(value);
   if (!Number.isInteger(n) || n < 0 || n > 65535) throw new InvalidArgumentError('must be an integer between 0 and 65535');
@@ -92,7 +95,7 @@ const program = new Command()
   .description(pkg.description)
   .version(pkg.version, '-v, --version')
   .argument('[connection-string]', 'postgres:// URL (default: $DATABASE_URL, then PG* variables)')
-  .addOption(new Option('-p, --port <port>', 'port for the web UI').argParser(parsePort).default(Number(process.env.PORT) || 5050))
+  .addOption(new Option('-p, --port <port>', 'port for the web UI').argParser(parsePort).default(Number(process.env.PORT) || DEFAULT_PORT))
   .option('-H, --host <host>', 'interface to bind (0.0.0.0 for containers/LAN)', '127.0.0.1')
   .option('-u, --user <name>', 'basic-auth username', 'admin')
   .option('-P, --password <password>', 'basic-auth password (default: random, printed at startup)')

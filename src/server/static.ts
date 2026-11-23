@@ -47,7 +47,7 @@ export function loadAssets(root: string): Map<string, Asset> | null {
 export function serveAssets(assets: Map<string, Asset> | null): MiddlewareHandler {
   return async (c) => {
     if (!assets) {
-      return c.text('pgdeck UI is not built. Run "npm run build", or use "npm run dev" during development.', 503);
+      return c.text('pgdeck UI is not built. Run "pnpm build", or use "pnpm dev" during development.', 503);
     }
     const p = c.req.path === '/' ? '/index.html' : c.req.path;
     const asset = assets.get(p);
