@@ -86,12 +86,14 @@ export function createLiveSampler(ctx: DbContext) {
       rowsWritten: Number(c?.rows_written ?? 0),
     };
 
-    const secs = prev ? Math.max((now.t - prev.t) / 1000, 0.001) : 1;
-    // Counters can go backwards after pg_stat_reset(); clamp rates at 0.
-    const rate = (key: keyof Omit<Counters, 't'>) => (prev ? Math.max(now[key] - prev[key], 0) / secs : 0);
-    const hit = prev ? Math.max(now.blksHit - prev.blksHit, 0) : 0;
-    const read = prev ? Math.max(now.blksRead - prev.blksRead, 0) : 0;
+    // Capture the previous sample before replacing it: the rates below compare against it.
+    const last = prev;
     prev = now;
+    const secs = last ? Math.max((now.t - last.t) / 1000, 0.001) : 1;
+    // Counters can go backwards after pg_stat_reset(); clamp rates at 0.
+    const rate = (key: keyof Omit<Counters, 't'>) => (last ? Math.max(now[key] - last[key], 0) / secs : 0);
+    const hit = last ? Math.max(now.blksHit - last.blksHit, 0) : 0;
+    const read = last ? Math.max(now.blksRead - last.blksRead, 0) : 0;
 
     const k = conns.rows[0]!;
     return {
