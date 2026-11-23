@@ -1,6 +1,6 @@
 {
   "name": "pgdeck",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A fast, modern web UI for PostgreSQL. Run it with npx, browse and edit data, run SQL, and watch live stats.",
   "keywords": [
     "postgres",
