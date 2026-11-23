@@ -20,8 +20,12 @@ export function printBanner(
     `  ${pc.green('✓')} ${label('Connected')}${pc.bold(info.database)} as ${info.user} ${pc.dim(`(${serverVersion})`)}`,
     `    ${label('Databases')}${databaseCount} available ${pc.dim('(switch in the UI)')}`,
     `  ${pc.cyan('➜')} ${label('Web UI')}${pc.bold(pc.cyan(url))}`,
-    `    ${label('Listening')}${config.host}:${port}${config.basePath ? pc.dim(`  (base path ${config.basePath})`) : ''}`,
+    // Say who can reach the UI, rather than repeating the address above.
+    isLoopback(config.host)
+      ? `    ${label('Reachable')}from this machine only ${pc.dim(`(remote: ssh -L ${port}:127.0.0.1:${port} <server>, a reverse proxy, or --host 0.0.0.0)`)}`
+      : `    ${label('Reachable')}from the network on ${config.host === '0.0.0.0' || config.host === '::' ? 'all interfaces' : config.host}, port ${port}`,
   ];
+  if (config.basePath) lines.push(`    ${label('Base path')}${config.basePath}`);
 
   if (config.auth) {
     const hint = config.auth.generated ? pc.dim('  (generated: pass --password to keep it fixed)') : '';
