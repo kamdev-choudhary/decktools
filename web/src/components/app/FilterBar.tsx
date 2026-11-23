@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { Combobox } from './Combobox';
 import { fieldKind } from './FieldInput';
 
 const needsValue = (f: Filter) => !UNARY_OPS.includes(f.op);
@@ -38,18 +39,16 @@ function ValueInput({ column, filter, onChange, autoFocus }: { column?: Column; 
 
   if (!isList(filter.op) && kind === 'enum' && column?.enumValues) {
     return (
-      <Select value={value || undefined} onValueChange={onChange}>
-        <SelectTrigger size="sm" className={cn(cls, 'w-auto')} aria-label="Value">
-          <SelectValue placeholder="Choose…" />
-        </SelectTrigger>
-        <SelectContent>
-          {column.enumValues.map((v) => (
-            <SelectItem key={v} value={v} className="font-mono text-xs">
-              {v}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Combobox
+        value={value || undefined}
+        onChange={onChange}
+        options={column.enumValues.map((v) => ({ value: v }))}
+        placeholder="Choose…"
+        searchPlaceholder="Search values…"
+        mono
+        aria-label="Value"
+        className="min-w-0 flex-1"
+      />
     );
   }
   if (!isList(filter.op) && kind === 'boolean') {
@@ -140,19 +139,15 @@ function FilterEditor({ columns, value, onApply }: { columns: Column[]; value: F
                 <span className="pr-2">{match}</span>
               )}
             </div>
-            <Select value={f.col} onValueChange={(col) => update(i, { col, val: '' })}>
-              <SelectTrigger size="sm" className="h-8 w-40 min-w-0 font-mono text-xs" aria-label="Column">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {columns.map((c) => (
-                  <SelectItem key={c.name} value={c.name} className="font-mono text-xs">
-                    {c.name}
-                    <span className="ml-2 text-muted-foreground">{c.typeName}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+              value={f.col}
+              onChange={(col) => update(i, { col, val: '' })}
+              options={columns.map((c) => ({ value: c.name, hint: c.typeName }))}
+              searchPlaceholder="Search columns…"
+              mono
+              aria-label="Column"
+              className="w-44"
+            />
             <Select value={f.op} onValueChange={(op) => update(i, { op: op as FilterOp })}>
               <SelectTrigger size="sm" className="h-8 w-32 shrink-0 text-xs" aria-label="Operator">
                 <SelectValue>{OP_LABEL[f.op] ?? f.op}</SelectValue>

@@ -73,7 +73,7 @@ function PeekBody({ db, fk, value }: { db: string; fk: FkTarget; value: string }
   const href = tableHref(db, fk.schema, fk.table, { [fk.column]: value });
 
   return (
-    <div className="flex max-h-[inherit] min-h-0 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 items-center justify-between gap-3 border-b px-3 py-2">
         <div className="min-w-0">
           <div className="truncate font-mono text-xs font-medium">
@@ -102,7 +102,7 @@ function PeekBody({ db, fk, value }: { db: string; fk: FkTarget; value: string }
             {row.data.fields.map((f, i) => {
               const v = row.data.rows[0]![i] ?? null;
               return (
-                <div key={f} className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] gap-3 px-3 py-1.5">
+                <div key={f} className="grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] gap-3 px-3 py-1 hover:bg-muted/40">
                   <dt className="truncate font-mono text-muted-foreground" title={f}>
                     {f}
                   </dt>
@@ -135,7 +135,10 @@ export function FkPeek({ db, fk, value }: { db: string; fk: FkTarget; value: str
           <ArrowUpRight className="size-3.5" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="flex w-[min(26rem,calc(100vw-2rem))] flex-col overflow-hidden p-0">
+      <PopoverContent
+        align="start"
+        className="flex max-h-[min(26rem,var(--radix-popover-content-available-height))] w-[min(26rem,calc(100vw-2rem))] flex-col overflow-hidden p-0"
+      >
         {open && <PeekBody db={db} fk={fk} value={value} />}
       </PopoverContent>
     </Popover>
