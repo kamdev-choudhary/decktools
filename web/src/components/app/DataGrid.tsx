@@ -127,7 +127,7 @@ export function DataGrid({
                     : undefined
                 }
               >
-                <td className={cn(edgeCell, 'z-10 py-1 align-middle text-xs text-muted-foreground tabular-nums')}>
+                <td className={cn(edgeCell, 'z-10 py-2 align-middle text-xs text-muted-foreground tabular-nums')}>
                   {selection ? (
                     <Checkbox
                       aria-label={`Select row ${rowOffset + i + 1}`}
@@ -147,7 +147,7 @@ export function DataGrid({
                     data-field={fields[j]}
                     title={v && v.length > 40 ? v.slice(0, 4000) : undefined}
                     className={cn(
-                      'border-r border-b px-3 py-1 align-top font-mono text-[12.5px] transition-colors group-hover:bg-row-hover group-data-[state=selected]:bg-row-selected',
+                      'border-r border-b px-3 py-2 align-top font-mono text-[12.5px] transition-colors group-hover:bg-row-hover group-data-[state=selected]:bg-row-selected',
                       wrap ? 'max-w-[640px] break-words whitespace-pre-wrap' : 'max-w-[360px] truncate',
                       numeric[j] && 'text-right tabular-nums',
                       v === null && 'text-null italic',

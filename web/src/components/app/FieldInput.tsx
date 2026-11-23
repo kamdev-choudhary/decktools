@@ -1,4 +1,4 @@
-import { Braces, Clock, Shuffle } from 'lucide-react';
+import { Braces, Shuffle } from 'lucide-react';
 import { useState } from 'react';
 import type { Column } from '@shared/types';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { DateTimeField } from './DateTimeField';
 
 export type FieldKind = 'boolean' | 'enum' | 'date' | 'datetime' | 'time' | 'uuid' | 'number' | 'json' | 'line' | 'text';
 
@@ -25,29 +26,6 @@ export function fieldKind(col: Column): FieldKind {
   if (col.category === 'N' || NUMERIC_TEXT.test(t)) return 'number';
   if (t === 'varchar' || t === 'bpchar' || t === 'name' || t === 'citext' || t === 'inet' || t === 'cidr' || t === 'macaddr') return 'line';
   return 'text';
-}
-
-const pad = (n: number, w = 2) => String(n).padStart(w, '0');
-
-/** "Now" in the literal format Postgres prints for the column's type. */
-function nowLiteral(col: Column): string {
-  const d = new Date();
-  const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const time = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
-  const offMin = -d.getTimezoneOffset();
-  const tz = `${offMin >= 0 ? '+' : '-'}${pad(Math.floor(Math.abs(offMin) / 60))}:${pad(Math.abs(offMin) % 60)}`;
-  switch (col.typeName) {
-    case 'timestamptz':
-      return `${date} ${time}${tz}`;
-    case 'timestamp':
-      return `${date} ${time}`;
-    case 'timetz':
-      return `${time}${tz}`;
-    case 'time':
-      return time;
-    default:
-      return date;
-  }
 }
 
 function jsonError(text: string): string | null {
@@ -131,31 +109,19 @@ export function FieldInput({ id, column, value, disabled, placeholder, changed, 
       );
 
     case 'date':
-      return (
-        <Input
-          {...common}
-          type="date"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={cn('w-full font-mono text-[13px] sm:w-56', ring)}
-        />
-      );
-
     case 'datetime':
     case 'time':
       return (
-        <div className="flex gap-2">
-          <Input
-            {...common}
-            value={value}
-            placeholder={placeholder || (kind === 'time' ? 'HH:MM:SS' : 'YYYY-MM-DD HH:MM:SS')}
-            onChange={(e) => onChange(e.target.value)}
-            className={cn('font-mono text-[13px]', ring)}
-          />
-          <Button type="button" variant="outline" size="sm" className="h-9 shrink-0" disabled={disabled} onClick={() => onChange(nowLiteral(column))}>
-            <Clock /> Now
-          </Button>
-        </div>
+        <DateTimeField
+          id={id}
+          column={column}
+          mode={kind}
+          value={value}
+          disabled={disabled}
+          placeholder={placeholder}
+          className={cn(kind === 'date' && 'sm:max-w-56', ring || undefined)}
+          onChange={onChange}
+        />
       );
 
     case 'uuid':
