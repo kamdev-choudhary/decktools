@@ -1,68 +1,27 @@
 ---
+import Corners from './Corners.astro';
 import Shot from './Shot.astro';
 
 const stops = [
-  {
-    id: 'browse',
-    shot: 'table',
-    title: 'Browse any table',
-    body: 'Sort, page and filter with AND or OR across millions of rows. Column headers show each type and where its foreign key points.',
-    alt: 'The orders table in pgdeck: a grid of order ids, customer UUIDs that link to customers, statuses, totals and timestamps, with filters and pagination.',
-  },
-  {
-    id: 'edit',
-    shot: 'editor',
-    title: 'Edit rows with the right controls',
-    body: 'Dates get a calendar, enums a menu, JSON a checked editor, and foreign keys a searchable picker over the table they reference.',
-    alt: 'The Edit row dialog for an order: a foreign key field with a Browse button, an enum menu for status and a date picker for timestamps.',
-  },
-  {
-    id: 'sql',
-    shot: 'sql',
-    title: 'Run SQL',
-    body: 'Highlighting and table autocomplete. Run the selection or the whole script with ⌘ Enter, go back through history, export any result.',
-    alt: 'The SQL editor with a revenue-by-country query and its ten result rows below.',
-  },
-  {
-    id: 'structure',
-    shot: 'structure',
-    title: 'Change the schema',
-    body: 'Add, rename and retype columns. Create indexes concurrently, with sort order, partial predicates and any access method. Every change shows its SQL first.',
-    alt: 'The Structure tab for orders: columns with types, defaults and flags, and their indexes, each with an actions menu.',
-  },
-  {
-    id: 'create',
-    shot: 'create-table',
-    title: 'Create tables',
-    body: 'Build columns with types, defaults, primary keys, auto-increment and foreign keys, and read the CREATE TABLE statement as you go.',
-    alt: 'The New table dialog with columns for id, number and created_at, constraint toggles and a references picker.',
-  },
-  {
-    id: 'import',
-    shot: 'import',
-    title: 'Import gigabytes',
-    body: 'Drop CSV, TSV or JSON Lines files, gzipped or not. Each one is matched to its table by name and streamed through COPY. pg_dump backups restore here too.',
-    alt: 'The Import page with a drop zone for data files and database backups.',
-  },
-  {
-    id: 'export',
-    shot: 'export',
-    title: 'Export and back up',
-    body: 'Download a table in seven formats, or the whole database as a restorable SQL backup or a ZIP with one file per table.',
-    alt: 'The Export page listing every table with checkboxes, and options for structure, data and file format.',
-  },
+  { id: 'browse', shot: 'table', label: 'Browse', body: 'Sort, page and filter millions of rows. Headers show each type and where its foreign key points.', alt: 'The orders table: order ids, customer UUIDs linking to customers, statuses, totals and timestamps, with filters and pagination.' },
+  { id: 'edit', shot: 'editor', label: 'Edit', body: 'Double-click a row for a form with the right control for each column, including a picker for foreign keys.', alt: 'The Edit row dialog for an order, with a foreign key Browse button, a status menu and date pickers.' },
+  { id: 'sql', shot: 'sql', label: 'SQL', body: 'Highlighting and table autocomplete. Run the selection or the whole script, keep history, export results.', alt: 'The SQL editor with a revenue-by-country query and its result rows.' },
+  { id: 'structure', shot: 'structure', label: 'Structure', body: 'Columns, indexes, constraints and references, each with actions to change or drop it.', alt: 'The Structure tab for orders with columns, indexes and constraints.' },
+  { id: 'create', shot: 'create-table', label: 'Create', body: 'Build a table column by column, with constraints and foreign keys, and read the SQL as you go.', alt: 'The New table dialog with columns, constraint toggles and a references picker.' },
+  { id: 'import', shot: 'import', label: 'Import', body: 'Drop data files or a pg_dump backup. Files are matched to tables by name and streamed in.', alt: 'The Import page with drop zones for data files and backups.' },
+  { id: 'export', shot: 'export', label: 'Export', body: 'Pick tables and a format, or download the whole database as a restorable backup.', alt: 'The Export page with a table list and format options.' },
 ];
 ---
 
-<section id="tour" class="relative isolate border-y border-line bg-tide-soft py-20 md:py-28">
-  <div class="wrap">
-    <div class="max-w-2xl">
-      <h2 class="h2">Everything you'd open psql for.</h2>
-      <p class="lede mt-5">These are real screens from pgdeck, running against a demo shop database. Pick one.</p>
-    </div>
-
-    <div class="tour mt-12 grid gap-8 lg:grid-cols-[19rem_minmax(0,1fr)] lg:gap-10">
-      <div role="tablist" aria-label="pgdeck screens" aria-orientation="vertical" class="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0">
+<section id="tour" class="section">
+  <Corners />
+  <div class="pad py-20 md:py-28">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div class="max-w-xl">
+        <h2 class="h2">Take the tour.</h2>
+        <p class="lede mt-5">Real screens from pgdeck, running against a demo shop database.</p>
+      </div>
+      <div role="tablist" aria-label="pgdeck screens" class="tour-tabs flex max-w-full gap-1 overflow-x-auto rounded-full border border-line-strong bg-surface p-1 [scrollbar-width:none]">
         {
           stops.map((s, i) => (
             <button
@@ -72,70 +31,68 @@ const stops = [
               aria-controls={`panel-${s.id}`}
               aria-selected={i === 0 ? 'true' : 'false'}
               tabindex={i === 0 ? 0 : -1}
-              class="tab group shrink-0 rounded-xl px-4 py-3 text-left transition-colors hover:bg-paper-raised aria-selected:bg-paper-raised aria-selected:ring-1 aria-selected:ring-line"
+              class="h-8 shrink-0 rounded-full px-3.5 text-sm text-muted transition-colors hover:text-fg aria-selected:bg-fg aria-selected:text-bg"
             >
-              <span class="block font-semibold whitespace-nowrap text-ink-soft group-aria-selected:text-ink lg:whitespace-normal">{s.title}</span>
-              <span class="mt-1.5 hidden text-[0.92rem] leading-snug text-ink-soft group-aria-selected:lg:block">{s.body}</span>
+              {s.label}
             </button>
           ))
         }
       </div>
+    </div>
 
-      <div class="relative min-w-0">
-        <div class="glow pointer-events-none absolute -inset-x-10 -top-10 -bottom-10 -z-0 opacity-40" aria-hidden="true"></div>
-        <div class="frame relative">
-          <div class="frame-bar" aria-hidden="true">
-            <div class="flex gap-1.5">
-              <span class="size-2.5 rounded-full bg-line"></span>
-              <span class="size-2.5 rounded-full bg-line"></span>
-              <span class="size-2.5 rounded-full bg-line"></span>
-            </div>
+    <div class="relative mt-10">
+      <div class="tour-glow pointer-events-none absolute -inset-x-6 -inset-y-6 -z-10" aria-hidden="true"></div>
+      <div class="brand-border rounded-[16px] bg-surface">
+        <div class="overflow-hidden rounded-[16px]">
+          <div class="window-bar" aria-hidden="true">
+            <div class="dots"><i></i><i></i><i></i></div>
           </div>
           <div class="grid">
             {
               stops.map((s, i) => (
-                <div
-                  role="tabpanel"
-                  id={`panel-${s.id}`}
-                  aria-labelledby={`tab-${s.id}`}
-                  data-active={i === 0 ? '' : undefined}
-                  class="panel col-start-1 row-start-1"
-                >
-                  <Shot name={s.shot} alt={s.alt} sizes="(min-width: 1216px) 840px, 94vw" />
+                <div role="tabpanel" id={`panel-${s.id}`} aria-labelledby={`tab-${s.id}`} data-active={i === 0 ? '' : undefined} class="panel col-start-1 row-start-1">
+                  <Shot name={s.shot} alt={s.alt} sizes="(min-width: 1200px) 1080px, 94vw" />
                 </div>
               ))
             }
           </div>
         </div>
-        {
-          stops.map((s, i) => (
-            <p data-caption={s.id} hidden={i !== 0} class="mt-4 text-[0.95rem] text-ink-soft lg:hidden">
-              {s.body}
-            </p>
-          ))
-        }
       </div>
     </div>
+    {
+      stops.map((s, i) => (
+        <p data-caption={s.id} hidden={i !== 0} class="mx-auto mt-6 max-w-2xl text-center text-muted">
+          {s.body}
+        </p>
+      ))
+    }
   </div>
 </section>
 
 <style>
+  .tour-glow {
+    background:
+      radial-gradient(closest-side at 20% 40%, color-mix(in oklab, var(--blue) 40%, transparent), transparent),
+      radial-gradient(closest-side at 85% 70%, color-mix(in oklab, var(--pink) 32%, transparent), transparent);
+    filter: blur(50px);
+    opacity: 0.45;
+  }
   .panel {
     opacity: 0;
     visibility: hidden;
     transition:
-      opacity 0.28s ease,
-      visibility 0s linear 0.28s;
+      opacity 0.3s ease,
+      visibility 0s linear 0.3s;
   }
   .panel[data-active] {
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.28s ease;
+    transition: opacity 0.3s ease;
   }
 </style>
 
 <script>
-  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.tour [role=tab]')];
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.tour-tabs [role=tab]')];
   const select = (tab: HTMLButtonElement, focus = false) => {
     for (const t of tabs) {
       const on = t === tab;
@@ -152,13 +109,10 @@ const stops = [
   tabs.forEach((tab, i) => {
     tab.addEventListener('click', () => select(tab));
     tab.addEventListener('keydown', (e) => {
-      const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+      const step = ({ ArrowRight: 1, ArrowLeft: -1 } as Record<string, number>)[e.key];
       if (step) {
         e.preventDefault();
         select(tabs[(i + step + tabs.length) % tabs.length]!, true);
-      } else if (e.key === 'Home' || e.key === 'End') {
-        e.preventDefault();
-        select(tabs[e.key === 'Home' ? 0 : tabs.length - 1]!, true);
       }
     });
   });

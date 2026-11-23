@@ -1,34 +1,45 @@
 ---
+import { NPM_URL, REPO_URL } from '../lib/meta';
+import Corners from './Corners.astro';
 import CopyCommand from './CopyCommand.astro';
 import Logo from './Logo.astro';
-const repo = 'https://github.com/kamdev-choudhary/pgdeck';
 ---
 
-<section class="relative isolate overflow-hidden bg-night py-28 text-center text-night-ink md:py-36">
-  <div class="grid-bg pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_60%_70%_at_50%_100%,#000_10%,transparent_70%)]" aria-hidden="true"></div>
-  <div class="glow pointer-events-none absolute -bottom-72 left-1/2 -z-10 h-[34rem] w-[min(60rem,120vw)] -translate-x-1/2" aria-hidden="true"></div>
-  <div class="wrap">
-    <h2 class="display headline-ink mx-auto max-w-[15ch] text-[clamp(2.6rem,1.4rem+4.8vw,5.2rem)]">Point it at a database and press Enter.</h2>
-    <p class="mx-auto mt-6 max-w-[46ch] text-[1.1rem] text-night-soft">It prints a link and a password. Open the link. That’s the whole setup.</p>
+<section class="section relative isolate overflow-hidden">
+  <Corners />
+  <div class="grid-bg pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_55%_80%_at_50%_100%,#000_20%,transparent_75%)]" aria-hidden="true"></div>
+  <div class="cta-glow pointer-events-none absolute -bottom-40 left-1/2 -z-10 h-80 w-[min(56rem,120vw)] -translate-x-1/2" aria-hidden="true"></div>
+  <div class="pad py-24 text-center md:py-32">
+    <h2 class="display mx-auto max-w-[15ch] text-[clamp(2.5rem,1.3rem+4.6vw,4.75rem)]">Point it at a database and press Enter.</h2>
+    <p class="lede mx-auto mt-6">It prints a link and a password. Open the link. That’s the setup.</p>
     <div class="mx-auto mt-10 flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center">
-      <CopyCommand command="npx pgdeck postgres://localhost:5432" class="flex-1 !border-night-line !bg-night-raised text-left [&_code]:!text-night-ink" />
-      <a href={repo} class="inline-flex h-[3.35rem] items-center justify-center rounded-xl bg-night-ink px-6 font-semibold text-night transition-opacity hover:opacity-85">
-        Star on GitHub
-      </a>
+      <CopyCommand command="npx pgdeck postgres://localhost:5432" class="flex-1 text-left" />
+      <a href={REPO_URL} class="btn btn-primary h-[3.1rem] shrink-0">Star on GitHub</a>
     </div>
   </div>
 </section>
 
-<footer class="bg-night text-night-soft">
-  <div class="wrap flex flex-col gap-4 border-t border-night-line py-8 text-sm sm:flex-row sm:items-center">
-    <span class="flex items-center gap-2 font-semibold text-night-ink">
-      <Logo class="size-5" /> pgdeck
-    </span>
+<footer class="section">
+  <Corners />
+  <div class="pad flex flex-col gap-5 py-10 text-sm text-faint md:flex-row md:items-center">
+    <span class="flex items-center gap-2 font-medium text-fg"><Logo class="size-5" /> pgdeck</span>
     <span>Open source under the MIT license.</span>
-    <nav class="flex gap-5 sm:ml-auto" aria-label="Footer">
-      <a href={repo} class="hover:text-night-ink">GitHub</a>
-      <a href="https://www.npmjs.com/package/pgdeck" class="hover:text-night-ink">npm</a>
-      <a href={`${repo}/issues`} class="hover:text-night-ink">Report an issue</a>
+    <nav class="flex flex-wrap gap-x-6 gap-y-2 md:ml-auto" aria-label="Footer">
+      <a href={`${REPO_URL}#readme`} class="hover:text-fg">Docs</a>
+      <a href={REPO_URL} class="hover:text-fg">GitHub</a>
+      <a href={NPM_URL} class="hover:text-fg">npm</a>
+      <a href={`${REPO_URL}/releases`} class="hover:text-fg">Releases</a>
+      <a href={`${REPO_URL}/issues`} class="hover:text-fg">Report an issue</a>
     </nav>
   </div>
 </footer>
+
+<style>
+  .cta-glow {
+    background:
+      radial-gradient(closest-side at 35% 50%, color-mix(in oklab, var(--blue) 60%, transparent), transparent),
+      radial-gradient(closest-side at 65% 50%, color-mix(in oklab, var(--pink) 50%, transparent), transparent);
+    filter: blur(60px);
+    opacity: 0.6;
+  }
+</style>

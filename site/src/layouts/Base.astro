@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { getImage } from 'astro:assets';
-import ogSource from '../assets/shots/overview-light.png';
+import ogSource from '../assets/shots/overview-dark.png';
 
 interface Props {
   title: string;
@@ -23,8 +23,7 @@ const ogUrl = new URL(og.src, Astro.site);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
-    <meta name="theme-color" content="#f7f9fb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0a1320" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#000000" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -32,7 +31,7 @@ const ogUrl = new URL(og.src, Astro.site);
     <meta property="og:image" content={ogUrl} />
     <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body class="bg-paper text-ink">
+  <body class="bg-bg text-fg">
     <slot />
   </body>
 </html>
