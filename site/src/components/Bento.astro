@@ -156,9 +156,9 @@ const sqlLines = [
             <span class="field font-mono text-[0.72rem]">2026-08-03 14:15:58+05:30</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="w-[4.5rem] shrink-0 font-mono text-[0.72rem] text-faint"><span class="text-amber">⚿</span> id</span>
+            <span class="w-[4.5rem] shrink-0 font-mono text-[0.72rem] text-faint"><svg viewBox="0 0 24 24" class="inline size-3 align-[-1px] text-amber" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M17 6l2 2M15 8l2 2"/></svg> id</span>
             <span class="field min-w-0 truncate border-blue/60 font-mono text-[0.72rem] ring-3 ring-blue/15">01a207ae-9328-7dab…</span>
-            <span class="field w-auto shrink-0 font-medium">v7</span>
+            <span class="field flex-none px-2.5 font-medium">v7</span>
           </div>
         </div>
       </article>
@@ -217,7 +217,7 @@ const sqlLines = [
                 columns.map((c) => (
                   <div class="flex items-center gap-2 border-b border-line px-3.5 py-2 last:border-b-0">
                     <span class="w-[5.6rem] shrink-0 truncate font-mono text-fg">{c.name}</span>
-                    <span class="w-[6.2rem] shrink-0 truncate rounded-md border border-line px-1.5 py-0.5 font-mono text-[0.7rem] text-green">{c.type}</span>
+                    <span class="w-[7rem] shrink-0 truncate rounded-md border border-line px-1.5 py-0.5 font-mono text-[0.7rem] text-green">{c.type}</span>
                     <span class="flex gap-1">
                       {['PK', 'NN', 'AI'].map((f) => (
                         <span class:list={['rounded px-1 py-px font-mono text-[0.62rem]', c.flags.includes(f) ? 'bg-fg text-bg' : 'border border-line text-faint']}>{f}</span>
