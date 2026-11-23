@@ -25,6 +25,13 @@
   --term-dim: #7f93ab;
   --term-ok: #6fcf97;
   --term-link: #8fc1ec;
+  /* The hero and closing bands are night in both schemes. */
+  --night: #07111f;
+  --night-raised: #0c1a2d;
+  --night-line: rgba(160, 196, 230, 0.14);
+  --night-ink: #eef4fb;
+  --night-soft: #a6bbd2;
+  --glow: #3b7bb3;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -44,6 +51,8 @@
     --term: #060c15;
     --term-ink: #d6e2ef;
     --term-dim: #71849c;
+    --night: #050c17;
+    --night-raised: #0a1626;
   }
 }
 
@@ -66,6 +75,12 @@
   --color-term-dim: var(--term-dim);
   --color-term-ok: var(--term-ok);
   --color-term-link: var(--term-link);
+  --color-night: var(--night);
+  --color-night-raised: var(--night-raised);
+  --color-night-line: var(--night-line);
+  --color-night-ink: var(--night-ink);
+  --color-night-soft: var(--night-soft);
+  --color-glow: var(--glow);
 }
 
 @layer base {
@@ -160,5 +175,45 @@
     font-family: var(--font-mono);
     font-size: 0.8rem;
     line-height: 1.7;
+  }
+
+  /* A data grid fading into the dark: wide cells, short rows. */
+  .grid-bg {
+    background-image:
+      linear-gradient(to right, var(--night-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--night-line) 1px, transparent 1px);
+    background-size: 136px 44px;
+    background-position: center top;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 75%);
+  }
+  .glow {
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--glow) 70%, transparent), transparent);
+    filter: blur(20px);
+  }
+  .headline-ink {
+    background: linear-gradient(180deg, #ffffff 30%, #b4cde6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Bento tiles: one border weight, radius by importance. */
+  .tile {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: var(--paper-raised);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 1.9rem;
+    padding-inline: 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--paper);
+    font-size: 0.8rem;
+    white-space: nowrap;
   }
 }

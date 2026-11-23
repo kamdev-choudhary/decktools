@@ -1,0 +1,14 @@
+{
+	"pid": 85353,
+	"port": 47617,
+	"url": "http://localhost:47617",
+	"urls": {
+		"local": [
+			"http://localhost:47617/"
+		],
+		"network": [],
+		"networkInterfaceNames": []
+	},
+	"background": false,
+	"startedAt": "2026-11-23T09:21:47.048Z"
+}

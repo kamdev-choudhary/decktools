@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import Closing from '../components/Closing.astro';
+import Deploy from '../components/Deploy.astro';
+import Details from '../components/Details.astro';
+import Hero from '../components/Hero.astro';
+import Nav from '../components/Nav.astro';
+import Tour from '../components/Tour.astro';
+---
+
+<Base
+  title="pgdeck: a PostgreSQL web admin you start with one command"
+  description="Browse and edit data, run SQL, manage tables and watch live stats for every database on your PostgreSQL server. Run npx pgdeck and open the link."
+>
+  <Nav />
+  <main>
+    <Hero />
+    <Tour />
+    <Details />
+    <Deploy />
+    <Closing />
+  </main>
+</Base>

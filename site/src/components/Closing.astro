@@ -1,0 +1,31 @@
+---
+import CopyCommand from './CopyCommand.astro';
+import Logo from './Logo.astro';
+const repo = 'https://github.com/kamdev-choudhary/pgdeck';
+---
+
+<section class="py-24 md:py-32">
+  <div class="wrap">
+    <h2 class="display max-w-[16ch] text-[clamp(2.6rem,1.4rem+4.8vw,5rem)]">Point it at a database and press Enter.</h2>
+    <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-center">
+      <CopyCommand command="npx pgdeck postgres://localhost:5432" class="md:w-[32rem]" />
+      <a href={repo} class="inline-flex h-[3.35rem] items-center justify-center rounded-xl border border-line px-5 font-semibold transition-colors hover:border-ink-faint">
+        Star it on GitHub
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="border-t border-line">
+  <div class="wrap flex flex-col gap-4 py-8 text-sm text-ink-faint sm:flex-row sm:items-center">
+    <span class="flex items-center gap-2 font-semibold text-ink">
+      <Logo class="size-5" /> pgdeck
+    </span>
+    <span>Open source under the MIT license.</span>
+    <nav class="flex gap-5 sm:ml-auto" aria-label="Footer">
+      <a href={repo} class="hover:text-ink">GitHub</a>
+      <a href="https://www.npmjs.com/package/pgdeck" class="hover:text-ink">npm</a>
+      <a href={`${repo}/issues`} class="hover:text-ink">Report an issue</a>
+    </nav>
+  </div>
+</footer>
