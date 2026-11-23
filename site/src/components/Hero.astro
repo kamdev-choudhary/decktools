@@ -1,132 +1,127 @@
 ---
+import { getMeta, REPO_URL } from '../lib/meta';
+import Corners from './Corners.astro';
 import CopyCommand from './CopyCommand.astro';
+import Cross from './Cross.astro';
 import Shot from './Shot.astro';
 
+const { version } = await getMeta();
 const command = 'npx pgdeck postgres://localhost:5432/shop';
+const stats = [
+  ['1M rows', 'imported from CSV in about 3 s'],
+  ['1 command', 'no install, no config, no account'],
+  ['7 formats', 'to export, plus SQL backups'],
+  ['PostgreSQL 12+', 'local, in Docker or managed'],
+] as const;
 ---
 
-<section id="top" class="relative isolate overflow-hidden bg-night text-night-ink">
+<section id="top" class="relative isolate overflow-hidden">
   <div class="grid-bg pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
-  <div class="glow pointer-events-none absolute top-[36rem] left-1/2 -z-10 h-[46rem] w-[min(78rem,140vw)] -translate-x-1/2" aria-hidden="true"></div>
 
-  <div class="wrap relative pt-16 text-center md:pt-24">
-    <a
-      href="https://github.com/kamdev-choudhary/pgdeck/releases"
-      class="intro inline-flex items-center gap-2 rounded-full border border-night-line bg-night-raised/70 py-1 pr-3.5 pl-1 text-[0.82rem] text-night-soft transition-colors hover:text-night-ink"
-      style="--d:0"
-    >
-      <span class="rounded-full bg-glow/30 px-2.5 py-0.5 font-semibold text-night-ink">New</span>
-      Tables and indexes, right in the UI
+  <div class="pad pt-20 text-center md:pt-28">
+    <a href={`${REPO_URL}/releases`} class="intro inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface py-1 pr-3 pl-1 text-[0.8rem] text-muted transition-colors hover:text-fg" style="--d:0">
+      <span class="rounded-full bg-[image:var(--brand)] px-2 py-0.5 font-medium text-white">v{version}</span>
+      Tables, columns and indexes, right in the UI
+      <svg viewBox="0 0 16 16" class="size-3" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 3 5 5-5 5"></path></svg>
     </a>
-    <h1 class="intro display headline-ink mx-auto mt-7 max-w-[13ch] text-[clamp(3.1rem,1.4rem+7.2vw,7.2rem)]" style="--d:1">
-      Postgres, open in a browser tab.
+
+    <h1 class="intro display mx-auto mt-8 max-w-[14ch] text-[clamp(2.9rem,1.2rem+6.6vw,6.5rem)]" style="--d:1">
+      The Postgres admin that starts with one command.
     </h1>
-    <p class="intro mx-auto mt-7 max-w-[52ch] text-[1.15rem] leading-relaxed text-night-soft md:text-[1.25rem]" style="--d:2">
-      A web admin for PostgreSQL that starts with one command. Browse and edit rows, run SQL, change tables and watch
-      live activity on every database on your server.
+    <p class="intro lede mx-auto mt-7 md:text-[1.2rem]" style="--d:2">
+      Browse and edit rows, run SQL, change tables and watch live activity on every database on your server. pgdeck runs
+      wherever Node does and opens in any browser.
     </p>
-    <div class="intro mx-auto mt-10 flex max-w-xl flex-col items-stretch gap-3" style="--d:3">
-      <div class="cmd-glow rounded-[14px] p-px">
-        <CopyCommand command="npx pgdeck postgres://user:pass@host:5432/db" class="!border-0 !bg-night-raised text-left !text-night-ink [&_code]:!text-night-ink" />
-      </div>
-      <p class="text-[0.83rem] text-night-soft/80">Node.js 20+ and PostgreSQL 12+. Nothing to install. MIT licensed.</p>
+
+    <div id="get-started" class="intro mx-auto mt-10 flex max-w-2xl flex-col items-stretch gap-3 sm:flex-row sm:items-center" style="--d:3">
+      <CopyCommand command="npx pgdeck postgres://user:pass@host:5432/db" class="flex-1 text-left" />
+      <a href={`${REPO_URL}#readme`} class="btn btn-ghost h-[3.1rem] shrink-0">Read the docs</a>
     </div>
+    <p class="intro mt-4 text-[0.82rem] text-faint" style="--d:4">Free and open source, MIT licensed. Needs Node.js 20 or newer.</p>
   </div>
 
-  <!-- The one orchestrated moment: the command runs, pgdeck answers, the app opens and settles flat as you scroll. -->
-  <div class="wrap relative mt-16 pb-24 md:mt-20 md:pb-32">
-    <div class="stage relative">
-      <div class="app-in">
-        <div class="tilt rounded-[18px] bg-gradient-to-b from-white/25 to-white/5 p-px">
-          <div class="overflow-hidden rounded-[17px] bg-night-raised">
-            <div class="flex h-10 items-center gap-3 border-b border-night-line px-4" aria-hidden="true">
-              <div class="flex gap-1.5">
-                <span class="size-2.5 rounded-full bg-[#ff5f57]/80"></span>
-                <span class="size-2.5 rounded-full bg-[#febc2e]/80"></span>
-                <span class="size-2.5 rounded-full bg-[#28c840]/80"></span>
-              </div>
-              <div class="mx-auto flex h-6 w-full max-w-xs items-center justify-center gap-1.5 rounded-md bg-night px-3 font-mono text-[0.7rem] text-night-soft">
-                <svg viewBox="0 0 24 24" class="size-3" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
-                127.0.0.1:47615
-              </div>
-              <div class="w-12"></div>
+  <!-- The one orchestrated moment: the command runs, pgdeck answers, the app opens. -->
+  <div class="pad relative mt-16 pb-20 md:mt-20 md:pb-28">
+    <div class="glow pointer-events-none absolute inset-x-[8%] top-[12%] -z-10 h-[70%]" aria-hidden="true"></div>
+    <div class="relative">
+      <div class="app-in brand-border rounded-[16px] bg-surface">
+        <div class="overflow-hidden rounded-[16px]">
+          <div class="window-bar" aria-hidden="true">
+            <div class="dots"><i></i><i></i><i></i></div>
+            <div class="mx-auto flex h-6 w-full max-w-xs items-center justify-center gap-1.5 rounded-md border border-line bg-bg px-3 font-mono text-[0.7rem] text-faint">
+              <svg viewBox="0 0 24 24" class="size-3" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+              db.example.com
             </div>
-            <Shot
-              name="overview"
-              alt="The pgdeck overview: connection, transaction and cache stats, live charts of transactions and rows per second, and the active sessions on the shop database."
-              eager
-              sizes="(min-width: 1216px) 1150px, 94vw"
-            />
+            <div class="w-[46px]"></div>
           </div>
+          <Shot
+            name="overview"
+            alt="The pgdeck overview: connections, transactions and cache stats, live charts of transactions and rows per second, and the active sessions on the shop database."
+            eager
+            sizes="(min-width: 1200px) 1100px, 94vw"
+          />
         </div>
       </div>
 
-      <div class="term relative z-10 mt-5 w-full rounded-2xl border border-night-line bg-term/95 p-5 backdrop-blur md:absolute md:-bottom-10 md:-left-6 md:mt-0 md:w-[27.5rem] lg:-left-10">
-        <div class="mb-4 flex items-center gap-1.5" aria-hidden="true">
-          <span class="size-2.5 rounded-full bg-term-dim/40"></span>
-          <span class="size-2.5 rounded-full bg-term-dim/40"></span>
-          <span class="size-2.5 rounded-full bg-term-dim/40"></span>
-          <span class="ml-auto font-mono text-[0.68rem] text-term-dim">zsh</span>
+      <div class="term relative z-20 mt-4 w-full rounded-2xl border border-line-strong bg-surface/90 p-5 text-left backdrop-blur-md md:absolute md:-bottom-12 md:-left-8 md:mt-0 md:w-[27rem]">
+        <div class="mb-4 flex items-center" aria-hidden="true">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <span class="ml-auto font-mono text-[0.68rem] text-faint">~/shop</span>
         </div>
-        <div class="code overflow-x-auto whitespace-pre text-term-ink [scrollbar-width:none]" role="img" aria-label={`Terminal running ${command}, then pgdeck printing its web address and login`}>
-          <div><span class="text-term-dim">~ $ </span><span class="type inline-block overflow-hidden align-bottom" style={`--n:${command.length}`}>{command}</span></div>
-          <div class="out mt-3" style="--i:0">  <span class="font-semibold">pgdeck</span> <span class="text-term-dim">v0.1.2</span></div>
-          <div class="out mt-3" style="--i:1">  <span class="text-term-ok">✓ Connected</span>   shop as postgres <span class="text-term-dim">(PostgreSQL 18)</span></div>
-          <div class="out" style="--i:2">    <span class="text-term-dim">Databases</span>   35 available</div>
-          <div class="out" style="--i:3">  <span class="text-term-link">➜ Web UI      http://127.0.0.1:47615/</span></div>
-          <div class="out" style="--i:4">    <span class="text-term-dim">Login</span>       admin / 7Qm2xLpR9vKe</div>
+        <div class="code overflow-x-auto whitespace-pre text-fg [scrollbar-width:none]" role="img" aria-label={`Terminal running ${command}, then pgdeck printing its web address and login`}>
+          <div><span class="text-faint">$ </span><span class="type inline-block overflow-hidden align-bottom" style={`--n:${command.length}`}>{command}</span></div>
+          <div class="out mt-3" style="--i:0">  <span class="font-semibold text-blue">pgdeck</span> <span class="text-faint">v{version}</span></div>
+          <div class="out mt-3" style="--i:1">  <span class="text-green">✓ Connected</span>   shop as postgres <span class="text-faint">(PostgreSQL 18)</span></div>
+          <div class="out" style="--i:2">    <span class="text-faint">Databases</span>   35 available</div>
+          <div class="out" style="--i:3">  <span class="text-blue">➜ Web UI      http://127.0.0.1:47615/</span></div>
+          <div class="out" style="--i:4">    <span class="text-faint">Login</span>       admin / <span class="text-amber">7Qm2xLpR9vKe</span></div>
         </div>
       </div>
     </div>
   </div>
+
+  <dl class="section grid grid-cols-2 lg:grid-cols-4">
+    <Corners />
+    {
+      stats.map(([n, label], i) => (
+        <div class:list={['relative px-5 py-7 md:px-8 md:py-9', i % 2 === 1 && 'border-l border-line', i === 2 && 'lg:border-l', i >= 2 && 'border-t border-line lg:border-t-0']}>
+          {i > 0 && i < 4 && <Cross class="-top-[7px] -left-[7px] hidden lg:block" />}
+          <dt class="text-[clamp(1.35rem,1rem+1.2vw,1.85rem)] font-semibold tracking-[-0.04em]">{n}</dt>
+          <dd class="mt-1 text-sm text-muted">{label}</dd>
+        </div>
+      ))
+    }
+  </dl>
 </section>
 
 <style>
+  .glow {
+    background:
+      radial-gradient(closest-side at 30% 50%, color-mix(in oklab, var(--blue) 55%, transparent), transparent),
+      radial-gradient(closest-side at 72% 55%, color-mix(in oklab, var(--pink) 45%, transparent), transparent);
+    filter: blur(60px);
+    opacity: 0.55;
+  }
   .intro {
     animation: intro 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    animation-delay: calc(var(--d) * 0.08s);
-  }
-  .cmd-glow {
-    background: linear-gradient(120deg, rgba(134, 179, 220, 0.7), rgba(134, 179, 220, 0.08) 40%, rgba(134, 179, 220, 0.08) 60%, rgba(240, 179, 78, 0.55));
+    animation-delay: calc(var(--d) * 0.07s);
   }
   .type {
     width: calc(var(--n) * 1ch);
-    animation: type 1.1s steps(var(--n)) 0.7s both;
+    animation: type 1.1s steps(var(--n)) 0.6s both;
   }
   .out {
     opacity: 0;
     animation: fade 0.25s ease-out both;
-    animation-delay: calc(2s + var(--i) * 0.13s);
+    animation-delay: calc(1.9s + var(--i) * 0.13s);
   }
   .app-in {
-    animation: rise 1s cubic-bezier(0.2, 0.8, 0.2, 1) 2.7s both;
-  }
-  .tilt {
-    transform-origin: 50% 0;
-    transform: perspective(1800px) rotateX(14deg) scale(0.95);
-  }
-  @supports (animation-timeline: view()) {
-    .tilt {
-      animation: flatten linear both;
-      animation-timeline: view();
-      animation-range: entry 10% cover 42%;
-    }
-  }
-  @supports not (animation-timeline: view()) {
-    .tilt {
-      transform: none;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .tilt {
-      transform: none !important;
-      animation: none !important;
-    }
+    animation: rise 1s cubic-bezier(0.2, 0.8, 0.2, 1) 2.6s both;
   }
   @keyframes intro {
     from {
       opacity: 0;
-      transform: translateY(14px);
+      transform: translateY(12px);
     }
   }
   @keyframes type {
@@ -142,15 +137,7 @@ const command = 'npx pgdeck postgres://localhost:5432/shop';
   @keyframes rise {
     from {
       opacity: 0;
-      transform: translateY(3rem);
-    }
-  }
-  @keyframes flatten {
-    from {
-      transform: perspective(1800px) rotateX(14deg) scale(0.95);
-    }
-    to {
-      transform: none;
+      transform: translateY(2.5rem) scale(0.98);
     }
   }
 </style>
