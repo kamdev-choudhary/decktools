@@ -158,7 +158,7 @@ export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { d
           <DialogHeader className="border-b px-6 py-4">
             <DialogTitle>New table</DialogTitle>
             <DialogDescription>
-              Define the columns. You can add indexes and more constraints later in the SQL editor.
+              Define the columns. Indexes and other constraints can be added afterwards on the Structure tab.
             </DialogDescription>
           </DialogHeader>
 
