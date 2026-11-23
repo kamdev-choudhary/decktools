@@ -2,6 +2,7 @@ import type {
   ApiErrorBody,
   Cell,
   DatabaseList,
+  DbStats,
   DbInfo,
   LoginRequest,
   MutationResponse,
@@ -74,4 +75,5 @@ export const api = {
   remove: (database: string, schema: string, table: string, keys: RowKey[]) =>
     request<MutationResponse>(db(database, 'delete'), { schema, table, keys }),
   query: (database: string, sql: string) => request<QueryResponse>(db(database, 'query'), { sql }),
+  stats: (database: string) => request<DbStats>(db(database, 'stats')),
 };

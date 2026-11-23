@@ -18,6 +18,7 @@ function databaseRoutes() {
   return new Hono<DbEnv>()
     .get('/info', async (c) => c.json(await c.var.db.info()))
     .get('/tables', async (c) => c.json(await c.var.db.tables()))
+    .get('/stats', async (c) => c.json(await c.var.db.stats()))
     .get('/meta', async (c) => {
       const { schema, table } = parse(metaQuery, c.req.query());
       return c.json(await c.var.db.meta(schema, table));

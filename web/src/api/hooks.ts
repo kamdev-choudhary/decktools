@@ -9,6 +9,7 @@ export const keys = {
   db: (db: string) => ['db', db] as const,
   info: (db: string) => ['db', db, 'info'] as const,
   tables: (db: string) => ['db', db, 'tables'] as const,
+  stats: (db: string) => ['db', db, 'stats'] as const,
   meta: (db: string, schema: string, table: string) => ['db', db, 'meta', schema, table] as const,
   rowsOf: (db: string, schema: string, table: string) => ['db', db, 'rows', schema, table] as const,
   rows: (db: string, req: RowsRequest) => ['db', db, 'rows', req.schema, req.table, req] as const,
@@ -42,6 +43,8 @@ export function useLogout() {
 export const useDatabases = () => useQuery({ queryKey: keys.databases, queryFn: api.databases });
 
 export const useInfo = (db: string) => useQuery({ queryKey: keys.info(db), queryFn: () => api.info(db) });
+
+export const useStats = (db: string) => useQuery({ queryKey: keys.stats(db), queryFn: () => api.stats(db) });
 
 export const useTables = (db: string) => useQuery({ queryKey: keys.tables(db), queryFn: () => api.tables(db) });
 

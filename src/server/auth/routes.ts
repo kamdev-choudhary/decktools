@@ -1,6 +1,7 @@
 import { Hono, type Context, type MiddlewareHandler } from 'hono';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
+import { parse as parseCookie } from 'hono/utils/cookie';
 import { z } from 'zod';
 import type { SessionInfo } from '../../shared/types.js';
 import { parse } from '../schemas.js';
@@ -85,5 +86,11 @@ export function createAuth(auth: AuthConfig | null) {
       return c.json<SessionInfo>({ authRequired: !!auth, authenticated: !auth, username: null });
     });
 
-  return { routes, requireSession };
+  /** For requests Hono doesn't see (WebSocket upgrades): is this Cookie header signed in? */
+  const authorizeCookieHeader = (cookieHeader: string | undefined): boolean => {
+    if (!auth) return true;
+    return !!sessions.touch(parseCookie(cookieHeader ?? '', COOKIE)[COOKIE]);
+  };
+
+  return { routes, requireSession, authorizeCookieHeader };
 }

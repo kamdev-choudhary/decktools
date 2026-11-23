@@ -37,6 +37,9 @@
   --row-hover: #fafafa;
   --row-selected: #f0f6ff;
   --null: #a8a8a8;
+  /* Chart series, validated for CVD separation on #fff (dataviz validate_palette.js). */
+  --chart-data: #0070f3;
+  --chart-index: #d6409f;
   --sidebar: #fafafa;
   --sidebar-foreground: #171717;
   --sidebar-border: #ebebeb;
@@ -70,6 +73,9 @@
   --row-hover: #111111;
   --row-selected: #0d1a2e;
   --null: #575757;
+  /* Validated on #0a0a0a. */
+  --chart-data: #3291ff;
+  --chart-index: #e5489e;
   --sidebar: #000000;
   --sidebar-foreground: #ededed;
   --sidebar-border: #1f1f1f;
@@ -109,6 +115,8 @@
   --color-row-hover: var(--row-hover);
   --color-row-selected: var(--row-selected);
   --color-null: var(--null);
+  --color-chart-data: var(--chart-data);
+  --color-chart-index: var(--chart-index);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-border: var(--sidebar-border);

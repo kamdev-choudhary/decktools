@@ -2,6 +2,8 @@ import type { Cell, RowKey, RowsRequest } from '../shared/types.js';
 import { createPool, type DbConfig, type DbContext } from './client.js';
 import { getInfo, getTableMeta, listDatabases, listTables } from './introspect.js';
 import { runQuery } from './query.js';
+import { getStats } from './stats.js';
+import { createLiveSampler } from './live.js';
 import { deleteRows, insertRow, selectRows, updateRow } from './rows.js';
 
 
@@ -16,6 +18,9 @@ export function createDatabase(config: DbConfig) {
   return {
     readonly: config.readonly,
     info: () => getInfo(ctx),
+    stats: () => getStats(ctx),
+    /** A sampler that reports per-second rates since its previous call. */
+    liveSampler: () => createLiveSampler(ctx),
     listDatabases: () => listDatabases(ctx),
     tables: () => listTables(ctx),
     meta: (schema: string, table: string) => getTableMeta(ctx, schema, table),

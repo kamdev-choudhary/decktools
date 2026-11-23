@@ -56,6 +56,74 @@ export interface TableRef {
   kind: RelKind;
 }
 
+/** Per-relation storage and maintenance stats for the overview page. */
+export interface TableStats {
+  schema: string;
+  name: string;
+  kind: RelKind;
+  /** Live rows from pg_stat (or the planner estimate if never analyzed). */
+  rows: number;
+  deadRows: number;
+  tableBytes: number;
+  indexBytes: number;
+  totalBytes: number;
+  indexCount: number;
+  seqScans: number | null;
+  indexScans: number | null;
+  /** Most recent manual or auto vacuum / analyze, ISO timestamps. */
+  lastVacuum: string | null;
+  lastAnalyze: string | null;
+}
+
+export interface DbStats {
+  sizeBytes: number;
+  uptimeSeconds: number;
+  serverVersion: string;
+  connections: { total: number; active: number; idle: number; idleInTransaction: number; max: number };
+  /** Share of block reads served from shared buffers, 0..1; null before any reads. */
+  cacheHitRatio: number | null;
+  transactions: { commits: number; rollbacks: number };
+  tuples: { inserted: number; updated: number; deleted: number; fetched: number };
+  deadlocks: number;
+  tempBytes: number;
+  /** When pg_stat_database counters were last reset (or null = since server start). */
+  statsSince: string | null;
+  extensions: { name: string; version: string }[];
+  tables: TableStats[];
+}
+
+/** A query running (or idle) on the database right now, from pg_stat_activity. */
+export interface LiveActivity {
+  pid: number;
+  user: string | null;
+  application: string;
+  client: string | null;
+  state: string | null;
+  waitEvent: string | null;
+  /** Seconds since the current query (or transaction, if idle in one) started. */
+  durationSeconds: number | null;
+  query: string;
+}
+
+/** One sample pushed over the live WebSocket, every few seconds. */
+export interface LiveSample {
+  type: 'sample';
+  /** Epoch milliseconds. */
+  t: number;
+  connections: { total: number; active: number; idle: number; idleInTransaction: number; max: number };
+  /** Rates over the interval since the previous sample (0 for the first). */
+  commitsPerSec: number;
+  rollbacksPerSec: number;
+  rowsReadPerSec: number;
+  rowsWrittenPerSec: number;
+  /** Cache hit ratio over the interval; null when there were no block reads. */
+  cacheHitRatio: number | null;
+  /** Client sessions other than pgdeck's own pool. */
+  activity: LiveActivity[];
+}
+
+export type LiveMessage = LiveSample | { type: 'error'; error: string };
+
 export interface Column {
   name: string;
   type: string;

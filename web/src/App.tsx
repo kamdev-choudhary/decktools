@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import type { SessionInfo } from '@shared/types';
 import { useDatabases, useInfo, useSession } from '@/api/hooks';
 import { CenteredSpinner, ErrorAlert } from '@/components/app/feedback';
@@ -24,12 +25,21 @@ function Workspace({ session }: { session: SessionInfo }) {
   const route = useRoute();
   const databases = useDatabases();
 
-  // "#/" has no database yet: go to the server's default one.
-  useEffect(() => {
-    if (route.view === 'root' && databases.data) navigate(dbHref(databases.data.default), true);
-  }, [route.view, databases.data]);
+  // Go to the server's default database when the URL names none, or names one
+  // that doesn't exist (a stale bookmark, a typo, or a database dropped since).
+  const unknownDb =
+    route.view !== 'root' && !!databases.data && !databases.data.databases.some((d) => d.name === route.db);
 
-  if (route.view === 'root') {
+  useEffect(() => {
+    if (!databases.data) return;
+    if (route.view === 'root') navigate(dbHref(databases.data.default), true);
+    else if (unknownDb) {
+      toast.warning(`Database "${route.db}" not found`, { description: `Opened ${databases.data.default} instead.` });
+      navigate(dbHref(databases.data.default), true);
+    }
+  }, [route, databases.data, unknownDb]);
+
+  if (route.view === 'root' || unknownDb) {
     return databases.isError ? <ErrorAlert error={databases.error} className="m-6 w-auto" /> : <CenteredSpinner />;
   }
   return <Shell key={route.db} db={route.db} session={session} />;
