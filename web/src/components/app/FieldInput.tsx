@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { generateUuid, preferredUuidVersion } from '@/lib/uuid';
 import { DateTimeField } from './DateTimeField';
 import { FkField, type FkTarget } from './ForeignKey';
 
@@ -58,6 +59,8 @@ export function FieldInput({ id, column, db, fk, value, disabled, placeholder, c
   // Decided once from the initial value, so typing past the limit doesn't swap
   // the element (and steal focus) mid-edit.
   const [startsLong] = useState(() => value.length > 60 || value.includes('\n'));
+  // Match the UUID version already in use (decided from the initial value / column default).
+  const [uuidVer] = useState(() => preferredUuidVersion(value, column.default));
   const baseKind = fieldKind(column);
   const kind: FieldKind = baseKind === 'line' && startsLong ? 'text' : baseKind;
   const ring = changed && 'border-warning/60 focus-visible:border-warning';
@@ -155,8 +158,11 @@ export function FieldInput({ id, column, db, fk, value, disabled, placeholder, c
             onChange={(e) => onChange(e.target.value)}
             className={cn('font-mono text-[13px]', ring)}
           />
-          <Button type="button" variant="outline" size="sm" className="h-9 shrink-0" disabled={disabled} onClick={() => onChange(crypto.randomUUID())}>
-            <Shuffle /> Generate
+          <Button type="button" variant="outline" size="sm" className="h-9 shrink-0" disabled={disabled}
+            title={`Generate a new UUIDv${uuidVer}`}
+            onClick={() => onChange(generateUuid(uuidVer))}
+          >
+            <Shuffle /> Generate <span className="font-mono text-[11px] text-muted-foreground">v{uuidVer}</span>
           </Button>
         </div>
       );

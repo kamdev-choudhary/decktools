@@ -153,6 +153,9 @@ importers:
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
+      uuid:
+        specifier: ^14.0.3
+        version: 14.0.3
       vite:
         specifier: ^8.3.8
         version: 8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)
@@ -2258,6 +2261,10 @@ packages:
       '@types/react':
         optional: true
 
+  uuid@14.0.3:
+    resolution: {integrity: sha512-Sc5u1VVln93y1Xnz4R+CunOZc7R9LUcTmhj7Rc7Eg3HVcf7rVn2FOoa812fe0W8p3jD7xeoGSYbfqCGGH2B6xw==}
+    hasBin: true
+
   verkit@0.5.0:
     resolution: {integrity: sha512-u4J1hr6Y+C/hit34GwL3eIcUf3wngT8TlYUjK7tk0jxydKLAq3sYvifjdTDA6U3KCKRcQCQDGf/srjxfZF3l7g==}
     engines: {node: '>=18.12.0'}
@@ -4286,6 +4293,8 @@ snapshots:
       tslib: 2.9.1
     optionalDependencies:
       '@types/react': 19.3.0
+
+  uuid@14.0.3: {}
 
   verkit@0.5.0: {}
 
