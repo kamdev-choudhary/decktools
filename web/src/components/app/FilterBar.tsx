@@ -115,7 +115,7 @@ export function FilterControl({ columns, value, onChange }: FilterControlProps) 
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex h-10 shrink-0 items-center gap-2 border-b bg-grid-header/60 px-3 md:px-4">
+    <div className="flex h-12 shrink-0 items-center gap-2 border-b bg-grid-header/60 px-3 md:px-4">
       <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
         <ListFilter className="size-3.5" />
         <span className="hidden sm:inline">Filters</span>
@@ -127,7 +127,7 @@ export function FilterControl({ columns, value, onChange }: FilterControlProps) 
           {value.map((f, i) => (
             <span
               key={i}
-              className="inline-flex h-6 max-w-72 shrink-0 items-center rounded-md border bg-background font-mono text-[11px]"
+              className="inline-flex h-8 max-w-72 shrink-0 items-center rounded-md border bg-background font-mono text-xs"
             >
               <button
                 type="button"
@@ -150,7 +150,7 @@ export function FilterControl({ columns, value, onChange }: FilterControlProps) 
             </span>
           ))}
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="xs" className="shrink-0 text-muted-foreground" disabled={!columns.length}>
+            <Button variant="outline" size="sm" className="shrink-0" disabled={!columns.length}>
               <Plus /> {value.length ? 'Add' : 'Add filter'}
             </Button>
           </PopoverTrigger>
@@ -168,7 +168,7 @@ export function FilterControl({ columns, value, onChange }: FilterControlProps) 
       </Popover>
 
       {value.length > 0 && (
-        <Button variant="ghost" size="xs" className="shrink-0 text-muted-foreground" onClick={() => onChange([])}>
+        <Button variant="ghost" size="sm" className="shrink-0 text-muted-foreground" onClick={() => onChange([])}>
           Clear all
         </Button>
       )}

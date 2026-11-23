@@ -1,4 +1,6 @@
+import { HardDrive, Lock, Rows3, Table2 } from 'lucide-react';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { REL_KIND_LABEL } from '@shared/types';
 import { useMeta } from '@/api/hooks';
 import { CenteredSpinner, ErrorAlert } from '@/components/app/feedback';
@@ -43,11 +45,24 @@ export function TableView({ db, schema, table, readonly }: TableViewProps) {
         </TabsList>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="hidden shrink-0 cursor-default text-xs text-muted-foreground lg:inline">
-              {REL_KIND_LABEL[m.kind]} · {m.size}
-              {m.estimate >= 0 && ` · ~${formatNumber(m.estimate)} rows`}
-              {!readonly && !m.editable && ' · read-only'}
-            </span>
+            <div className="hidden shrink-0 cursor-default items-center gap-1.5 lg:flex">
+              <Badge variant="secondary" className="capitalize">
+                <Table2 /> {REL_KIND_LABEL[m.kind]}
+              </Badge>
+              <Badge variant="outline" className="text-muted-foreground tabular-nums">
+                <HardDrive /> {m.size}
+              </Badge>
+              {m.estimate >= 0 && (
+                <Badge variant="outline" className="text-muted-foreground tabular-nums">
+                  <Rows3 /> ~{formatNumber(m.estimate)} rows
+                </Badge>
+              )}
+              {!readonly && !m.editable && (
+                <Badge variant="outline" className="border-warning/40 text-warning">
+                  <Lock /> Read-only
+                </Badge>
+              )}
+            </div>
           </TooltipTrigger>
           <TooltipContent className="max-w-xs">
             <div className="font-mono">

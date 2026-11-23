@@ -63,12 +63,18 @@ export async function getTableMeta(ctx: DbContext, schema: string, table: string
     ctx.pool.query<Column>(
       `select a.attname as name,
               format_type(a.atttypid, a.atttypmod) as type,
+              coalesce(bt.typname, t.typname) as "typeName",
+              coalesce(bt.typcategory, t.typcategory) as category,
+              (select array_agg(e.enumlabel::text order by e.enumsortorder)
+                 from pg_enum e where e.enumtypid = coalesce(bt.oid, t.oid)) as "enumValues",
               not a.attnotnull as nullable,
               pg_get_expr(d.adbin, d.adrelid) as "default",
               a.attidentity <> '' as identity,
               a.attgenerated <> '' as generated,
               col_description(a.attrelid, a.attnum) as comment
        from pg_attribute a
+       join pg_type t on t.oid = a.atttypid
+       left join pg_type bt on t.typtype = 'd' and bt.oid = t.typbasetype -- look through domains
        left join pg_attrdef d on d.adrelid = a.attrelid and d.adnum = a.attnum
        where a.attrelid = $1 and a.attnum > 0 and not a.attisdropped
        order by a.attnum`,

@@ -16,7 +16,7 @@ function NavLink({ href, active, icon: Icon, children }: { href: string; active:
       href={href}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'flex h-8 items-center gap-2 rounded-md px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
+        'flex h-8 items-center gap-2 rounded-md px-2 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
         active && 'bg-sidebar-accent font-medium text-foreground',
       )}
     >
@@ -72,7 +72,7 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Search tables…"
-            className="h-8 pl-8 text-sm"
+            className="h-8 pl-8 text-[13px]"
             spellCheck={false}
             autoComplete="off"
           />
@@ -116,11 +116,11 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
                           href={tableHref(db, t.schema, t.name)}
                           aria-current={isActive ? 'page' : undefined}
                           className={cn(
-                            'flex h-7 min-w-0 items-center gap-2 rounded-md pr-2 pl-6 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
+                            'flex h-8 min-w-0 items-center gap-2 rounded-md pr-2 pl-6 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
                             isActive && 'bg-sidebar-accent font-medium text-foreground',
                           )}
                         >
-                          <Icon className="size-3.5 shrink-0 opacity-70" />
+                          <Icon className="size-4 shrink-0 opacity-70" />
                           <TruncatedText
                             text={t.name}
                             side="right"

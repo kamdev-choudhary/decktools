@@ -6,9 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 import { errorMessage, Kbd, Spinner } from './feedback';
+import { FieldInput } from './FieldInput';
 
 interface FieldState {
   text: string;
@@ -85,8 +84,8 @@ export function RowEditor({ meta, mode, row, focusField, onClose, onSave }: RowE
           // Focus the cell that was double-clicked rather than the first control.
           e.preventDefault();
           const body = bodyRef.current;
-          const selector = focusField ? `textarea[data-field="${CSS.escape(focusField)}"]:not(:disabled)` : '';
-          ((selector && body?.querySelector<HTMLTextAreaElement>(selector)) || body?.querySelector('textarea:not(:disabled)'))?.focus();
+          const selector = focusField ? `[data-field="${CSS.escape(focusField)}"]:not(:disabled)` : '';
+          ((selector && body?.querySelector<HTMLElement>(selector)) || body?.querySelector<HTMLElement>('[data-field]:not(:disabled)'))?.focus();
         }}
       >
         <form
@@ -117,7 +116,7 @@ export function RowEditor({ meta, mode, row, focusField, onClose, onSave }: RowE
               return (
                 <div key={c.name} className="space-y-2 py-3.5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Label htmlFor={id} className="font-mono text-[13px]">
+                    <Label id={`${id}-label`} htmlFor={id} className="font-mono text-[13px]">
                       {pk.has(c.name) && <KeyRound className="size-3 text-warning" />}
                       {c.name}
                     </Label>
@@ -149,18 +148,14 @@ export function RowEditor({ meta, mode, row, focusField, onClose, onSave }: RowE
                       )}
                     </div>
                   </div>
-                  <Textarea
+                  <FieldInput
                     id={id}
-                    data-field={c.name}
+                    column={c}
                     value={st.isNull ? '' : st.text}
                     placeholder={placeholder}
                     disabled={c.generated || st.isNull}
-                    spellCheck={false}
-                    onChange={(e) => update(c.name, { text: e.target.value, useDefault: false })}
-                    className={cn(
-                      'max-h-60 min-h-9 font-mono text-[13px]',
-                      isChanged(c.name) && 'border-warning/60 focus-visible:border-warning',
-                    )}
+                    changed={isChanged(c.name)}
+                    onChange={(text) => update(c.name, { text, useDefault: false })}
                   />
                 </div>
               );

@@ -126,7 +126,17 @@ export type LiveMessage = LiveSample | { type: 'error'; error: string };
 
 export interface Column {
   name: string;
+  /** Formatted type, e.g. "character varying(255)", "timestamp(3) with time zone". */
   type: string;
+  /** Underlying type name, e.g. "varchar", "timestamptz", "jsonb", "uuid", or the enum's name. */
+  typeName: string;
+  /**
+   * pg_type.typcategory: A array, B boolean, D date/time, E enum, N numeric,
+   * S string, U user-defined (json, uuid, ...), and others.
+   */
+  category: string;
+  /** Allowed labels when the column is an enum, in their declared order. */
+  enumValues: string[] | null;
   nullable: boolean;
   default: string | null;
   identity: boolean;
