@@ -79,7 +79,7 @@ export function RowEditor({ meta, mode, row, focusField, onClose, onSave }: RowE
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="flex max-h-[calc(100dvh-4rem)] flex-col gap-0 p-0 sm:max-w-2xl"
+        className="flex max-h-[calc(100dvh-4rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
         onOpenAutoFocus={(e) => {
           // Focus the cell that was double-clicked rather than the first control.
           e.preventDefault();
@@ -89,7 +89,7 @@ export function RowEditor({ meta, mode, row, focusField, onClose, onSave }: RowE
         }}
       >
         <form
-          className="flex min-h-0 flex-col"
+          className="flex min-h-0 flex-1 flex-col"
           onSubmit={(e) => {
             e.preventDefault();
             void submit();

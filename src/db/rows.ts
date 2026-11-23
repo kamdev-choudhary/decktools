@@ -1,9 +1,9 @@
 import type pg from 'pg';
-import type { Cell, Filter, MutationResponse, RowKey, RowsRequest, RowsResponse, TableMeta } from '../shared/types.js';
+import type { Cell, Filter, FilterMatch, MutationResponse, RowKey, RowsRequest, RowsResponse, TableMeta } from '../shared/types.js';
 import { queryRaw, withTransaction, type DbContext } from './client.js';
 import { UserError } from './errors.js';
 import { getTableMeta } from './introspect.js';
-import { FILTER_SQL, isUnaryOp, qualified, quoteIdent } from './sql.js';
+import { FILTER_SQL, isListOp, isUnaryOp, qualified, quoteIdent, splitList } from './sql.js';
 
 /** Above this planner estimate an unfiltered count(*) is skipped as too slow. */
 const EXACT_COUNT_THRESHOLD = 50_000;
@@ -20,15 +20,17 @@ function assertWritable(ctx: DbContext, meta: TableMeta): void {
   if (!meta.editable) throw new UserError(`${meta.schema}.${meta.table} has no primary key or is not a table, so it cannot be edited here`);
 }
 
-function buildWhere(meta: TableMeta, filters: Filter[], values: unknown[]): string {
+function buildWhere(meta: TableMeta, filters: Filter[], match: FilterMatch, values: unknown[]): string {
   assertColumns(meta, filters.map((f) => f.col));
   const parts = filters.map((f) => {
     const toSql = FILTER_SQL[f.op];
     if (isUnaryOp(f.op)) return toSql(quoteIdent(f.col), '');
-    values.push(f.val ?? '');
+    values.push(isListOp(f.op) ? splitList(f.val ?? '') : (f.val ?? ''));
     return toSql(quoteIdent(f.col), `$${values.length}`);
   });
-  return parts.length ? ` where ${parts.join(' and ')}` : '';
+  if (!parts.length) return '';
+  // Parenthesise each condition so OR can't bind across an operator's own logic.
+  return ` where ${parts.map((p) => `(${p})`).join(match === 'or' ? ' or ' : ' and ')}`;
 }
 
 function buildKeyWhere(meta: TableMeta, key: RowKey, values: unknown[]): string {
@@ -54,7 +56,7 @@ export async function selectRows(ctx: DbContext, req: RowsRequest): Promise<Rows
   const rel = qualified(req.schema, req.table);
 
   const values: unknown[] = [];
-  const where = buildWhere(meta, req.filters ?? [], values);
+  const where = buildWhere(meta, req.filters ?? [], req.match ?? 'and', values);
 
   let orderBy = '';
   if (req.sort) {

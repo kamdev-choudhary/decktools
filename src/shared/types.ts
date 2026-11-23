@@ -177,7 +177,24 @@ export interface TableMeta {
   constraints: Constraint[];
 }
 
-export const FILTER_OPS = ['=', '!=', '<', '<=', '>', '>=', 'contains', 'like', 'ilike', 'is null', 'is not null'] as const;
+export const FILTER_OPS = [
+  '=',
+  '!=',
+  '<',
+  '<=',
+  '>',
+  '>=',
+  'contains',
+  'not contains',
+  'starts with',
+  'ends with',
+  'in',
+  'not in',
+  'like',
+  'ilike',
+  'is null',
+  'is not null',
+] as const;
 export type FilterOp = (typeof FILTER_OPS)[number];
 
 export interface Filter {
@@ -188,6 +205,14 @@ export interface Filter {
 
 export type SortDir = 'asc' | 'desc';
 
+/** How multiple filter conditions combine: every one must match, or any one. */
+export type FilterMatch = 'and' | 'or';
+
+/** Operators whose value is a comma-separated list. */
+export const LIST_OPS: readonly FilterOp[] = ['in', 'not in'];
+/** Operators that take no value. */
+export const UNARY_OPS: readonly FilterOp[] = ['is null', 'is not null'];
+
 export interface RowsRequest {
   schema: string;
   table: string;
@@ -196,6 +221,7 @@ export interface RowsRequest {
   sort?: string;
   dir?: SortDir;
   filters?: Filter[];
+  match?: FilterMatch;
 }
 
 export interface RowsResponse {

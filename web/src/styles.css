@@ -151,3 +151,10 @@
     outline: none;
   }
 }
+
+/* Borders only, no drop shadows (toasts are styled by sonner itself). */
+@layer base {
+  [data-sonner-toast] {
+    box-shadow: none !important;
+  }
+}

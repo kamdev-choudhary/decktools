@@ -19,6 +19,7 @@ export const rowsBody = tableRef.extend({
     .array(z.object({ col: ident, op: z.enum(FILTER_OPS), val: z.string().optional() }))
     .max(50)
     .default([]),
+  match: z.enum(['and', 'or']).default('and'),
 });
 
 export const insertBody = tableRef.extend({ values: cellRecord });

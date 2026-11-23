@@ -130,7 +130,7 @@ export function LiveChart({ title, series, times, slots, format, height = 140, c
 
         {hi !== null && (
           <div
-            className="pointer-events-none absolute top-0 z-10 min-w-36 rounded-md border bg-popover px-2.5 py-2 text-xs shadow-md"
+            className="pointer-events-none absolute top-0 z-10 min-w-36 rounded-md border bg-popover px-2.5 py-2 text-xs"
             style={{
               left: Math.min(Math.max(x(hi) + 12, 0), Math.max(width - 160, 0)),
             }}
