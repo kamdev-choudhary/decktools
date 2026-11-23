@@ -1,7 +1,10 @@
-import { ChevronRight, Eye, FileDown, FileUp, Layers, LayoutGrid, Search, SquareTerminal, Table2, type LucideIcon } from 'lucide-react';
+import { ChevronRight, Eye, FileDown, FileUp, Layers, LayoutGrid, Plus, Search, SquareTerminal, Table2, type LucideIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { REL_KIND_LABEL, type RelKind, type TableRef } from '@shared/types';
-import { useTables } from '@/api/hooks';
+import { useInfo, useTables } from '@/api/hooks';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { CreateTableDialog } from './CreateTableDialog';
 import { Input } from '@/components/ui/input';
 import { dbHref, exportHref, importHref, sqlHref, tableHref, type Route } from '@/lib/router';
 import { cn } from '@/lib/utils';
@@ -31,6 +34,8 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
   const tables = useTables(db);
   const [filter, setFilter] = useState('');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [creating, setCreating] = useState(false);
+  const readonly = useInfo(db).data?.readonly ?? true;
 
   const groups = useMemo(() => {
     const needle = filter.trim().toLowerCase();
@@ -71,8 +76,8 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
         </NavLink>
       </div>
 
-      <div className="px-3 pb-2">
-        <div className="relative">
+      <div className="flex gap-1.5 px-3 pb-2">
+        <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
@@ -84,7 +89,18 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
             autoComplete="off"
           />
         </div>
+        {!readonly && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon-sm" aria-label="New table" onClick={() => setCreating(true)} className="size-8">
+                <Plus />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">New table</TooltipContent>
+          </Tooltip>
+        )}
       </div>
+      {creating && <CreateTableDialog db={db} defaultSchema={route.view === 'table' ? route.schema : 'public'} onClose={() => setCreating(false)} />}
 
       <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
         <nav className="px-3 pb-4" aria-label="Tables">

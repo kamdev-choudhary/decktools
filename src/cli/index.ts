@@ -32,7 +32,7 @@ Examples:
 Environment:
   DATABASE_URL      connection string when none is given as an argument
   PG*               PGHOST, PGUSER, PGDATABASE... used when neither is set
-  PGDECK_PASSWORD   basic-auth password (same as --password)
+  PGDECK_PASSWORD   login password (same as --password)
   PORT              port for the web UI (same as --port)
 `;
 
@@ -100,8 +100,8 @@ const program = new Command()
   .argument('[connection-string]', 'postgres:// URL (default: $DATABASE_URL, then PG* variables)')
   .addOption(new Option('-p, --port <port>', 'port for the web UI').argParser(parsePort).default(Number(process.env.PORT) || DEFAULT_PORT))
   .option('-H, --host <host>', 'interface to bind (0.0.0.0 for containers/LAN)', '127.0.0.1')
-  .option('-u, --user <name>', 'basic-auth username', 'admin')
-  .option('-P, --password <password>', 'basic-auth password (default: random, printed at startup)')
+  .option('-u, --user <name>', 'login username', 'admin')
+  .option('-P, --password <password>', 'login password (default: random, printed at startup)')
   .option('--no-auth', 'disable the login prompt (only on a trusted host)')
   .option('--readonly', 'open every session read-only and disable editing', false)
   .option('--ssl', 'connect with SSL without verifying the certificate', false)

@@ -88,3 +88,23 @@ export async function relationDdl(ctx: DbContext, schema: string, table: string)
     .trim()
     .concat('\n');
 }
+
+/** ANALYZE or VACUUM a batch of tables, one statement each (VACUUM can't run in a transaction). */
+export async function runMaintenance(
+  ctx: DbContext,
+  action: 'analyze' | 'vacuum',
+  tables: { schema: string; table: string }[],
+): Promise<{ ok: true; message: string; done: number; failed: { table: string; error: string }[] }> {
+  const failed: { table: string; error: string }[] = [];
+  let done = 0;
+  for (const t of tables) {
+    try {
+      await ctx.pool.query(`${action === 'vacuum' ? 'VACUUM (ANALYZE)' : 'ANALYZE'} ${qualified(t.schema, t.table)}`);
+      done++;
+    } catch (e) {
+      failed.push({ table: `${t.schema}.${t.table}`, error: (e as Error).message });
+    }
+  }
+  const verb = action === 'vacuum' ? 'Vacuumed' : 'Analyzed';
+  return { ok: true, message: `${verb} ${done} table${done === 1 ? '' : 's'}${failed.length ? `, ${failed.length} failed` : ''}`, done, failed };
+}

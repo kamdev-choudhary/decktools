@@ -1,9 +1,11 @@
-import { Activity, Database, Gauge, HardDrive, RefreshCw, SquareTerminal, Users, type LucideIcon } from 'lucide-react';
+import { Activity, Database, Plus, Gauge, HardDrive, RefreshCw, SquareTerminal, Users, type LucideIcon } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useInfo, useStats, keys } from '@/api/hooks';
 import { useLive, type LiveStatus } from '@/api/live';
 import { CenteredSpinner, ErrorAlert } from '@/components/app/feedback';
+import { DatabaseActionsMenu } from '@/components/app/DatabaseActions';
+import { CreateTableDialog } from '@/components/app/CreateTableDialog';
 import { ActiveSessions } from '@/components/app/overview/ActiveSessions';
 import { HealthChecks } from '@/components/app/overview/HealthChecks';
 import { LiveChart } from '@/components/app/overview/LiveChart';
@@ -60,6 +62,7 @@ export function OverviewView({ db }: { db: string }) {
   const info = useInfo(db);
   const stats = useStats(db);
   const live = useLive(db);
+  const [newTable, setNewTable] = useState(false);
   const s = stats.data;
   const l = live.latest;
 
@@ -124,7 +127,14 @@ export function OverviewView({ db }: { db: string }) {
                 <SquareTerminal /> SQL Editor
               </a>
             </Button>
+            {info.data && !info.data.readonly && (
+              <Button size="sm" onClick={() => setNewTable(true)}>
+                <Plus /> New table
+              </Button>
+            )}
+            <DatabaseActionsMenu db={db} />
           </div>
+          {newTable && <CreateTableDialog db={db} onClose={() => setNewTable(false)} />}
         </div>
 
         {stats.isError && <ErrorAlert error={stats.error} title="Could not load statistics" />}

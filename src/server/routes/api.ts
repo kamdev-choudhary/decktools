@@ -5,7 +5,7 @@ import { stream } from 'hono/streaming';
 import { EXPORT_META } from '../../shared/export.js';
 import type { Database, DatabaseManager } from '../../db/index.js';
 import { UserError } from '../../db/errors.js';
-import { createDatabaseBody, createTableBody, databaseActionBody, deleteBody, dumpQuery, exportQuery, importQuery, insertBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
+import { createDatabaseBody, createTableBody, databaseActionBody, deleteBody, dumpQuery, exportQuery, importQuery, insertBody, maintenanceBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
 import { createGzip } from 'node:zlib';
 import yazl from 'yazl';
 
@@ -140,6 +140,10 @@ function databaseRoutes() {
     .post('/create-table', async (c) => {
       const spec = parse(createTableBody, await jsonBody(c.req));
       return c.json(await c.var.db.createTable(spec));
+    })
+    .post('/maintenance', async (c) => {
+      const { action, tables } = parse(maintenanceBody, await jsonBody(c.req));
+      return c.json(await c.var.db.maintenance(action, tables));
     })
     .get('/catalog', async (c) => c.json(await c.var.db.catalog()))
     .post('/query', async (c) => {

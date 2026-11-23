@@ -77,6 +77,12 @@ export const tableActionBody = z.object({
 
 const fkAction = z.enum(FK_ACTIONS);
 
+/** POST /maintenance: ANALYZE / VACUUM many tables. */
+export const maintenanceBody = z.object({
+  action: z.enum(['analyze', 'vacuum']),
+  tables: z.array(tableRef).min(1).max(10_000),
+});
+
 /** POST /create-table */
 export const createTableBody = z.object({
   schema: ident,

@@ -1,5 +1,12 @@
-import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Activity, AlertTriangle, CheckCircle2, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import type { DbStats } from '@shared/types';
+import { api } from '@/api/client';
+import { keys } from '@/api/hooks';
+import { Button } from '@/components/ui/button';
+import { errorMessage, Spinner } from '../feedback';
 import { formatBytes, formatNumber, formatPercent } from '@/lib/format';
 import { tableHref } from '@/lib/router';
 
@@ -7,6 +14,8 @@ interface Finding {
   title: string;
   detail: string;
   tables?: { schema: string; name: string }[];
+  /** A one-click fix for the listed tables. */
+  fix?: 'analyze' | 'vacuum';
 }
 
 const MB = 1024 * 1024;
@@ -36,6 +45,7 @@ function findings(stats: DbStats): Finding[] {
       title: `${bloated.length} table(s) with many dead rows`,
       detail: 'Over 20% dead tuples. VACUUM (or tuning autovacuum) would reclaim space.',
       tables: bloated,
+      fix: 'vacuum',
     });
   }
 
@@ -63,6 +73,7 @@ function findings(stats: DbStats): Finding[] {
       title: `${formatNumber(neverAnalyzed.length)} table(s) never analyzed`,
       detail: 'The planner has no statistics for them. Run ANALYZE so queries get good plans.',
       tables: neverAnalyzed,
+      fix: 'analyze',
     });
   }
 
@@ -74,6 +85,50 @@ function findings(stats: DbStats): Finding[] {
   }
 
   return out;
+}
+
+function FixButton({ db, action, tables }: { db: string; action: 'analyze' | 'vacuum'; tables: { schema: string; name: string }[] }) {
+  const qc = useQueryClient();
+  const run = useMutation({
+    mutationFn: () => api.maintenance(db, action, tables.map((t) => ({ schema: t.schema, table: t.name }))),
+    onSuccess: (res) => {
+      if (res.failed.length) toast.warning(res.message, { description: res.failed.slice(0, 3).map((f) => `${f.table}: ${f.error}`).join('\n') });
+      else toast.success(res.message);
+      void qc.invalidateQueries({ queryKey: keys.stats(db) });
+    },
+    onError: (e) => toast.error(`${action === 'vacuum' ? 'Vacuum' : 'Analyze'} failed`, { description: errorMessage(e) }),
+  });
+  const Icon = action === 'vacuum' ? Sparkles : Activity;
+  const n = tables.length;
+  return (
+    <Button variant="outline" size="sm" className="mt-1.5 h-7 text-xs" disabled={run.isPending} onClick={() => run.mutate()}>
+      {run.isPending ? <Spinner /> : <Icon />}
+      {run.isPending ? `${action === 'vacuum' ? 'Vacuuming' : 'Analyzing'} ${n} table${n === 1 ? '' : 's'}…` : `${action === 'vacuum' ? 'Vacuum' : 'Analyze'} ${n === 1 ? 'it' : n === 2 ? 'both' : `all ${n}`}`}
+    </Button>
+  );
+}
+
+function TableChips({ db, tables }: { db: string; tables: { schema: string; name: string }[] }) {
+  const [all, setAll] = useState(false);
+  const shown = all ? tables : tables.slice(0, 5);
+  return (
+    <div className="flex max-h-48 flex-wrap gap-1 overflow-y-auto pt-0.5">
+      {shown.map((t) => (
+        <a
+          key={`${t.schema}.${t.name}`}
+          href={tableHref(db, t.schema, t.name)}
+          className="rounded border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          {t.name}
+        </a>
+      ))}
+      {tables.length > 5 && (
+        <button type="button" onClick={() => setAll((v) => !v)} className="px-1 py-0.5 text-[11px] text-muted-foreground hover:text-foreground hover:underline">
+          {all ? 'Show less' : `+${tables.length - 5} more`}
+        </button>
+      )}
+    </div>
+  );
 }
 
 export function HealthChecks({ db, stats }: { db: string; stats: DbStats }) {
@@ -99,20 +154,8 @@ export function HealthChecks({ db, stats }: { db: string; stats: DbStats }) {
           <div className="min-w-0 space-y-1">
             <div className="font-medium">{f.title}</div>
             <p className="text-xs text-muted-foreground">{f.detail}</p>
-            {f.tables && (
-              <div className="flex flex-wrap gap-1 pt-0.5">
-                {f.tables.slice(0, 5).map((t) => (
-                  <a
-                    key={`${t.schema}.${t.name}`}
-                    href={tableHref(db, t.schema, t.name)}
-                    className="rounded border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
-                  >
-                    {t.name}
-                  </a>
-                ))}
-                {f.tables.length > 5 && <span className="px-1 py-0.5 text-[11px] text-muted-foreground">+{f.tables.length - 5} more</span>}
-              </div>
-            )}
+            {f.tables && <TableChips db={db} tables={f.tables} />}
+            {f.fix && f.tables && <FixButton db={db} action={f.fix} tables={f.tables} />}
           </div>
         </li>
       ))}

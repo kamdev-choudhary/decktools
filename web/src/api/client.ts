@@ -84,6 +84,8 @@ export const api = {
   tableAction: (database: string, schema: string, table: string, action: TableAction) =>
     request<{ ok: true; message: string }>(db(database, 'table-action'), { schema, table, action }),
   createTable: (database: string, spec: NewTable) => request<{ ok: true; message: string }>(db(database, 'create-table'), spec),
+  maintenance: (database: string, action: 'analyze' | 'vacuum', tables: { schema: string; table: string }[]) =>
+    request<{ ok: true; message: string; done: number; failed: { table: string; error: string }[] }>(db(database, 'maintenance'), { action, tables }),
   catalog: (database: string) => request<{ schemas: string[]; types: { name: string; kind: string }[] }>(db(database, 'catalog')),
   ddl: (database: string, schema: string, table: string) =>
     request<{ sql: string }>(db(database, `ddl?${new URLSearchParams({ schema, table })}`)),

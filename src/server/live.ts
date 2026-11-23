@@ -34,8 +34,7 @@ export function createLiveHub({ manager, basePath, authorizeCookieHeader }: Live
   async function join(dbName: string, ws: WebSocket) {
     let channel = channels.get(dbName);
     if (!channel) {
-      const db = await manager.get(dbName);
-      const sample = db.liveSampler();
+      let sample = (await manager.get(dbName)).liveSampler();
       const clients = new Set<WebSocket>();
       let busy = false;
       const tick = async () => {
@@ -45,6 +44,11 @@ export function createLiveHub({ manager, basePath, authorizeCookieHeader }: Live
           const msg = JSON.stringify(await sample());
           for (const c of clients) if (c.readyState === c.OPEN) c.send(msg);
         } catch (err) {
+          // The pool was closed (database renamed, copied or dropped); reopen on the next beat.
+          if (/after calling end/i.test((err as Error).message)) {
+            sample = await manager.get(dbName).then((db) => db.liveSampler()).catch(() => sample);
+            return;
+          }
           const msg: LiveMessage = { type: 'error', error: (err as Error).message };
           for (const c of clients) send(c, msg);
         } finally {

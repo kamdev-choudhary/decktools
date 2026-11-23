@@ -1,6 +1,7 @@
-import { Check, ChevronsUpDown, Database } from 'lucide-react';
+import { Check, ChevronsUpDown, Database, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useDatabases } from '@/api/hooks';
+import { useDatabases, useInfo } from '@/api/hooks';
+import { CreateDatabaseDialog } from './DatabaseActions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -13,6 +14,8 @@ import { Kbd, Spinner } from './feedback';
 export function DatabaseSwitcher({ current }: { current: string }) {
   const [open, setOpen] = useState(false);
   const databases = useDatabases();
+  const readonly = useInfo(current).data?.readonly ?? true;
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -28,6 +31,7 @@ export function DatabaseSwitcher({ current }: { current: string }) {
   const list = databases.data?.databases ?? [];
 
   return (
+    <>
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="sm" role="combobox" aria-expanded={open} className="gap-2 px-2 font-medium">
@@ -69,12 +73,29 @@ export function DatabaseSwitcher({ current }: { current: string }) {
               ))}
             </CommandGroup>
           </CommandList>
-          <div className="flex items-center justify-end gap-1 border-t px-3 py-2 text-xs text-muted-foreground">
-            Toggle with <Kbd>⌘</Kbd>
-            <Kbd>K</Kbd>
+          <div className="flex items-center gap-1 border-t px-2 py-1.5 text-xs text-muted-foreground">
+            {!readonly && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() => {
+                  setOpen(false);
+                  setCreating(true);
+                }}
+              >
+                <Plus /> New database
+              </Button>
+            )}
+            <span className="ml-auto flex items-center gap-1">
+              <Kbd>⌘</Kbd>
+              <Kbd>K</Kbd>
+            </span>
           </div>
         </Command>
       </PopoverContent>
     </Popover>
+    {creating && <CreateDatabaseDialog onClose={() => setCreating(false)} />}
+    </>
   );
 }
