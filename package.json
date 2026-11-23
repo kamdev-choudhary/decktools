@@ -47,6 +47,8 @@
     "dev": "concurrently -k -n api,web -c blue,magenta \"pnpm:dev:server\" \"pnpm:dev:web\"",
     "dev:server": "tsx watch src/cli/index.ts --no-auth",
     "dev:web": "vite --config web/vite.config.ts",
+    "site:dev": "pnpm --filter pgdeck-site dev",
+    "site:build": "pnpm --filter pgdeck-site build",
     "typecheck": "tsc -p tsconfig.json && tsc -p web/tsconfig.json",
     "start": "node dist/cli.js",
     "prepublishOnly": "pnpm typecheck && pnpm build",
