@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { FILTER_OPS } from '../shared/types.js';
 import { EXPORT_FORMATS, IMPORT_FORMATS } from '../shared/export.js';
 import { UserError } from '../db/errors.js';
+import { FK_ACTIONS } from '../shared/create-table.js';
 
 const ident = z.string().min(1).max(256);
 const cell = z.string().nullable();
@@ -73,6 +74,45 @@ export const tableActionBody = z.object({
     z.object({ action: z.literal('refresh') }),
   ]),
 });
+
+const fkAction = z.enum(FK_ACTIONS);
+
+/** POST /create-table */
+export const createTableBody = z.object({
+  schema: ident,
+  name: z.string().min(1).max(63),
+  comment: z.string().max(10_000).default(''),
+  columns: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(63),
+        type: z.string().min(1).max(128),
+        nullable: z.boolean().default(true),
+        primaryKey: z.boolean().default(false),
+        unique: z.boolean().default(false),
+        identity: z.boolean().default(false),
+        default: z.string().max(10_000).default(''),
+        references: z
+          .object({ schema: ident, table: ident, column: ident, onDelete: fkAction.default('NO ACTION'), onUpdate: fkAction.default('NO ACTION') })
+          .nullable()
+          .default(null),
+        comment: z.string().max(10_000).default(''),
+      }),
+    )
+    .min(1)
+    .max(1600),
+});
+
+const dbName = z.string().min(1).max(63);
+
+/** POST /databases */
+export const createDatabaseBody = z.object({ name: dbName, template: dbName.optional(), owner: ident.optional() });
+
+/** POST /databases/action */
+export const databaseActionBody = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('rename'), name: dbName, newName: dbName }),
+  z.object({ action: z.literal('drop'), name: dbName, force: z.boolean().default(false) }),
+]);
 
 /** POST /restore: run an uploaded dump. */
 export const restoreQuery = z.object({

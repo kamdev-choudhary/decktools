@@ -78,7 +78,7 @@ export async function relationDdl(ctx: DbContext, schema: string, table: string)
     return `CREATE ${meta.kind === 'm' ? 'MATERIALIZED VIEW' : 'VIEW'} ${qualified(schema, table)} AS\n${rows[0]!.def.trimEnd().replace(/;$/, '')};\n`;
   }
   let out = '';
-  for await (const chunk of dumpSql(ctx, { tables: [{ schema, table }], structure: true, data: false })) out += chunk.toString();
+  for await (const chunk of dumpSql(ctx, { tables: [{ schema, table }], structure: true, data: false, keepOutsideForeignKeys: true })) out += chunk.toString();
   // Keep only the object definitions, not the dump preamble/settings.
   return out
     .split('\n')

@@ -24,6 +24,8 @@ export interface DumpOptions {
   tables: TableId[];
   structure: boolean;
   data: boolean;
+  /** Keep foreign keys to tables outside the export (for showing DDL, not for restoring). */
+  keepOutsideForeignKeys?: boolean;
 }
 
 interface TableRow {
@@ -304,7 +306,7 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
         [oids],
       );
       const included = new Set(oids);
-      const ok = fks.rows.filter((f) => included.has(f.ref));
+      const ok = fks.rows.filter((f) => opts.keepOutsideForeignKeys || included.has(f.ref));
       const skipped = fks.rows.length - ok.length;
       if (ok.length || skipped) {
         yield `-- Foreign keys\n` +

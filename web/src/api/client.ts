@@ -15,6 +15,7 @@ import type {
   TableMeta,
   TableRef,
 } from '@shared/types';
+import type { NewTable } from '@shared/create-table';
 
 /**
  * API calls are resolved against the page's own directory, so the UI works
@@ -63,6 +64,9 @@ export const api = {
   logout: () => request<SessionInfo>('auth/logout', {}),
 
   databases: () => request<DatabaseList>('databases'),
+  createDatabase: (body: { name: string; template?: string }) => request<{ ok: true; message: string }>('databases', body),
+  databaseAction: (body: { action: 'rename'; name: string; newName: string } | { action: 'drop'; name: string; force: boolean }) =>
+    request<{ ok: true; message: string }>('databases/action', body),
 
   info: (database: string) => request<DbInfo>(db(database, 'info')),
   tables: (database: string) => request<TableRef[]>(db(database, 'tables')),
@@ -79,6 +83,8 @@ export const api = {
   stats: (database: string) => request<DbStats>(db(database, 'stats')),
   tableAction: (database: string, schema: string, table: string, action: TableAction) =>
     request<{ ok: true; message: string }>(db(database, 'table-action'), { schema, table, action }),
+  createTable: (database: string, spec: NewTable) => request<{ ok: true; message: string }>(db(database, 'create-table'), spec),
+  catalog: (database: string) => request<{ schemas: string[]; types: { name: string; kind: string }[] }>(db(database, 'catalog')),
   ddl: (database: string, schema: string, table: string) =>
     request<{ sql: string }>(db(database, `ddl?${new URLSearchParams({ schema, table })}`)),
 };

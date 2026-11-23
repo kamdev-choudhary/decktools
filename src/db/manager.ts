@@ -3,6 +3,7 @@ import { parseIntoClientConfig } from 'pg-connection-string';
 import type { DatabaseList, DatabaseSummary } from '../shared/types.js';
 import { UserError } from './errors.js';
 import { createDatabase, type Database } from './database.js';
+import { quoteIdent } from './sql.js';
 
 export interface ManagerConfig {
   /** postgres:// URL or key=value string. Empty means PG* environment defaults. */
@@ -76,6 +77,60 @@ export class DatabaseManager {
     if (!this.known?.has(name)) await this.list();
     if (!this.known?.has(name)) throw new UserError(`Database "${name}" does not exist or you cannot connect to it`, 404);
     return this.open(name, { ...this.base, database: name });
+  }
+
+  /* Database administration. Statements run on the default database's pool. */
+
+  private async admin(): Promise<Database> {
+    if (this.config.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
+    return this.get(this.defaultName);
+  }
+
+  /** Close a database's pool so it can be dropped, renamed or used as a template. */
+  private async release(name: string): Promise<void> {
+    const db = this.pools.get(name);
+    if (!db) return;
+    this.pools.delete(name);
+    await db.close().catch(() => {});
+  }
+
+  private guardDefault(name: string, verb: string): void {
+    if (name === this.defaultName) {
+      throw new UserError(`"${name}" is the database pgdeck connects through, so it can't be ${verb} from here. Connect pgdeck to another database first.`, 409);
+    }
+  }
+
+  async createDb(name: string, opts: { template?: string; owner?: string }): Promise<{ ok: true; message: string }> {
+    const admin = await this.admin();
+    let sql = `CREATE DATABASE ${quoteIdent(name)}`;
+    if (opts.owner) sql += ` OWNER ${quoteIdent(opts.owner)}`;
+    if (opts.template) {
+      // Copying needs the template to have no other sessions, including ours.
+      this.guardDefault(opts.template, 'copied');
+      await this.release(opts.template);
+      sql += ` TEMPLATE ${quoteIdent(opts.template)}`;
+    }
+    await admin.exec(sql);
+    this.known = null;
+    return { ok: true, message: opts.template ? `Created ${name} as a copy of ${opts.template}` : `Created database ${name}` };
+  }
+
+  async renameDb(name: string, newName: string): Promise<{ ok: true; message: string }> {
+    const admin = await this.admin();
+    this.guardDefault(name, 'renamed');
+    await this.release(name);
+    await admin.exec(`ALTER DATABASE ${quoteIdent(name)} RENAME TO ${quoteIdent(newName)}`);
+    this.known = null;
+    return { ok: true, message: `Renamed ${name} to ${newName}` };
+  }
+
+  async dropDb(name: string, force: boolean): Promise<{ ok: true; message: string }> {
+    const admin = await this.admin();
+    this.guardDefault(name, 'dropped');
+    await this.release(name);
+    await admin.exec(`DROP DATABASE ${quoteIdent(name)}${force ? ' WITH (FORCE)' : ''}`);
+    this.known = null;
+    return { ok: true, message: `Dropped database ${name}` };
   }
 
   async closeAll(): Promise<void> {

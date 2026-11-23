@@ -8,6 +8,8 @@ import type { Readable } from 'node:stream';
 import { exportRows, importRows, type ExportRequest, type ImportRequest } from './transfer.js';
 import { dumpSql, type DumpOptions } from './dump.js';
 import { restoreScript, type RestoreOptions } from './restore.js';
+import { createTable, getCatalog } from './create-table.js';
+import type { NewTable } from '../shared/create-table.js';
 import { relationDdl, runTableAction, type TableAction } from './table-actions.js';
 import { deleteRows, insertRow, selectRows, updateRow } from './rows.js';
 
@@ -37,6 +39,8 @@ export function createDatabase(config: DbConfig) {
     /** Truncate / drop / rename / duplicate / vacuum / analyze / refresh. */
     tableAction: (schema: string, table: string, action: TableAction) => runTableAction(ctx, schema, table, action),
     ddl: (schema: string, table: string) => relationDdl(ctx, schema, table),
+    createTable: (spec: NewTable) => createTable(ctx, spec),
+    catalog: () => getCatalog(ctx),
     listDatabases: () => listDatabases(ctx),
     tables: () => listTables(ctx),
     meta: (schema: string, table: string) => getTableMeta(ctx, schema, table),
@@ -46,6 +50,10 @@ export function createDatabase(config: DbConfig) {
       updateRow(ctx, schema, table, key, values),
     remove: (schema: string, table: string, keys: RowKey[]) => deleteRows(ctx, schema, table, keys),
     query: (sql: string) => runQuery(ctx, sql),
+    /** Run one trusted, server-built statement outside any transaction (CREATE DATABASE etc). */
+    exec: async (sql: string): Promise<void> => {
+      await ctx.pool.query(sql);
+    },
     close: () => ctx.pool.end(),
   };
 }

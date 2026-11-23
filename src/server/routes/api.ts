@@ -5,7 +5,7 @@ import { stream } from 'hono/streaming';
 import { EXPORT_META } from '../../shared/export.js';
 import type { Database, DatabaseManager } from '../../db/index.js';
 import { UserError } from '../../db/errors.js';
-import { deleteBody, dumpQuery, exportQuery, importQuery, insertBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
+import { createDatabaseBody, createTableBody, databaseActionBody, deleteBody, dumpQuery, exportQuery, importQuery, insertBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
 import { createGzip } from 'node:zlib';
 import yazl from 'yazl';
 
@@ -137,6 +137,11 @@ function databaseRoutes() {
       const { schema, table } = parse(metaQuery, c.req.query());
       return c.json({ sql: await c.var.db.ddl(schema, table) });
     })
+    .post('/create-table', async (c) => {
+      const spec = parse(createTableBody, await jsonBody(c.req));
+      return c.json(await c.var.db.createTable(spec));
+    })
+    .get('/catalog', async (c) => c.json(await c.var.db.catalog()))
     .post('/query', async (c) => {
       const { sql } = parse(queryBody, await jsonBody(c.req));
       return c.json(await c.var.db.query(sql));
@@ -153,5 +158,13 @@ export function apiRoutes(manager: DatabaseManager) {
 
   return new Hono()
     .get('/databases', async (c) => c.json(await manager.list()))
+    .post('/databases', async (c) => {
+      const { name, template, owner } = parse(createDatabaseBody, await jsonBody(c.req));
+      return c.json(await manager.createDb(name, { template, owner }));
+    })
+    .post('/databases/action', async (c) => {
+      const a = parse(databaseActionBody, await jsonBody(c.req));
+      return c.json(a.action === 'drop' ? await manager.dropDb(a.name, a.force) : await manager.renameDb(a.name, a.newName));
+    })
     .route('/db/:database', perDb);
 }

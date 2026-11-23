@@ -27,6 +27,8 @@ interface ComboboxProps {
   'aria-label'?: string;
   /** Extra content after the list, e.g. a "skip" choice. */
   footer?: ReactNode;
+  /** Allow values that aren't in the list: the typed text can be picked as-is. */
+  creatable?: boolean;
 }
 
 /** A select you can type into: Popover + Command, filtering by value, label and hint. */
@@ -41,13 +43,23 @@ export function Combobox({
   disabled,
   className,
   footer,
+  creatable = false,
   ...aria
 }: ComboboxProps) {
   const [open, setOpen] = useState(false);
-  const current = options.find((o) => o.value === value);
+  const [search, setSearch] = useState('');
+  const current = options.find((o) => o.value === value) ?? (creatable && value ? { value } : undefined);
+  const typed = search.trim();
+  const showCreate = creatable && typed !== '' && !options.some((o) => o.value === typed);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) setSearch('');
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -66,9 +78,26 @@ export function Combobox({
       </PopoverTrigger>
       <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-60 p-0">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} className="h-9 text-xs" />
+          <CommandInput placeholder={searchPlaceholder} className="h-9 text-xs" value={search} onValueChange={setSearch} />
           <CommandList className="max-h-64">
-            <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">{emptyText}</CommandEmpty>
+            {!showCreate && <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">{emptyText}</CommandEmpty>}
+            {showCreate && (
+              <CommandGroup forceMount>
+                <CommandItem
+                  forceMount
+                  value={`__create__${typed}`}
+                  onSelect={() => {
+                    onChange(typed);
+                    setOpen(false);
+                    setSearch('');
+                  }}
+                  className="gap-2 text-xs"
+                >
+                  <span className="text-muted-foreground">Use</span>
+                  <span className={cn('min-w-0 truncate', mono && 'font-mono')}>{typed}</span>
+                </CommandItem>
+              </CommandGroup>
+            )}
             <CommandGroup>
               {options.map((o) => (
                 <CommandItem
@@ -78,6 +107,7 @@ export function Combobox({
                   onSelect={() => {
                     onChange(o.value);
                     setOpen(false);
+                    setSearch('');
                   }}
                   className="gap-2 text-xs"
                 >
