@@ -10,6 +10,8 @@ import { dumpSql, type DumpOptions } from './dump.js';
 import { restoreScript, type RestoreOptions } from './restore.js';
 import { alterTable, createTable, getCatalog } from './create-table.js';
 import { getSchemaGraph } from './graph.js';
+import { applyGrants, applySchemaPreset, getRole, listRoles, runRoleAction } from './roles.js';
+import type { GrantChange, RoleAction, SchemaPreset } from '../shared/roles.js';
 import { availableExtensions, getObject, listObjects, runObjectAction } from './objects.js';
 import type { ObjectAction, ObjectKind } from '../shared/types.js';
 import { enableStatements, explainQuery, listStatements, resetStatements, signalSession } from './perf.js';
@@ -50,6 +52,12 @@ export function createDatabase(config: DbConfig) {
     catalog: () => getCatalog(ctx),
     /** Tables, columns and foreign keys for the ER diagram. */
     graph: () => getSchemaGraph(ctx),
+    /** Roles are server-wide; privileges are listed for this database. */
+    roles: () => listRoles(ctx),
+    role: (name: string) => getRole(ctx, name),
+    roleAction: (a: RoleAction) => runRoleAction(ctx, a),
+    grants: (role: string, changes: GrantChange[]) => applyGrants(ctx, role, changes),
+    grantPreset: (role: string, schema: string, preset: SchemaPreset, future: boolean) => applySchemaPreset(ctx, role, schema, preset, future),
     objects: () => listObjects(ctx),
     object: (kind: ObjectKind, oid: number) => getObject(ctx, kind, oid),
     availableExtensions: () => availableExtensions(ctx),

@@ -5,7 +5,7 @@ import { stream } from 'hono/streaming';
 import { EXPORT_META } from '../../shared/export.js';
 import type { Database, DatabaseManager } from '../../db/index.js';
 import { UserError } from '../../db/errors.js';
-import { alterBody, createDatabaseBody, objectActionBody, objectQuery, explainBody, signalBody, statementsQuery, createTableBody, databaseActionBody, deleteBody, dumpQuery, exportQuery, importQuery, insertBody, maintenanceBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
+import { grantPresetBody, grantsBody, roleActionBody, roleQuery, alterBody, createDatabaseBody, objectActionBody, objectQuery, explainBody, signalBody, statementsQuery, createTableBody, databaseActionBody, deleteBody, dumpQuery, exportQuery, importQuery, insertBody, maintenanceBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
 import { createGzip } from 'node:zlib';
 import yazl from 'yazl';
 
@@ -170,6 +170,17 @@ function databaseRoutes() {
     })
     .get('/extensions/available', async (c) => c.json(await c.var.db.availableExtensions()))
     .post('/object-action', async (c) => c.json(await c.var.db.objectAction(parse(objectActionBody, await jsonBody(c.req)) as never)))
+    .get('/roles', async (c) => c.json(await c.var.db.roles()))
+    .get('/role', async (c) => c.json(await c.var.db.role(parse(roleQuery, c.req.query()).name)))
+    .post('/role-action', async (c) => c.json(await c.var.db.roleAction(parse(roleActionBody, await jsonBody(c.req)))))
+    .post('/grants', async (c) => {
+      const { role, changes } = parse(grantsBody, await jsonBody(c.req));
+      return c.json(await c.var.db.grants(role, changes));
+    })
+    .post('/grant-preset', async (c) => {
+      const { role, schema, preset, future } = parse(grantPresetBody, await jsonBody(c.req));
+      return c.json(await c.var.db.grantPreset(role, schema, preset, future));
+    })
     .get('/graph', async (c) => c.json(await c.var.db.graph()))
     .get('/catalog', async (c) => c.json(await c.var.db.catalog()))
     .post('/query', async (c) => {

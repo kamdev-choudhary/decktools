@@ -26,6 +26,7 @@ import type {
 } from '@shared/types';
 import type { NewTable } from '@shared/create-table';
 import type { AlterAction } from '@shared/alter';
+import type { GrantChange, RoleAction, RoleDetail, RolesResponse, SchemaPreset } from '@shared/roles';
 
 /**
  * API calls are resolved against the page's own directory, so the UI works
@@ -108,6 +109,13 @@ export const api = {
   object: (database: string, kind: ObjectKind, oid: number) => request<ObjectDetail>(db(database, `object?${new URLSearchParams({ kind, oid: String(oid) })}`)),
   availableExtensions: (database: string) => request<AvailableExtension[]>(db(database, 'extensions/available')),
   objectAction: (database: string, action: ObjectAction) => request<{ ok: true; message: string; oid?: number }>(db(database, 'object-action'), action),
+  roles: (database: string) => request<RolesResponse>(db(database, 'roles')),
+  role: (database: string, name: string) => request<RoleDetail>(db(database, `role?${new URLSearchParams({ name })}`)),
+  roleAction: (database: string, action: RoleAction) => request<{ ok: true; message: string; name?: string }>(db(database, 'role-action'), action),
+  grants: (database: string, role: string, changes: GrantChange[]) =>
+    request<{ ok: true; message: string; statements: string[] }>(db(database, 'grants'), { role, changes }),
+  grantPreset: (database: string, role: string, schema: string, preset: SchemaPreset, future: boolean) =>
+    request<{ ok: true; message: string }>(db(database, 'grant-preset'), { role, schema, preset, future }),
   graph: (database: string) => request<SchemaGraph>(db(database, 'graph')),
   catalog: (database: string) => request<{ schemas: string[]; types: { name: string; kind: string }[] }>(db(database, 'catalog')),
   ddl: (database: string, schema: string, table: string) =>

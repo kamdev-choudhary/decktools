@@ -40,7 +40,7 @@ export function useAlter(db: string, schema: string, table: string, onDone?: () 
   });
 }
 
-function SqlPreview({ statements }: { statements: string[] }) {
+export function SqlPreview({ statements }: { statements: string[] }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="rounded-lg border">
@@ -62,7 +62,7 @@ function SqlPreview({ statements }: { statements: string[] }) {
   );
 }
 
-function Field({ label, htmlFor, hint, children }: { label: string; htmlFor?: string; hint?: React.ReactNode; children: React.ReactNode }) {
+export function Field({ label, htmlFor, hint, children }: { label: string; htmlFor?: string; hint?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={htmlFor} className="text-xs">
@@ -79,7 +79,7 @@ function useTypeOptions(db: string): ComboOption[] {
   return useMemo(() => [...COMMON_TYPES, ...(catalog.data?.types ?? []).map((t) => ({ value: t.name, hint: t.kind }))], [catalog.data]);
 }
 
-function DialogShell({
+export function DialogShell({
   title,
   description,
   statements,
@@ -116,7 +116,7 @@ function DialogShell({
         >
           <DialogHeader className="border-b px-6 py-4">
             <DialogTitle>{title}</DialogTitle>
-            <DialogDescription className="break-all">{description}</DialogDescription>
+            <DialogDescription className="[overflow-wrap:anywhere]">{description}</DialogDescription>
           </DialogHeader>
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
             {children}

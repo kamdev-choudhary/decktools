@@ -4,6 +4,7 @@ import { EXPORT_FORMATS, IMPORT_FORMATS } from '../shared/export.js';
 import { UserError } from '../db/errors.js';
 import { FK_ACTIONS } from '../shared/create-table.js';
 import { INDEX_METHODS } from '../shared/alter.js';
+import type { RoleAction } from '../shared/roles.js';
 
 const ident = z.string().min(1).max(256);
 const cell = z.string().nullable();
@@ -200,6 +201,65 @@ export const updateBody = tableRef.extend({ key: cellRecord, values: cellRecord 
 export const deleteBody = tableRef.extend({ keys: z.array(cellRecord).min(1).max(10_000) });
 
 export const queryBody = z.object({ sql: z.string().min(1).max(5_000_000) });
+
+/* Roles */
+
+const roleName = z.string().min(1).max(63);
+const roleAttributes = {
+  login: z.boolean(),
+  superuser: z.boolean(),
+  createdb: z.boolean(),
+  createrole: z.boolean(),
+  replication: z.boolean(),
+  bypassrls: z.boolean(),
+  inherit: z.boolean(),
+  connLimit: z.number().int().min(-1).max(1_000_000),
+  validUntil: z.string().max(64).nullable(),
+};
+
+export const roleQuery = z.object({ name: roleName });
+
+/** POST /role-action */
+export const roleActionBody: z.ZodType<RoleAction> = z.discriminatedUnion('action', [
+  z.object({
+    action: z.literal('create'),
+    name: roleName,
+    password: z.string().max(1024).default(''),
+    memberOf: z.array(roleName).max(100).default([]),
+    comment: z.string().max(10_000).default(''),
+    ...roleAttributes,
+  }),
+  z.object({
+    action: z.literal('update'),
+    name: roleName,
+    newName: roleName.optional(),
+    attributes: z.object(roleAttributes).partial().optional(),
+    password: z.string().max(1024).nullable().optional(),
+    comment: z.string().max(10_000).optional(),
+  }),
+  z.object({ action: z.literal('membership'), role: roleName, group: roleName, grant: z.boolean(), admin: z.boolean().optional() }),
+  z.object({ action: z.literal('drop'), name: roleName, reassignTo: roleName.optional(), dropOwned: z.boolean().default(false) }),
+  z.object({ action: z.literal('revokeDefault'), role: roleName, forRole: roleName, schema: ident.nullable(), type: z.enum(['r', 'S', 'f', 'T', 'n']) }),
+]) as z.ZodType<RoleAction>;
+
+/** POST /grants */
+export const grantsBody = z.object({
+  role: roleName,
+  changes: z
+    .array(
+      z.object({
+        kind: z.enum(['database', 'schema', 'table', 'sequence', 'function']),
+        oid: z.number().int().positive(),
+        privilege: z.string().regex(/^[A-Z]+$/),
+        grant: z.boolean(),
+      }),
+    )
+    .min(1)
+    .max(20_000),
+});
+
+/** POST /grant-preset */
+export const grantPresetBody = z.object({ role: roleName, schema: ident, preset: z.enum(['read', 'write', 'none']), future: z.boolean().default(false) });
 
 /** Validate input, turning schema failures into a 400 the UI can display. */
 export function parse<T extends z.ZodType>(schema: T, input: unknown): z.infer<T> {

@@ -110,6 +110,15 @@ any reverse proxy to reach it remotely.
   to trace a table's links down to the exact columns, drag cards (positions are
   remembered), and export as PNG or SVG. Tables referenced almost everywhere
   (like `users`) have their links tucked away so the rest stays readable.
+- **Roles and permissions.** Create users and groups, set their attributes
+  (login, create databases, create roles, connection limit, password expiry),
+  change passwords (hashed with SCRAM-SHA-256 before they're sent, so they never
+  show up in server logs) and manage group membership. A privilege grid shows
+  what a role has on the database, its schemas, tables, sequences and functions:
+  tick and untick, review the SQL, save in one transaction. Grant read or
+  read/write access to a whole schema in one step (optionally for tables created
+  later), see default privileges, and drop roles safely by handing their objects
+  to another role first.
 - **Functions, triggers, sequences and extensions.** Listed in the sidebar with
   their definitions. Edit and save functions (and trigger functions) in place,
   enable or disable triggers, set a sequence's next value, install, update or

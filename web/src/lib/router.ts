@@ -14,6 +14,8 @@ const OBJECT_KINDS: ObjectKind[] = ['function', 'trigger', 'sequence', 'extensio
  *   #/<db>/export              → export tables / back up the database
  *   #/<db>/diagram?focus=s.t   → ER diagram, optionally centred on one table
  *   #/<db>/obj/<kind>/<oid>    → function / trigger / sequence / extension
+ *   #/<db>/roles               → roles on the server
+ *   #/<db>/roles/<name>        → one role: attributes, memberships, privileges in <db>
  *   #/<db>/t/<schema>/<table>  → table
  *   …/<table>?col=value        → table pre-filtered with col = value (used by FK links)
  */
@@ -25,6 +27,8 @@ export type Route =
   | { view: 'export'; db: string }
   | { view: 'diagram'; db: string; focus: string | null }
   | { view: 'object'; db: string; kind: ObjectKind; oid: number }
+  | { view: 'roles'; db: string }
+  | { view: 'role'; db: string; name: string }
   | { view: 'table'; db: string; schema: string; table: string; eq: Record<string, string> };
 
 function decode(s: string): string {
@@ -48,6 +52,7 @@ export function parseRoute(hash: string): Route {
   if (section === 'obj' && OBJECT_KINDS.includes(schema as ObjectKind) && /^\d+$/.test(table ?? '')) {
     return { view: 'object', db, kind: schema as ObjectKind, oid: Number(table) };
   }
+  if (section === 'roles') return schema ? { view: 'role', db, name: schema } : { view: 'roles', db };
   if (section === 'diagram') return { view: 'diagram', db, focus: new URLSearchParams(query).get('focus') };
   if (section === 't' && schema && table) {
     return { view: 'table', db, schema, table, eq: Object.fromEntries(new URLSearchParams(query)) };
@@ -62,6 +67,8 @@ export const importHref = (db: string) => `#/${enc(db)}/import`;
 export const exportHref = (db: string) => `#/${enc(db)}/export`;
 export const objectHref = (db: string, kind: ObjectKind, oid: number) => `#/${enc(db)}/obj/${kind}/${oid}`;
 export const diagramHref = (db: string, focus?: string | null) => `#/${enc(db)}/diagram${focus ? `?${new URLSearchParams({ focus })}` : ''}`;
+export const rolesHref = (db: string) => `#/${enc(db)}/roles`;
+export const roleHref = (db: string, name: string) => `#/${enc(db)}/roles/${enc(name)}`;
 export const tableHref = (db: string, schema: string, table: string, eq?: Record<string, string>) => {
   const qs = eq && Object.keys(eq).length ? `?${new URLSearchParams(eq)}` : '';
   return `#/${enc(db)}/t/${enc(schema)}/${enc(table)}${qs}`;
