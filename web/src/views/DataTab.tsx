@@ -7,6 +7,7 @@ import { useRowMutations, useRows } from '@/api/hooks';
 import { DataGrid } from '@/components/app/DataGrid';
 import { ErrorAlert, errorMessage } from '@/components/app/feedback';
 import { FilterControl, type FilterState } from '@/components/app/FilterBar';
+import { singleColumnFks } from '@/components/app/ForeignKey';
 import { Pagination } from '@/components/app/Pagination';
 import { RowEditor } from '@/components/app/RowEditor';
 import {
@@ -65,6 +66,7 @@ export function DataTab({ db, meta, initialEq, actionsSlot }: DataTabProps) {
   useEffect(() => setSelected(new Set()), [data]);
 
   const types = useMemo(() => Object.fromEntries(meta.columns.map((c) => [c.name, c.type])), [meta.columns]);
+  const fks = useMemo(() => singleColumnFks(meta), [meta]);
 
   const rowObject = (i: number): Record<string, Cell> =>
     Object.fromEntries((data?.fields ?? []).map((f, j) => [f, data!.rows[i]![j] ?? null]));
@@ -151,6 +153,8 @@ export function DataTab({ db, meta, initialEq, actionsSlot }: DataTabProps) {
         rows={data?.rows ?? []}
         types={types}
         primaryKey={meta.primaryKey}
+        db={db}
+        foreignKeys={fks}
         sort={sort}
         onSort={onSort}
         rowOffset={page * pageSize}
@@ -177,6 +181,8 @@ export function DataTab({ db, meta, initialEq, actionsSlot }: DataTabProps) {
         <RowEditor
           key={editor.mode === 'edit' ? `edit-${editor.index}` : 'insert'}
           meta={meta}
+          db={db}
+          foreignKeys={fks}
           mode={editor.mode}
           row={editIndex !== null ? rowObject(editIndex) : undefined}
           focusField={editor.mode === 'edit' ? editor.focusField : undefined}

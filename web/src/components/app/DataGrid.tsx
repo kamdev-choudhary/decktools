@@ -4,6 +4,7 @@ import type { Cell, SortDir } from '@shared/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { isNumericType } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { FkHeaderLink, FkPeek, type FkTarget } from './ForeignKey';
 
 const MAX_CELL_CHARS = 300;
 
@@ -24,6 +25,10 @@ export interface DataGridProps {
   /** Wrap long values instead of truncating (Structure tab). */
   wrap?: boolean;
   className?: string;
+  /** Database name, needed for foreign-key links. */
+  db?: string;
+  /** Single-column foreign keys by local column name. */
+  foreignKeys?: Record<string, FkTarget>;
 }
 
 const edgeCell = 'sticky left-0 border-r border-b bg-grid-header px-3 text-right';
@@ -41,6 +46,8 @@ export function DataGrid({
   emptyText = 'No rows',
   wrap = false,
   className,
+  db,
+  foreignKeys,
 }: DataGridProps) {
   const lastClicked = useRef<number | null>(null);
   const pk = new Set(primaryKey);
@@ -105,6 +112,7 @@ export function DataGrid({
                     )}
                   </button>
                   {types?.[f] && <div className="font-mono text-[10.5px] font-normal text-muted-foreground">{types[f]}</div>}
+                  {db && foreignKeys?.[f] && <FkHeaderLink db={db} fk={foreignKeys[f]} />}
                 </th>
               );
             })}
@@ -153,7 +161,18 @@ export function DataGrid({
                       v === null && 'text-null italic',
                     )}
                   >
-                    {v === null ? 'NULL' : wrap || v.length <= MAX_CELL_CHARS ? v : `${v.slice(0, MAX_CELL_CHARS)}…`}
+                    {v === null ? (
+                      'NULL'
+                    ) : db && foreignKeys?.[fields[j]!] ? (
+                      <span className="flex min-w-0 items-center gap-1">
+                        <span className="truncate">{v}</span>
+                        <FkPeek db={db} fk={foreignKeys[fields[j]!]!} value={v} />
+                      </span>
+                    ) : wrap || v.length <= MAX_CELL_CHARS ? (
+                      v
+                    ) : (
+                      `${v.slice(0, MAX_CELL_CHARS)}…`
+                    )}
                   </td>
                 ))}
               </tr>

@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { errorMessage, Kbd, Spinner } from './feedback';
 import { FieldInput } from './FieldInput';
+import type { FkTarget } from './ForeignKey';
 import { TruncatedText } from './TruncatedText';
 
 interface FieldState {
@@ -18,6 +19,9 @@ interface FieldState {
 
 export interface RowEditorProps {
   meta: TableMeta;
+  db: string;
+  /** Single-column foreign keys by column, for the "Browse" picker. */
+  foreignKeys: Record<string, FkTarget>;
   mode: 'insert' | 'edit';
   /** Current values, for edit mode. */
   row?: Record<string, Cell>;
@@ -54,7 +58,7 @@ function ToggleChip({ pressed, onToggle, title, children }: { pressed: boolean; 
   );
 }
 
-export function RowEditor({ meta, mode, row, focusField, onClose, onSave }: RowEditorProps) {
+export function RowEditor({ meta, db, foreignKeys, mode, row, focusField, onClose, onSave }: RowEditorProps) {
   const bodyRef = useRef<HTMLDivElement>(null);
   const columns = mode === 'insert' ? meta.columns.filter((c) => !c.generated) : meta.columns;
   const [fields, setFields] = useState<Record<string, FieldState>>(() =>
@@ -163,6 +167,8 @@ export function RowEditor({ meta, mode, row, focusField, onClose, onSave }: RowE
                       <FieldInput
                         id={id}
                         column={c}
+                        db={db}
+                        fk={foreignKeys[c.name]}
                         value={st.isNull ? '' : st.text}
                         placeholder={placeholder}
                         disabled={c.generated || st.isNull}

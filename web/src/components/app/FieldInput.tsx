@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { DateTimeField } from './DateTimeField';
+import { FkField, type FkTarget } from './ForeignKey';
 
 export type FieldKind = 'boolean' | 'enum' | 'date' | 'datetime' | 'time' | 'uuid' | 'number' | 'json' | 'line' | 'text';
 
@@ -41,6 +42,9 @@ function jsonError(text: string): string | null {
 interface FieldInputProps {
   id: string;
   column: Column;
+  db: string;
+  /** Set when the column is a single-column foreign key. */
+  fk?: FkTarget;
   value: string;
   disabled: boolean;
   placeholder: string;
@@ -49,7 +53,7 @@ interface FieldInputProps {
 }
 
 /** A type-appropriate editor for one column value. Values stay Postgres text literals. */
-export function FieldInput({ id, column, value, disabled, placeholder, changed, onChange }: FieldInputProps) {
+export function FieldInput({ id, column, db, fk, value, disabled, placeholder, changed, onChange }: FieldInputProps) {
   // Single-line fields fall back to a textarea for unusually long or multi-line values.
   // Decided once from the initial value, so typing past the limit doesn't swap
   // the element (and steal focus) mid-edit.
@@ -58,6 +62,23 @@ export function FieldInput({ id, column, value, disabled, placeholder, changed, 
   const kind: FieldKind = baseKind === 'line' && startsLong ? 'text' : baseKind;
   const ring = changed && 'border-warning/60 focus-visible:border-warning';
   const common = { id, 'data-field': column.name, disabled, spellCheck: false } as const;
+
+  // Foreign keys get a picker over the referenced table (booleans/enums keep their own UI).
+  if (fk && kind !== 'boolean' && kind !== 'enum') {
+    return (
+      <FkField
+        id={id}
+        column={column}
+        db={db}
+        fk={fk}
+        value={value}
+        disabled={disabled}
+        placeholder={placeholder}
+        className={ring || undefined}
+        onChange={onChange}
+      />
+    );
+  }
 
   switch (kind) {
     case 'boolean': {
