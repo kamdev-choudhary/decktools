@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Command, InvalidArgumentError, Option } from 'commander';
 import open from 'open';
 import pc from 'picocolors';
