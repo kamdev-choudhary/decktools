@@ -62,7 +62,12 @@ export function toCsv(fields: string[], rows: Cell[][]): string {
 }
 
 export function downloadCsv(filename: string, fields: string[], rows: Cell[][]): void {
-  const blob = new Blob([toCsv(fields, rows)], { type: 'text/csv;charset=utf-8' });
+  downloadText(filename, toCsv(fields, rows), 'text/csv');
+}
+
+/** Save text as a file in the browser. */
+export function downloadText(filename: string, text: string, mime: string): void {
+  const blob = new Blob([text], { type: `${mime};charset=utf-8` });
   const url = URL.createObjectURL(blob);
   const a = Object.assign(document.createElement('a'), { href: url, download: filename });
   a.click();

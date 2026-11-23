@@ -2,7 +2,7 @@ import { PostgreSQL, sql as sqlLanguage, type SQLNamespace } from '@codemirror/l
 import { Prec } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import CodeMirror from '@uiw/react-codemirror';
-import { Download, History, Play } from 'lucide-react';
+import { History, Play } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { QueryResult } from '@shared/types';
 import { ApiError } from '@/api/client';
@@ -12,7 +12,8 @@ import { ErrorAlert, Kbd, Spinner } from '@/components/app/feedback';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
-import { downloadCsv, formatNumber, lineCol } from '@/lib/format';
+import { formatNumber, lineCol } from '@/lib/format';
+import { ExportMenu } from '@/components/app/ExportMenu';
 import { sqlThemeDark, sqlThemeLight } from '@/lib/sql-theme';
 import { storage } from '@/lib/storage';
 import { useTheme } from '@/lib/theme';
@@ -182,9 +183,12 @@ function ResultBlock({ result, ms, only }: { result: QueryResult; ms?: number; o
         )}
         <div className="flex-1" />
         {hasRows && (
-          <Button variant="ghost" size="xs" onClick={() => downloadCsv('query.csv', result.fields, result.rows)}>
-            <Download /> CSV
-          </Button>
+          <ExportMenu
+            baseName="query"
+            size="xs"
+            columns={result.fields.map((name) => ({ name }))}
+            scopes={[{ id: 'result', label: 'Result', rows: result.rows, count: result.rows.length }]}
+          />
         )}
       </div>
       {hasRows && <DataGrid fields={result.fields} rows={result.rows} className={only ? undefined : 'max-h-[50vh]'} />}

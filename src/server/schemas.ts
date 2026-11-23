@@ -53,6 +53,7 @@ export const exportQuery = tableRef.extend({
 export const importQuery = tableRef.extend({
   format: z.enum(IMPORT_FORMATS),
   columns: jsonParam(z.array(ident).min(1).max(1600), '[]'),
+  keys: jsonParam(z.array(z.string().max(1024)).max(1600), '[]'),
   header: flag,
   delimiter: z.string().min(1).max(1).default(','),
   gzip: flag,

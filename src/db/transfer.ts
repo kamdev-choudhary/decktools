@@ -55,6 +55,8 @@ export interface ImportRequest {
   format: ImportFormat;
   /** Target table columns, in the order they appear in the file (CSV/TSV) or to pick from each object (NDJSON). */
   columns: string[];
+  /** NDJSON only: the object key to read for each entry of `columns` (defaults to the column names). */
+  keys?: string[];
   /** CSV/TSV: the first line is a header to skip. */
   header: boolean;
   /** CSV only. */
@@ -65,7 +67,7 @@ export interface ImportRequest {
 }
 
 /** JSON Lines → CSV rows for COPY, picking `columns` from each object. */
-function ndjsonToCsv(columns: string[]) {
+function ndjsonToCsv(keys: string[]) {
   let buffered = '';
   let line = 0;
   const csv = (v: unknown) => {
@@ -84,7 +86,7 @@ function ndjsonToCsv(columns: string[]) {
       throw new UserError(`Line ${line} is not valid JSON`);
     }
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new UserError(`Line ${line} is not a JSON object`);
-    out.push(columns.map((c) => csv(obj[c])).join(',') + '\n');
+    out.push(keys.map((k) => csv(obj[k])).join(',') + '\n');
   };
   return new Transform({
     transform(chunk: Buffer, _enc, cb: TransformCallback) {
@@ -136,6 +138,7 @@ export async function importRows(ctx: DbContext, req: ImportRequest, body: Reada
   for (const c of req.columns) if (!known.has(c)) throw new UserError(`Unknown column "${c}"`);
   if (new Set(req.columns).size !== req.columns.length) throw new UserError('Each column can only be mapped once');
   if (req.delimiter.length !== 1) throw new UserError('Delimiter must be a single character');
+  if (req.keys?.length && req.keys.length !== req.columns.length) throw new UserError('keys and columns must be the same length');
 
   const rel = qualified(req.schema, req.table);
   const cols = req.columns.map(quoteIdent).join(', ');
@@ -155,7 +158,7 @@ export async function importRows(ctx: DbContext, req: ImportRequest, body: Reada
     const copy = client.query(copyFrom(`copy ${rel} (${cols}) from stdin with (${options})`));
     const stages: NodeJS.ReadWriteStream[] = [counter];
     if (req.gzip) stages.push(createGunzip());
-    if (req.format === 'ndjson') stages.push(ndjsonToCsv(req.columns));
+    if (req.format === 'ndjson') stages.push(ndjsonToCsv(req.keys?.length ? req.keys : req.columns));
     await pipeline(body, ...(stages as [Transform]), copy);
     await client.query('commit');
     return { rowCount: copy.rowCount, ms: performance.now() - started, bytes: counter.bytes };

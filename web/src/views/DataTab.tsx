@@ -1,4 +1,4 @@
-import { Download, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Plus, RefreshCw, Trash2, Upload } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
@@ -8,6 +8,9 @@ import { DataGrid } from '@/components/app/DataGrid';
 import { ErrorAlert, errorMessage } from '@/components/app/feedback';
 import { FilterControl, type FilterState } from '@/components/app/FilterBar';
 import { singleColumnFks } from '@/components/app/ForeignKey';
+import { ExportMenu } from '@/components/app/ExportMenu';
+import { ImportDialog } from '@/components/app/ImportDialog';
+import { BASE } from '@/api/client';
 import { Pagination } from '@/components/app/Pagination';
 import { RowEditor } from '@/components/app/RowEditor';
 import {
@@ -22,7 +25,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { downloadCsv } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 type EditorState = { mode: 'insert' } | { mode: 'edit'; index: number; focusField: string };
@@ -33,9 +35,13 @@ interface DataTabProps {
   /** Equality filters to start with (from an FK link). Unknown columns are ignored. */
   initialEq: Record<string, string>;
   actionsSlot: HTMLElement | null;
+  /** pgdeck runs with --readonly (hides import). */
+  readonly: boolean;
 }
 
-export function DataTab({ db, meta, initialEq, actionsSlot }: DataTabProps) {
+export function DataTab({ db, meta, initialEq, actionsSlot, readonly }: DataTabProps) {
+  const [importing, setImporting] = useState(false);
+  const canImport = !readonly && (meta.kind === 'r' || meta.kind === 'p');
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(100);
   const [sort, setSort] = useState<{ col: string; dir: SortDir } | null>(null);
@@ -114,20 +120,42 @@ export function DataTab({ db, meta, initialEq, actionsSlot }: DataTabProps) {
               </TooltipTrigger>
               <TooltipContent>Refresh</TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="Export CSV"
-                  disabled={!data?.rows.length}
-                  onClick={() => data && downloadCsv(`${meta.schema}.${meta.table}.csv`, data.fields, data.rows)}
-                >
-                  <Download />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Export this page as CSV</TooltipContent>
-            </Tooltip>
+            {canImport && (
+              <Button variant="outline" size="sm" className="shrink-0" onClick={() => setImporting(true)}>
+                <Upload /> <span className="hidden md:inline">Import</span>
+              </Button>
+            )}
+            <ExportMenu
+              baseName={meta.table}
+              columns={meta.columns.map((c) => ({ name: c.name, typeName: c.typeName }))}
+              target={{ schema: meta.schema, table: meta.table }}
+              disabled={!data}
+              scopes={[
+                {
+                  id: 'all',
+                  label: filters.length ? 'All rows matching filters' : 'All rows',
+                  count: data?.total,
+                  approximate: data ? !data.totalExact : false,
+                  url: (format) =>
+                    `${BASE}api/db/${encodeURIComponent(db)}/export?${new URLSearchParams({
+                      schema: meta.schema,
+                      table: meta.table,
+                      format,
+                      filters: JSON.stringify(filters),
+                      match,
+                      ...(sort ? { sort: sort.col, dir: sort.dir } : {}),
+                    })}`,
+                },
+                { id: 'page', label: 'This page', count: data?.rows.length ?? 0, rows: data?.rows ?? [], disabled: !data?.rows.length },
+                {
+                  id: 'selected',
+                  label: 'Selected rows',
+                  count: selected.size,
+                  rows: [...selected].sort((a, b) => a - b).map((i) => data?.rows[i] ?? []),
+                  disabled: !selected.size,
+                },
+              ]}
+            />
             {meta.editable && (
               <Button size="sm" className="shrink-0" onClick={() => setEditor({ mode: 'insert' })}>
                 <Plus /> <span className="hidden sm:inline">Add row</span>
@@ -198,6 +226,8 @@ export function DataTab({ db, meta, initialEq, actionsSlot }: DataTabProps) {
           }}
         />
       )}
+
+      {importing && <ImportDialog db={db} meta={meta} onClose={() => setImporting(false)} />}
 
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent>

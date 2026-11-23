@@ -30,6 +30,17 @@ watch live activity. Put it behind any reverse proxy to reach it remotely.
 - **SQL editor.** Syntax highlighting and table autocomplete, run the
   selection or everything (<kbd>⌘ Enter</kbd>), multiple statements, error
   position highlighting, per-database history.
+- **Import gigabytes.** Stream CSV, TSV or JSON Lines files (optionally gzipped)
+  straight into Postgres with `COPY`. Nothing is buffered, so file size doesn't
+  matter. Columns are matched by name, you choose append or replace, and it
+  runs in one transaction: a bad row rolls everything back and tells you the
+  line. Upload progress, speed and time left are shown, and you can cancel.
+- **Export anything.** All rows matching your filters (streamed from a server
+  cursor, any size), the current page, or selected rows, as CSV, CSV for
+  Excel, TSV, JSON, JSON Lines, SQL `INSERT` statements or Markdown.
+- **Foreign keys.** Columns show what they reference; preview the referenced
+  row from any cell, jump to it, and pick values from the related table when
+  editing. The Structure tab lists outgoing and incoming references.
 - **Structure view.** Columns, indexes and constraints for every table.
 - **Safe defaults.** Login page with a generated password, binds to
   `127.0.0.1`, CSRF protection, optional read-only mode.
@@ -128,6 +139,12 @@ location /db/ {
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
+
+    # Large imports: no body limit, stream uploads, allow long requests.
+    client_max_body_size 0;
+    proxy_request_buffering off;
+    proxy_read_timeout 1h;
+    proxy_send_timeout 1h;
 }
 ```
 
@@ -156,6 +173,9 @@ as. Treat it like a database password.
 - **Login.** On by default, with a random password printed at startup. Sessions
   are HTTP-only, `SameSite=Strict` cookies kept in memory. Restarting pgdeck
   logs everyone out. Failed logins are rate-limited per client address.
+- **Imports.** Uploads have no size limit and no request timeout. If you put
+  pgdeck behind a proxy, raise its body-size and timeout limits too (for nginx:
+  `client_max_body_size 0; proxy_request_buffering off; proxy_read_timeout 1h;`).
 - **Network.** Binds to `127.0.0.1` unless you pass `--host`. pgdeck warns at
   startup if you combine a public interface with `--no-auth`.
 - **CSRF.** API calls require a custom header, and WebSocket connections check
