@@ -19,7 +19,7 @@ import type {
  * API calls are resolved against the page's own directory, so the UI works
  * whether it's served at "/" or behind a proxy at "/some/prefix/".
  */
-const BASE = location.pathname.endsWith('/') ? location.pathname : `${location.pathname}/`;
+export const BASE = location.pathname.endsWith('/') ? location.pathname : `${location.pathname}/`;
 
 export class ApiError extends Error {
   readonly detail?: string;
