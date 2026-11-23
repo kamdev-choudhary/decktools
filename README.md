@@ -48,7 +48,15 @@ watch live activity. Put it behind any reverse proxy to reach it remotely.
 - **Foreign keys.** Columns show what they reference; preview the referenced
   row from any cell, jump to it, and pick values from the related table when
   editing. The Structure tab lists outgoing and incoming references.
-- **Structure view.** Columns, indexes and constraints for every table.
+- **Schema management.** Create tables with a column builder (types, defaults,
+  primary key, unique, auto-increment, foreign keys) and a live SQL preview.
+  On the Structure tab, add, edit (rename, change type, default, not null,
+  comment) and drop columns; create indexes (multi-column, ASC/DESC, unique,
+  btree/gin/gist/brin/hash, partial, concurrently) and drop indexes and
+  constraints.
+- **Table and database actions.** Rename, duplicate, truncate, drop, vacuum and
+  analyze tables from a ⋯ menu; create, copy, rename and drop databases. Health
+  checks can analyze or vacuum the affected tables in one click.
 - **Safe defaults.** Login page with a generated password, binds to
   `127.0.0.1`, CSRF protection, optional read-only mode.
 - **Light and dark themes.** Follows your system, or pick one.

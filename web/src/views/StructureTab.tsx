@@ -23,6 +23,7 @@ const CONSTRAINT_TYPE: Record<string, string> = {
   c: 'check',
   x: 'exclusion',
   t: 'trigger',
+  n: 'not null',
 };
 
 interface RelationItem {
