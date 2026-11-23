@@ -3,10 +3,10 @@ import { useMemo, useState } from 'react';
 import { REL_KIND_LABEL, type RelKind, type TableRef } from '@shared/types';
 import { useTables } from '@/api/hooks';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { dbHref, sqlHref, tableHref, type Route } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { ErrorAlert, Spinner } from './feedback';
+import { TruncatedText } from './TruncatedText';
 
 const KIND_ICON: Record<RelKind, LucideIcon> = { r: Table2, p: Table2, f: Table2, v: Eye, m: Layers };
 
@@ -79,7 +79,7 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
         </div>
       </div>
 
-      <ScrollArea className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
         <nav className="px-3 pb-4" aria-label="Tables">
           {tables.isPending && (
             <div className="flex items-center gap-2 px-2 py-3 text-sm text-muted-foreground">
@@ -102,7 +102,7 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
                   className="flex h-7 w-full items-center gap-1 rounded-md px-1 text-xs font-medium text-muted-foreground hover:text-foreground"
                 >
                   <ChevronRight className={cn('size-3.5 transition-transform', open && 'rotate-90')} />
-                  <span className="flex-1 truncate text-left">{schema}</span>
+                  <TruncatedText text={schema} className="flex-1 text-left" />
                   <span className="tabular-nums">{items.length}</span>
                 </button>
                 {open && (
@@ -114,15 +114,25 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
                         <a
                           key={t.name}
                           href={tableHref(db, t.schema, t.name)}
-                          title={`${t.schema}.${t.name} · ${REL_KIND_LABEL[t.kind]}`}
                           aria-current={isActive ? 'page' : undefined}
                           className={cn(
-                            'flex h-7 items-center gap-2 rounded-md pr-2 pl-6 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
+                            'flex h-7 min-w-0 items-center gap-2 rounded-md pr-2 pl-6 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
                             isActive && 'bg-sidebar-accent font-medium text-foreground',
                           )}
                         >
                           <Icon className="size-3.5 shrink-0 opacity-70" />
-                          <span className="truncate">{t.name}</span>
+                          <TruncatedText
+                            text={t.name}
+                            side="right"
+                            tooltip={
+                              <>
+                                <span className="font-mono">
+                                  {t.schema}.{t.name}
+                                </span>
+                                <span className="opacity-60"> · {REL_KIND_LABEL[t.kind]}</span>
+                              </>
+                            }
+                          />
                         </a>
                       );
                     })}
@@ -132,7 +142,7 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
             );
           })}
         </nav>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

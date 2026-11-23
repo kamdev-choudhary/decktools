@@ -62,7 +62,9 @@ export function StorageChart({ db, tables }: { db: string; tables: TableStats[] 
           const total = b.data + b.index;
           const row = (
             <div className="group flex h-7 items-center gap-3 rounded-md px-1 text-[13px] hover:bg-muted/50">
-              <span className="w-36 shrink-0 truncate text-muted-foreground group-hover:text-foreground sm:w-44">{b.label}</span>
+              <span className="w-36 shrink-0 truncate text-muted-foreground group-hover:text-foreground sm:w-44" title={b.label}>
+                {b.label}
+              </span>
               <div className="flex h-3.5 min-w-0 flex-1 gap-[2px]">
                 {b.data > 0 && (
                   <div

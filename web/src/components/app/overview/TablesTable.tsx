@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { formatBytes, formatCompact, formatNumber, formatPercent, formatRelative } from '@/lib/format';
 import { navigate, tableHref } from '@/lib/router';
 import { cn } from '@/lib/utils';
+import { TruncatedText } from '../TruncatedText';
 
 const KIND_ICON: Record<RelKind, LucideIcon> = { r: Table2, p: Table2, f: Table2, v: Eye, m: Layers };
 
@@ -125,9 +126,9 @@ export function TablesTable({ db, tables }: { db: string; tables: TableStats[] }
               return (
                 <tr key={`${t.schema}.${t.name}`} className="cursor-pointer transition-colors hover:bg-muted/40" onClick={() => navigate(href)}>
                   <td className="max-w-72 px-4 py-2.5">
-                    <a href={href} className="flex items-center gap-2.5" onClick={(e) => e.stopPropagation()}>
+                    <a href={href} className="flex min-w-0 items-center gap-2.5" onClick={(e) => e.stopPropagation()}>
                       <Icon className="size-4 shrink-0 text-muted-foreground" />
-                      <span className="truncate font-medium">{t.name}</span>
+                      <TruncatedText text={t.name} tooltip={`${t.schema}.${t.name}`} className="font-medium" />
                       {t.schema !== 'public' && (
                         <Badge variant="secondary" className="font-mono text-[10px]">
                           {t.schema}
