@@ -158,3 +158,63 @@
     box-shadow: none !important;
   }
 }
+
+/*
+ * Scrollbars: thin, rounded, theme-coloured. The thumb keeps at least 3:1
+ * contrast against the background in both themes (WCAG 1.4.11), and the
+ * track is transparent so it blends with whatever surface it sits on.
+ * color-scheme also makes native controls follow the active theme.
+ */
+@layer base {
+  :root {
+    color-scheme: light;
+    --scrollbar-thumb: #8f8f8f;
+    --scrollbar-thumb-hover: #666666;
+    --scrollbar-track: transparent;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+  .dark {
+    color-scheme: dark;
+    --scrollbar-thumb: #636363;
+    --scrollbar-thumb-hover: #8a8a8a;
+  }
+  * {
+    scrollbar-width: thin;
+  }
+  @media (prefers-contrast: more) {
+    :root {
+      --scrollbar-thumb: #000000;
+      --scrollbar-thumb-hover: #000000;
+      --scrollbar-track: #ffffff;
+    }
+    .dark {
+      --scrollbar-thumb: #ffffff;
+      --scrollbar-thumb-hover: #ffffff;
+      --scrollbar-track: #000000;
+    }
+  }
+
+  /* Browsers without scrollbar-color (Safari before 26.2): WebKit pseudo-elements. */
+  @supports not (scrollbar-color: auto) {
+    * {
+      scrollbar-width: auto;
+    }
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-corner {
+      background: var(--scrollbar-track);
+    }
+    ::-webkit-scrollbar-thumb {
+      /* A transparent border inset the pill from the edges. */
+      border: 2px solid transparent;
+      border-radius: 999px;
+      background: var(--scrollbar-thumb) padding-box;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-thumb-hover) padding-box;
+    }
+  }
+}
