@@ -27,6 +27,29 @@ export interface DbInfo {
   readonly: boolean;
 }
 
+export interface DatabaseSummary {
+  name: string;
+  size: string;
+}
+
+export interface DatabaseList {
+  /** The database named in the connection string (or the server default). */
+  default: string;
+  databases: DatabaseSummary[];
+}
+
+export interface SessionInfo {
+  /** False when pgdeck runs with --no-auth. */
+  authRequired: boolean;
+  authenticated: boolean;
+  username: string | null;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
 export interface TableRef {
   schema: string;
   name: string;

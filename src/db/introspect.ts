@@ -1,4 +1,4 @@
-import type { Column, Constraint, DbInfo, Index, RelKind, TableMeta, TableRef } from '../shared/types.js';
+import type { Column, Constraint, DatabaseSummary, DbInfo, Index, RelKind, TableMeta, TableRef } from '../shared/types.js';
 import type { DbContext } from './client.js';
 import { UserError } from './errors.js';
 
@@ -11,6 +11,16 @@ export async function getInfo(ctx: DbContext): Promise<DbInfo> {
            host(inet_server_addr()) as host,
            inet_server_port() as port`);
   return { ...rows[0]!, readonly: ctx.readonly };
+}
+
+/** Databases on this server the current role may connect to. */
+export async function listDatabases(ctx: DbContext): Promise<DatabaseSummary[]> {
+  const { rows } = await ctx.pool.query<DatabaseSummary>(`
+    select datname as name, pg_size_pretty(pg_database_size(datname)) as size
+    from pg_database
+    where not datistemplate and datallowconn and has_database_privilege(datname, 'CONNECT')
+    order by datname`);
+  return rows;
 }
 
 export async function listTables(ctx: DbContext): Promise<TableRef[]> {

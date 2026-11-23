@@ -2,10 +2,8 @@ import pg from 'pg';
 import type { Cell } from '../shared/types.js';
 
 export interface DbConfig {
-  /** postgres:// URL. Empty means fall back to PG* environment variables. */
-  connectionString?: string;
-  /** Use SSL without certificate verification. */
-  ssl: boolean;
+  /** Connection settings for one specific database. Missing fields fall back to PG* env vars. */
+  client: pg.ClientConfig;
   /** Open every session with default_transaction_read_only and refuse edits. */
   readonly: boolean;
   /** Cap on rows returned by any single query. */
@@ -29,9 +27,8 @@ export const RAW_TYPES = {
 
 export function createPool(config: DbConfig): pg.Pool {
   const pool = new pg.Pool({
-    connectionString: config.connectionString || undefined,
-    ssl: config.ssl ? { rejectUnauthorized: false } : undefined,
-    max: 5,
+    ...config.client,
+    max: 4,
     idleTimeoutMillis: 30_000,
     application_name: 'pgdeck',
     options: config.readonly ? '-c default_transaction_read_only=on' : undefined,
