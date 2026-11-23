@@ -94,7 +94,7 @@ async function tableDdl(client: pg.ClientBase, t: TableRow): Promise<string> {
     [t.oid],
   );
   const cons = await client.query<{ name: string; def: string }>(
-    `select conname as name, pg_get_constraintdef(oid, true) as def from pg_constraint
+    `select conname as name, pg_get_constraintdef(oid) as def from pg_constraint
      where conrelid = $1 and contype in ('p', 'u', 'c', 'x') order by contype = 'p' desc, conname`,
     [t.oid],
   );
@@ -189,7 +189,7 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
       const domains = await client.query<{ schema: string; name: string; base: string; notnull: boolean; def: string | null; checks: string[] | null }>(
         `select n.nspname as schema, t.typname as name, format_type(t.typbasetype, t.typtypmod) as base, t.typnotnull as notnull,
                 t.typdefault as def,
-                (select array_agg(pg_get_constraintdef(c.oid, true)) from pg_constraint c where c.contypid = t.oid) as checks
+                (select array_agg(pg_get_constraintdef(c.oid)) from pg_constraint c where c.contypid = t.oid) as checks
          from pg_type t join pg_namespace n on n.oid = t.typnamespace
          where t.typtype = 'd' and ${SYSTEM_SCHEMAS}
            and not exists (select 1 from pg_depend d where d.objid = t.oid and d.deptype = 'e')
@@ -298,7 +298,7 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
       if (idx.rows.length) yield `-- Indexes\n` + idx.rows.map((r) => `${r.def};\n`).join('') + '\n';
 
       const fks = await client.query<{ tbl: string; name: string; def: string; ref: number }>(
-        `select format('%I.%I', n.nspname, c.relname) as tbl, k.conname as name, pg_get_constraintdef(k.oid, true) as def, k.confrelid as ref
+        `select format('%I.%I', n.nspname, c.relname) as tbl, k.conname as name, pg_get_constraintdef(k.oid) as def, k.confrelid as ref
          from pg_constraint k join pg_class c on c.oid = k.conrelid join pg_namespace n on n.oid = c.relnamespace
          where k.contype = 'f' and k.conrelid = any($1::oid[]) order by 1, 2`,
         [oids],

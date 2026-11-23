@@ -49,6 +49,24 @@ export const exportQuery = tableRef.extend({
   dir: z.enum(['asc', 'desc']).optional(),
 });
 
+/** GET /dump: database export as one .sql file or a ZIP of per-table files. */
+export const dumpQuery = z.object({
+  tables: jsonParam(z.array(z.object({ schema: ident, table: ident })).max(10_000), '[]'),
+  structure: flag,
+  data: flag,
+  gzip: flag,
+  format: z.enum(['sql', 'zip']).default('sql'),
+  dataFormat: z.enum(EXPORT_FORMATS).default('csv'),
+});
+
+/** POST /restore: run an uploaded dump. */
+export const restoreQuery = z.object({
+  gzip: flag,
+  custom: flag,
+  single: z.enum(['0', '1']).default('1').transform((v) => v === '1'),
+  skipOwnership: z.enum(['0', '1']).default('1').transform((v) => v === '1'),
+});
+
 /** POST /import: options in the query string, the raw file is the body. */
 export const importQuery = tableRef.extend({
   format: z.enum(IMPORT_FORMATS),

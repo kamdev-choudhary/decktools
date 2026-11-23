@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { Readable } from 'node:stream';
+import { Readable, Transform } from 'node:stream';
 import { createGunzip } from 'node:zlib';
 import pg from 'pg';
 import { from as copyFrom } from 'pg-copy-streams';
@@ -27,6 +27,21 @@ const COPY_FROM_STDIN = /^\s*copy\b[\s\S]*\bfrom\s+stdin\b/i;
 const OWNERSHIP =
   /^\s*(alter\s+[\s\S]*\bowner\s+to\b|grant\b|revoke\b|alter\s+default\s+privileges\b|security\s+label\b|comment\s+on\s+extension\b)/i;
 const SETTING = /^\s*(set\b|select\s+pg_catalog\.set_config\b)/i;
+
+/** Statement text without leading whitespace and comments, for classifying it. */
+function stripLeadingComments(sql: string): string {
+  let s = sql;
+  for (;;) {
+    const t = s.replace(/^\s+/, '');
+    if (t.startsWith('--')) {
+      const nl = t.indexOf('\n');
+      s = nl === -1 ? '' : t.slice(nl + 1);
+    } else if (t.startsWith('/*')) {
+      const end = t.indexOf('*/');
+      s = end === -1 ? '' : t.slice(end + 2);
+    } else return t;
+  }
+}
 
 /**
  * Incremental scanner for psql-style scripts. Splits on semicolons outside
@@ -188,7 +203,7 @@ class ScriptScanner {
         const sql = s.slice(this.stmtStart, this.pos + 1);
         this.pos++;
         if (sql.replace(/;$/, '').trim()) {
-          if (COPY_FROM_STDIN.test(sql)) {
+          if (COPY_FROM_STDIN.test(stripLeadingComments(sql))) {
             events.push({ type: 'copy', sql, line: this.stmtLine });
             this.mode = 'copy-eol';
           } else events.push({ type: 'stmt', sql, line: this.stmtLine });
@@ -255,10 +270,20 @@ function annotate(err: unknown, line: number, sql: string): unknown {
 export async function restoreScript(ctx: DbContext, body: Readable, opts: RestoreOptions): Promise<RestoreResponse> {
   if (ctx.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
 
+  // Count bytes in a pass-through stage: a 'data' listener on `body` would
+  // start it flowing before the parser is attached and lose data.
   let bytes = 0;
-  body.on('data', (c: Buffer) => (bytes += c.length));
-  let source: Readable = opts.gzip ? body.pipe(createGunzip()) : body;
-  if (opts.gzip) body.on('error', (e) => source.destroy(e));
+  const counted = body.pipe(
+    new Transform({
+      transform(chunk: Buffer, _enc, cb) {
+        bytes += chunk.length;
+        cb(null, chunk);
+      },
+    }),
+  );
+  body.on('error', (e) => counted.destroy(e));
+  let source: Readable = opts.gzip ? counted.pipe(createGunzip()) : counted;
+  if (opts.gzip) counted.on('error', (e) => source.destroy(e));
   if (opts.custom) source = pgRestoreToSql(source);
   source.setEncoding('utf8');
 
@@ -273,12 +298,13 @@ export async function restoreScript(ctx: DbContext, body: Readable, opts: Restor
   const run = async (events: Event[]) => {
     for (const ev of events) {
       if (ev.type === 'stmt') {
-        if (opts.skipOwnership && OWNERSHIP.test(ev.sql)) {
+        const head = stripLeadingComments(ev.sql);
+        if (opts.skipOwnership && OWNERSHIP.test(head)) {
           result.skipped++;
           continue;
         }
         try {
-          if (SETTING.test(ev.sql) && opts.singleTransaction) {
+          if (SETTING.test(head) && opts.singleTransaction) {
             // Settings from newer pg_dump versions may not exist on this server; don't let them abort the restore.
             await client.query('savepoint pgdeck_set');
             try {
@@ -290,7 +316,7 @@ export async function restoreScript(ctx: DbContext, body: Readable, opts: Restor
               continue;
             }
             await client.query('release savepoint pgdeck_set');
-          } else if (SETTING.test(ev.sql)) {
+          } else if (SETTING.test(head)) {
             try {
               await client.query(ev.sql);
             } catch (e) {

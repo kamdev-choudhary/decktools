@@ -140,3 +140,15 @@ export interface ImportResponse {
   ms: number;
   bytes: number;
 }
+
+export interface RestoreResponse {
+  /** SQL statements executed. */
+  statements: number;
+  /** Statements skipped (ownership/privileges, unknown settings). */
+  skipped: number;
+  /** COPY blocks loaded, and rows they contained. */
+  copies: number;
+  rows: number;
+  ms: number;
+  bytes: number;
+}

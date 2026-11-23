@@ -6,6 +6,8 @@ import { getStats } from './stats.js';
 import { createLiveSampler } from './live.js';
 import type { Readable } from 'node:stream';
 import { exportRows, importRows, type ExportRequest, type ImportRequest } from './transfer.js';
+import { dumpSql, type DumpOptions } from './dump.js';
+import { restoreScript, type RestoreOptions } from './restore.js';
 import { deleteRows, insertRow, selectRows, updateRow } from './rows.js';
 
 
@@ -27,6 +29,10 @@ export function createDatabase(config: DbConfig) {
     exportRows: (req: ExportRequest, signal?: AbortSignal) => exportRows(ctx, req, signal),
     /** COPY an uploaded stream into a table. */
     importRows: (req: ImportRequest, body: Readable) => importRows(ctx, req, body),
+    /** pg_dump-style SQL for some or all tables (async iterator of chunks). */
+    dumpSql: (opts: DumpOptions) => dumpSql(ctx, opts),
+    /** Run an uploaded SQL dump (or pg_dump custom file). */
+    restore: (body: Readable, opts: RestoreOptions) => restoreScript(ctx, body, opts),
     listDatabases: () => listDatabases(ctx),
     tables: () => listTables(ctx),
     meta: (schema: string, table: string) => getTableMeta(ctx, schema, table),
