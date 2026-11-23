@@ -158,6 +158,24 @@ export interface Constraint {
   definition: string;
 }
 
+/** An outgoing foreign key: these columns reference refColumns of another table. */
+export interface ForeignKey {
+  name: string;
+  columns: string[];
+  refSchema: string;
+  refTable: string;
+  refColumns: string[];
+}
+
+/** An incoming foreign key: another table's columns reference this table. */
+export interface IncomingReference {
+  name: string;
+  schema: string;
+  table: string;
+  columns: string[];
+  refColumns: string[];
+}
+
 /** How a row is identified for edits: primary key columns, physical ctid, or not at all. */
 export type KeyMode = 'pk' | 'ctid' | null;
 
@@ -175,6 +193,8 @@ export interface TableMeta {
   editable: boolean;
   indexes: Index[];
   constraints: Constraint[];
+  foreignKeys: ForeignKey[];
+  referencedBy: IncomingReference[];
 }
 
 export const FILTER_OPS = [

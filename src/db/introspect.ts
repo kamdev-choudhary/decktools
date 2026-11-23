@@ -1,4 +1,4 @@
-import type { Column, Constraint, DatabaseSummary, DbInfo, Index, RelKind, TableMeta, TableRef } from '../shared/types.js';
+import type { Column, Constraint, DatabaseSummary, DbInfo, ForeignKey, IncomingReference, Index, RelKind, TableMeta, TableRef } from '../shared/types.js';
 import type { DbContext } from './client.js';
 import { UserError } from './errors.js';
 
@@ -59,7 +59,13 @@ export async function getTableMeta(ctx: DbContext, schema: string, table: string
   if (!relation) throw new UserError(`Relation ${schema}.${table} not found`, 404);
   const { oid, kind } = relation;
 
-  const [columns, pk, indexes, constraints] = await Promise.all([
+  // Column names of a constraint's key, in key order, as text[] (parsed to string[] by pg).
+  const keyCols = (rel: string, key: string) =>
+    `(select array_agg(a.attname::text order by k.ord)
+        from unnest(${key}) with ordinality k(attnum, ord)
+        join pg_attribute a on a.attrelid = ${rel} and a.attnum = k.attnum)`;
+
+  const [columns, pk, indexes, constraints, foreignKeys, referencedBy] = await Promise.all([
     ctx.pool.query<Column>(
       `select a.attname as name,
               format_type(a.atttypid, a.atttypmod) as type,
@@ -104,6 +110,29 @@ export async function getTableMeta(ctx: DbContext, schema: string, table: string
        order by array_position(array['p','u','f','c','x','t']::"char"[], contype), conname`,
       [oid],
     ),
+    ctx.pool.query<ForeignKey>(
+      `select c.conname as name,
+              ${keyCols('c.conrelid', 'c.conkey')} as columns,
+              rn.nspname as "refSchema", rc.relname as "refTable",
+              ${keyCols('c.confrelid', 'c.confkey')} as "refColumns"
+       from pg_constraint c
+       join pg_class rc on rc.oid = c.confrelid
+       join pg_namespace rn on rn.oid = rc.relnamespace
+       where c.conrelid = $1 and c.contype = 'f'
+       order by c.conname`,
+      [oid],
+    ),
+    ctx.pool.query<IncomingReference>(
+      `select c.conname as name, sn.nspname as schema, sc.relname as table,
+              ${keyCols('c.conrelid', 'c.conkey')} as columns,
+              ${keyCols('c.confrelid', 'c.confkey')} as "refColumns"
+       from pg_constraint c
+       join pg_class sc on sc.oid = c.conrelid
+       join pg_namespace sn on sn.oid = sc.relnamespace
+       where c.confrelid = $1 and c.contype = 'f'
+       order by sn.nspname, sc.relname, c.conname`,
+      [oid],
+    ),
   ]);
 
   const primaryKey = pk.rows.map((r) => r.name);
@@ -124,5 +153,7 @@ export async function getTableMeta(ctx: DbContext, schema: string, table: string
     editable: !ctx.readonly && isTable && keyMode !== null,
     indexes: indexes.rows,
     constraints: constraints.rows,
+    foreignKeys: foreignKeys.rows,
+    referencedBy: referencedBy.rows,
   };
 }
