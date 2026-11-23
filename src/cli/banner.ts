@@ -2,7 +2,14 @@ import pc from 'picocolors';
 import type { DbInfo } from '../shared/types.js';
 import { isLoopback, type AppConfig } from './config.js';
 
-export function printBanner(version: string, config: AppConfig, info: DbInfo, url: string, port: number): void {
+export function printBanner(
+  version: string,
+  config: AppConfig,
+  info: DbInfo,
+  databaseCount: number,
+  url: string,
+  port: number,
+): void {
   const label = (s: string) => pc.dim(s.padEnd(12));
   const serverVersion = info.version.split(' ').slice(0, 2).join(' ');
 
@@ -11,6 +18,7 @@ export function printBanner(version: string, config: AppConfig, info: DbInfo, ur
     `  ${pc.bold(pc.blue('pgdeck'))} ${pc.dim(`v${version}`)}`,
     '',
     `  ${pc.green('✓')} ${label('Connected')}${pc.bold(info.database)} as ${info.user} ${pc.dim(`(${serverVersion})`)}`,
+    `    ${label('Databases')}${databaseCount} available ${pc.dim('(switch in the UI)')}`,
     `  ${pc.cyan('➜')} ${label('Web UI')}${pc.bold(pc.cyan(url))}`,
     `    ${label('Listening')}${config.host}:${port}${config.basePath ? pc.dim(`  (base path ${config.basePath})`) : ''}`,
   ];

@@ -1,18 +1,15 @@
 import { Hono } from 'hono';
-import { basicAuth } from 'hono/basic-auth';
-import type { Database } from '../db/index.js';
+import type { DatabaseManager } from '../db/index.js';
+import { createAuth, type AuthConfig } from './auth/routes.js';
 import { requireCsrfHeader } from './middleware/csrf.js';
 import { handleError } from './middleware/errors.js';
 import { apiRoutes } from './routes/api.js';
 import { loadAssets, serveAssets } from './static.js';
 
-export interface AuthConfig {
-  username: string;
-  password: string;
-}
+export type { AuthConfig } from './auth/routes.js';
 
 export interface AppOptions {
-  db: Database;
+  manager: DatabaseManager;
   auth: AuthConfig | null;
   /** Prefix such as "/db" when a proxy forwards the path without stripping it. */
   basePath: string;
@@ -24,7 +21,7 @@ export interface AppOptions {
 const ADD_SLASH = '/__pgdeck_add_slash';
 const OUTSIDE_BASE = '/__pgdeck_outside_base';
 
-export function createApp({ db, auth, basePath, webRoot }: AppOptions) {
+export function createApp({ manager, auth, basePath, webRoot }: AppOptions) {
   const app = new Hono({
     // Strip the base path ourselves so every route below is written as if
     // the app were mounted at "/". The UI uses relative URLs, so it works
@@ -44,17 +41,17 @@ export function createApp({ db, auth, basePath, webRoot }: AppOptions) {
   app.all(OUTSIDE_BASE, (c) => c.json({ error: 'Not found' }, 404));
   app.get('/healthz', (c) => c.json({ ok: true }));
 
-  if (auth) {
-    app.use('*', basicAuth({ username: auth.username, password: auth.password, realm: 'pgdeck' }));
-  }
+  const { routes: authRoutes, requireSession } = createAuth(auth);
 
+  // The UI itself is public (it's just the login screen until signed in);
+  // everything under /api except the auth endpoints needs a session.
   app.use('/api/*', requireCsrfHeader);
-  app.route('/api', apiRoutes(db));
-  app.notFound((c) => (c.req.path.startsWith('/api/') ? c.json({ error: 'Not found' }, 404) : c.text('Not found', 404)));
+  app.route('/api/auth', authRoutes);
+  app.use('/api/*', requireSession);
+  app.route('/api', apiRoutes(manager));
+  app.all('/api/*', (c) => c.json({ error: 'Not found' }, 404));
 
   app.get('*', serveAssets(loadAssets(webRoot)));
 
   return app;
 }
-
-export type ApiApp = ReturnType<typeof apiRoutes>;

@@ -2,7 +2,7 @@ import { Command, InvalidArgumentError, Option } from 'commander';
 import open from 'open';
 import pc from 'picocolors';
 import pkg from '../../package.json' with { type: 'json' };
-import { createDatabase } from '../db/index.js';
+import { DatabaseManager } from '../db/index.js';
 import { startServer } from '../server/index.js';
 import { printBanner } from './banner.js';
 import { redact, resolveConfig, type CliOptions } from './config.js';
@@ -37,7 +37,7 @@ Environment:
 
 async function run(connection: string | undefined, opts: CliOptions): Promise<void> {
   const config = resolveConfig(connection, opts);
-  const db = createDatabase({
+  const manager = new DatabaseManager({
     connectionString: config.connectionString,
     ssl: config.ssl,
     readonly: config.readonly,
@@ -45,18 +45,20 @@ async function run(connection: string | undefined, opts: CliOptions): Promise<vo
   });
 
   let info;
+  let databaseCount;
   try {
-    info = await db.info();
+    info = await (await manager.connect()).info();
+    databaseCount = (await manager.list()).databases.length;
   } catch (err) {
     console.error(`\n  ${pc.red('✗')} Could not connect to ${redact(config.connectionString)}\n    ${(err as Error).message}\n`);
-    await db.close().catch(() => {});
+    await manager.closeAll();
     process.exit(1);
   }
 
   let started;
   try {
     started = await startServer({
-      db,
+      manager,
       auth: config.auth,
       basePath: config.basePath,
       webRoot: config.webRoot,
@@ -67,13 +69,13 @@ async function run(connection: string | undefined, opts: CliOptions): Promise<vo
     const e = err as NodeJS.ErrnoException;
     const msg = e.code === 'EADDRINUSE' ? `Port ${config.port} is already in use. Try --port ${config.port + 1}` : e.message;
     console.error(`\n  ${pc.red('✗')} ${msg}\n`);
-    await db.close().catch(() => {});
+    await manager.closeAll();
     process.exit(1);
   }
 
   const shownHost = config.host === '0.0.0.0' || config.host === '::' ? 'localhost' : config.host;
   const url = `http://${shownHost}:${started.port}${config.basePath}/`;
-  printBanner(pkg.version, config, info, url, started.port);
+  printBanner(pkg.version, config, info, databaseCount, url, started.port);
 
   if (config.open) open(url).catch(() => {});
 
@@ -83,7 +85,7 @@ async function run(connection: string | undefined, opts: CliOptions): Promise<vo
     stopping = true;
     console.log(pc.dim('\n  Shutting down...'));
     started.server.close();
-    await db.close().catch(() => {});
+    await manager.closeAll();
     process.exit(0);
   };
   process.on('SIGINT', shutdown);
