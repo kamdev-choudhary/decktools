@@ -37,15 +37,9 @@ export function StorageChart({ db, tables }: { db: string; tables: TableStats[] 
     index: t.indexBytes,
     rows: t.rows,
   }));
+  // The long tail is summarised in text: as a bar it would dwarf the top N.
   const rest = sized.slice(TOP_N);
-  if (rest.length) {
-    bars.push({
-      key: '__other',
-      label: `Other (${rest.length})`,
-      data: rest.reduce((s, t) => s + t.tableBytes, 0),
-      index: rest.reduce((s, t) => s + t.indexBytes, 0),
-    });
-  }
+  const restBytes = rest.reduce((sum, t) => sum + t.totalBytes, 0);
 
   const max = Math.max(...bars.map((b) => b.data + b.index), 1);
 
@@ -99,6 +93,12 @@ export function StorageChart({ db, tables }: { db: string; tables: TableStats[] 
           );
         })}
       </ul>
+      {rest.length > 0 && (
+        <p className="border-t pt-3 text-xs text-muted-foreground">
+          +{rest.length} more relation{rest.length > 1 ? 's' : ''} totalling{' '}
+          <span className="text-foreground tabular-nums">{formatBytes(restBytes)}</span>. See the full list below.
+        </p>
+      )}
     </div>
   );
 }

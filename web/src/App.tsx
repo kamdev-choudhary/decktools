@@ -7,10 +7,14 @@ import { Header } from '@/components/app/Header';
 import { SidebarNav } from '@/components/app/Sidebar';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { dbHref, navigate, useRoute } from '@/lib/router';
+import { storage } from '@/lib/storage';
+import { cn } from '@/lib/utils';
 import { LoginView } from '@/views/LoginView';
 import { OverviewView } from '@/views/OverviewView';
 import { SqlView } from '@/views/SqlView';
 import { TableView } from '@/views/TableView';
+
+const SIDEBAR_KEY = 'pgdeck.sidebar';
 
 export function App() {
   const session = useSession();
@@ -48,7 +52,19 @@ function Workspace({ session }: { session: SessionInfo }) {
 function Shell({ db, session }: { db: string; session: SessionInfo }) {
   const route = useRoute();
   const info = useInfo(db);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
+  const [collapsed, setCollapsed] = useState(() => storage.get(SIDEBAR_KEY) === 'collapsed'); // desktop
+
+  const toggleSidebar = () => {
+    if (window.matchMedia('(min-width: 768px)').matches) {
+      setCollapsed((c) => {
+        storage.set(SIDEBAR_KEY, c ? 'open' : 'collapsed');
+        return !c;
+      });
+    } else {
+      setSidebarOpen(true);
+    }
+  };
 
   useEffect(() => setSidebarOpen(false), [route]);
 
@@ -67,9 +83,9 @@ function Shell({ db, session }: { db: string; session: SessionInfo }) {
 
   return (
     <div className="flex h-dvh flex-col">
-      <Header db={db} route={route} session={session} info={info.data} onOpenSidebar={() => setSidebarOpen(true)} />
+      <Header db={db} route={route} session={session} info={info.data} onToggleSidebar={toggleSidebar} />
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-64 shrink-0 border-r bg-sidebar md:block">
+        <aside className={cn('hidden w-64 shrink-0 border-r bg-sidebar', !collapsed && 'md:block')}>
           <SidebarNav db={db} route={route} />
         </aside>
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>

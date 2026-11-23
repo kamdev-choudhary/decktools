@@ -67,7 +67,7 @@ export function DataGrid({
       <table className="w-max min-w-full border-separate border-spacing-0 text-[13px]">
         <thead className="sticky top-0 z-20">
           <tr>
-            <th className={cn(edgeCell, 'z-30 w-10 py-2 font-normal text-muted-foreground')}>
+            <th className={cn(edgeCell, 'z-30 w-10 py-1.5 font-normal text-muted-foreground')}>
               {selection ? (
                 <Checkbox
                   aria-label="Select all rows"
@@ -84,7 +84,7 @@ export function DataGrid({
               return (
                 <th
                   key={f}
-                  className="border-r border-b bg-grid-header px-3 py-2 text-left align-top font-medium whitespace-nowrap"
+                  className="border-r border-b bg-grid-header px-3 py-1.5 text-left align-top font-medium whitespace-nowrap"
                   aria-sort={sorted === 'asc' ? 'ascending' : sorted === 'desc' ? 'descending' : undefined}
                 >
                   <button
@@ -104,7 +104,7 @@ export function DataGrid({
                       />
                     )}
                   </button>
-                  {types?.[f] && <div className="mt-0.5 font-mono text-[11px] font-normal text-muted-foreground">{types[f]}</div>}
+                  {types?.[f] && <div className="font-mono text-[10.5px] font-normal text-muted-foreground">{types[f]}</div>}
                 </th>
               );
             })}
@@ -127,7 +127,7 @@ export function DataGrid({
                     : undefined
                 }
               >
-                <td className={cn(edgeCell, 'z-10 py-1.5 align-middle text-xs text-muted-foreground tabular-nums')}>
+                <td className={cn(edgeCell, 'z-10 py-1 align-middle text-xs text-muted-foreground tabular-nums')}>
                   {selection ? (
                     <Checkbox
                       aria-label={`Select row ${rowOffset + i + 1}`}
@@ -147,7 +147,7 @@ export function DataGrid({
                     data-field={fields[j]}
                     title={v && v.length > 40 ? v.slice(0, 4000) : undefined}
                     className={cn(
-                      'border-r border-b px-3 py-1.5 align-top font-mono text-[12.5px] transition-colors group-hover:bg-row-hover group-data-[state=selected]:bg-row-selected',
+                      'border-r border-b px-3 py-1 align-top font-mono text-[12.5px] transition-colors group-hover:bg-row-hover group-data-[state=selected]:bg-row-selected',
                       wrap ? 'max-w-[640px] break-words whitespace-pre-wrap' : 'max-w-[360px] truncate',
                       numeric[j] && 'text-right tabular-nums',
                       v === null && 'text-null italic',

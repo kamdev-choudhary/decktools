@@ -25,7 +25,7 @@ export function Pagination({ page, pageSize, shown, total, exact, loading, onPag
   const lastPage = exact ? Math.max(Math.ceil(total / pageSize) - 1, 0) : null;
 
   return (
-    <div className="flex shrink-0 flex-wrap items-center gap-3 border-t bg-background px-4 py-2 text-xs text-muted-foreground">
+    <div className="flex shrink-0 flex-wrap items-center gap-3 border-t bg-background px-3 py-1.5 text-xs md:px-4 text-muted-foreground">
       <span className="tabular-nums">
         <span className="text-foreground">
           {formatNumber(from)}–{formatNumber(to)}

@@ -1,11 +1,12 @@
 import { Download, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import type { Cell, Filter, RowKey, SortDir, TableMeta } from '@shared/types';
 import { useRowMutations, useRows } from '@/api/hooks';
 import { DataGrid } from '@/components/app/DataGrid';
 import { ErrorAlert, errorMessage } from '@/components/app/feedback';
-import { FilterBar } from '@/components/app/FilterBar';
+import { FilterControl } from '@/components/app/FilterBar';
 import { Pagination } from '@/components/app/Pagination';
 import { RowEditor } from '@/components/app/RowEditor';
 import {
@@ -25,7 +26,7 @@ import { cn } from '@/lib/utils';
 
 type EditorState = { mode: 'insert' } | { mode: 'edit'; index: number; focusField: string };
 
-export function DataTab({ db, meta }: { db: string; meta: TableMeta }) {
+export function DataTab({ db, meta, actionsSlot }: { db: string; meta: TableMeta; actionsSlot: HTMLElement | null }) {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(100);
   const [sort, setSort] = useState<{ col: string; dir: SortDir } | null>(null);
@@ -80,52 +81,55 @@ export function DataTab({ db, meta }: { db: string; meta: TableMeta }) {
 
   return (
     <>
-      <div className="flex flex-wrap items-start gap-3 border-b px-4 py-3 md:px-6">
-        <FilterBar
-          columns={meta.columns}
-          value={filters}
-          onApply={(f) => {
-            setFilters(f);
-            setPage(0);
-          }}
-        />
-        <div className="flex flex-wrap items-center gap-2">
-          {meta.editable && selected.size > 0 && (
-            <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)}>
-              <Trash2 /> Delete {selected.size}
-            </Button>
-          )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="icon-sm" onClick={() => rows.refetch()} disabled={rows.isFetching} aria-label="Refresh">
-                <RefreshCw className={cn(rows.isFetching && 'animate-spin')} />
+      {actionsSlot &&
+        createPortal(
+          <>
+            {meta.editable && selected.size > 0 && (
+              <Button variant="outline" size="sm" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)}>
+                <Trash2 /> Delete {selected.size}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>Refresh</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                aria-label="Export CSV"
-                disabled={!data?.rows.length}
-                onClick={() => data && downloadCsv(`${meta.schema}.${meta.table}.csv`, data.fields, data.rows)}
-              >
-                <Download />
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon-sm" onClick={() => rows.refetch()} disabled={rows.isFetching} aria-label="Refresh">
+                  <RefreshCw className={cn(rows.isFetching && 'animate-spin')} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Refresh</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Export CSV"
+                  disabled={!data?.rows.length}
+                  onClick={() => data && downloadCsv(`${meta.schema}.${meta.table}.csv`, data.fields, data.rows)}
+                >
+                  <Download />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Export this page as CSV</TooltipContent>
+            </Tooltip>
+            {meta.editable && (
+              <Button size="sm" className="shrink-0" onClick={() => setEditor({ mode: 'insert' })}>
+                <Plus /> <span className="hidden sm:inline">Add row</span>
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>Export this page as CSV</TooltipContent>
-          </Tooltip>
-          {meta.editable && (
-            <Button size="sm" onClick={() => setEditor({ mode: 'insert' })}>
-              <Plus /> Add row
-            </Button>
-          )}
-        </div>
-      </div>
+            )}
+          </>,
+          actionsSlot,
+        )}
 
-      {rows.isError && <ErrorAlert error={rows.error} className="mx-4 mt-3 w-auto md:mx-6" />}
+      <FilterControl
+        columns={meta.columns}
+        value={filters}
+        onChange={(f) => {
+          setFilters(f);
+          setPage(0);
+        }}
+      />
+
+      {rows.isError && <ErrorAlert error={rows.error} className="mx-3 mt-2 w-auto md:mx-4" />}
 
       <DataGrid
         fields={data?.fields ?? meta.columns.map((c) => c.name)}
