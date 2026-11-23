@@ -1,15 +1,17 @@
 import type {
   ApiErrorBody,
+  Cell,
+  DatabaseList,
   DbInfo,
-  DeleteRequest,
-  InsertRequest,
+  LoginRequest,
   MutationResponse,
   QueryResponse,
+  RowKey,
   RowsRequest,
   RowsResponse,
+  SessionInfo,
   TableMeta,
   TableRef,
-  UpdateRequest,
 } from '@shared/types';
 
 /**
@@ -37,6 +39,8 @@ export class ApiError extends Error {
   }
 }
 
+export const isUnauthorized = (e: unknown) => e instanceof ApiError && e.status === 401;
+
 async function request<T>(path: string, body?: unknown): Promise<T> {
   const res = await fetch(`${BASE}api/${path}`, {
     method: body === undefined ? 'GET' : 'POST',
@@ -49,14 +53,25 @@ async function request<T>(path: string, body?: unknown): Promise<T> {
   return data as T;
 }
 
+const db = (name: string, path: string) => `db/${encodeURIComponent(name)}/${path}`;
+
 export const api = {
-  info: () => request<DbInfo>('info'),
-  tables: () => request<TableRef[]>('tables'),
-  meta: (schema: string, table: string) =>
-    request<TableMeta>(`meta?${new URLSearchParams({ schema, table })}`),
-  rows: (req: RowsRequest) => request<RowsResponse>('rows', req),
-  insert: (req: InsertRequest) => request<MutationResponse>('insert', req),
-  update: (req: UpdateRequest) => request<MutationResponse>('update', req),
-  remove: (req: DeleteRequest) => request<MutationResponse>('delete', req),
-  query: (sql: string) => request<QueryResponse>('query', { sql }),
+  session: () => request<SessionInfo>('auth/session'),
+  login: (body: LoginRequest) => request<SessionInfo>('auth/login', body),
+  logout: () => request<SessionInfo>('auth/logout', {}),
+
+  databases: () => request<DatabaseList>('databases'),
+
+  info: (database: string) => request<DbInfo>(db(database, 'info')),
+  tables: (database: string) => request<TableRef[]>(db(database, 'tables')),
+  meta: (database: string, schema: string, table: string) =>
+    request<TableMeta>(db(database, `meta?${new URLSearchParams({ schema, table })}`)),
+  rows: (database: string, req: RowsRequest) => request<RowsResponse>(db(database, 'rows'), req),
+  insert: (database: string, schema: string, table: string, values: Record<string, Cell>) =>
+    request<MutationResponse>(db(database, 'insert'), { schema, table, values }),
+  update: (database: string, schema: string, table: string, key: RowKey, values: Record<string, Cell>) =>
+    request<MutationResponse>(db(database, 'update'), { schema, table, key, values }),
+  remove: (database: string, schema: string, table: string, keys: RowKey[]) =>
+    request<MutationResponse>(db(database, 'delete'), { schema, table, keys }),
+  query: (database: string, sql: string) => request<QueryResponse>(db(database, 'query'), { sql }),
 };

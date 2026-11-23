@@ -1,41 +1,61 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { storage } from './storage';
 
-export type Theme = 'light' | 'dark';
+export type ThemePreference = 'system' | 'light' | 'dark';
+export type ResolvedTheme = 'light' | 'dark';
 
 const KEY = 'pgdeck.theme';
-const query = () => window.matchMedia('(prefers-color-scheme: dark)');
+const darkQuery = () => window.matchMedia('(prefers-color-scheme: dark)');
 
-const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({ theme: 'light', toggle: () => {} });
+interface ThemeContextValue {
+  preference: ThemePreference;
+  resolved: ResolvedTheme;
+  setPreference: (p: ThemePreference) => void;
+}
+
+const ThemeContext = createContext<ThemeContextValue>({
+  preference: 'system',
+  resolved: 'dark',
+  setPreference: () => {},
+});
+
+function readPreference(): ThemePreference {
+  const v = storage.get(KEY);
+  return v === 'light' || v === 'dark' || v === 'system' ? v : 'system';
+}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [chosen, setChosen] = useState<Theme | null>(() => {
-    const v = storage.get(KEY);
-    return v === 'light' || v === 'dark' ? v : null;
-  });
-  const [systemDark, setSystemDark] = useState(() => query().matches);
+  const [preference, setPref] = useState<ThemePreference>(readPreference);
+  const [systemDark, setSystemDark] = useState(() => darkQuery().matches);
 
   useEffect(() => {
-    const mq = query();
+    const mq = darkQuery();
     const onChange = () => setSystemDark(mq.matches);
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
   }, []);
 
+  const resolved: ResolvedTheme = preference === 'system' ? (systemDark ? 'dark' : 'light') : preference;
+
   useEffect(() => {
     const root = document.documentElement;
-    if (chosen) root.dataset.theme = chosen;
-    else delete root.dataset.theme;
-  }, [chosen]);
+    root.classList.toggle('dark', resolved === 'dark');
+    root.style.colorScheme = resolved;
+  }, [resolved]);
 
-  const theme: Theme = chosen ?? (systemDark ? 'dark' : 'light');
-  const toggle = useCallback(() => {
-    const next: Theme = theme === 'dark' ? 'light' : 'dark';
-    storage.set(KEY, next);
-    setChosen(next);
-  }, [theme]);
+  const value = useMemo<ThemeContextValue>(
+    () => ({
+      preference,
+      resolved,
+      setPreference: (p) => {
+        storage.set(KEY, p);
+        setPref(p);
+      },
+    }),
+    [preference, resolved],
+  );
 
-  return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export const useTheme = () => useContext(ThemeContext);

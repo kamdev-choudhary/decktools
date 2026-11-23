@@ -134,22 +134,12 @@
   }
 }
 
-/* CodeMirror: blend into the theme instead of its own palette. */
+/* CodeMirror colours come from lib/sql-theme.ts; this only sizes it. */
 @layer components {
   .sql-editor .cm-editor {
-    @apply h-full bg-transparent text-[13px];
+    @apply h-full text-[13px];
   }
   .sql-editor .cm-editor.cm-focused {
     outline: none;
-  }
-  .sql-editor .cm-scroller {
-    @apply font-mono;
-  }
-  .sql-editor .cm-gutters {
-    @apply border-r border-border bg-transparent text-muted-foreground;
-  }
-  .sql-editor .cm-activeLine,
-  .sql-editor .cm-activeLineGutter {
-    @apply bg-muted/50;
   }
 }

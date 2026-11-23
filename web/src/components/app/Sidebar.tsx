@@ -1,0 +1,138 @@
+import { ChevronRight, Eye, Layers, LayoutGrid, Search, SquareTerminal, Table2, type LucideIcon } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { REL_KIND_LABEL, type RelKind, type TableRef } from '@shared/types';
+import { useTables } from '@/api/hooks';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { dbHref, sqlHref, tableHref, type Route } from '@/lib/router';
+import { cn } from '@/lib/utils';
+import { ErrorAlert, Spinner } from './feedback';
+
+const KIND_ICON: Record<RelKind, LucideIcon> = { r: Table2, p: Table2, f: Table2, v: Eye, m: Layers };
+
+function NavLink({ href, active, icon: Icon, children }: { href: string; active: boolean; icon: LucideIcon; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'flex h-8 items-center gap-2 rounded-md px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
+        active && 'bg-sidebar-accent font-medium text-foreground',
+      )}
+    >
+      <Icon className="size-4 shrink-0" />
+      <span className="truncate">{children}</span>
+    </a>
+  );
+}
+
+export function SidebarNav({ db, route }: { db: string; route: Route }) {
+  const tables = useTables(db);
+  const [filter, setFilter] = useState('');
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+
+  const groups = useMemo(() => {
+    const needle = filter.trim().toLowerCase();
+    const map = new Map<string, TableRef[]>();
+    for (const t of tables.data ?? []) {
+      if (needle && !`${t.schema}.${t.name}`.toLowerCase().includes(needle)) continue;
+      const list = map.get(t.schema) ?? [];
+      list.push(t);
+      map.set(t.schema, list);
+    }
+    return [...map];
+  }, [tables.data, filter]);
+
+  const toggle = (schema: string) =>
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(schema)) next.delete(schema);
+      else next.add(schema);
+      return next;
+    });
+
+  const active = route.view === 'table' ? `${route.schema}.${route.table}` : null;
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="space-y-0.5 p-3 pb-2">
+        <NavLink href={dbHref(db)} active={route.view === 'home'} icon={LayoutGrid}>
+          Overview
+        </NavLink>
+        <NavLink href={sqlHref(db)} active={route.view === 'sql'} icon={SquareTerminal}>
+          SQL Editor
+        </NavLink>
+      </div>
+
+      <div className="px-3 pb-2">
+        <div className="relative">
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Search tables…"
+            className="h-8 pl-8 text-sm"
+            spellCheck={false}
+            autoComplete="off"
+          />
+        </div>
+      </div>
+
+      <ScrollArea className="min-h-0 flex-1">
+        <nav className="px-3 pb-4" aria-label="Tables">
+          {tables.isPending && (
+            <div className="flex items-center gap-2 px-2 py-3 text-sm text-muted-foreground">
+              <Spinner /> Loading tables…
+            </div>
+          )}
+          {tables.isError && <ErrorAlert error={tables.error} className="mt-2" />}
+          {tables.isSuccess && !groups.length && (
+            <p className="px-2 py-3 text-sm text-muted-foreground">{filter ? 'No matching tables' : 'No tables in this database'}</p>
+          )}
+
+          {groups.map(([schema, items]) => {
+            const open = !!filter || !collapsed.has(schema);
+            return (
+              <div key={schema} className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => toggle(schema)}
+                  aria-expanded={open}
+                  className="flex h-7 w-full items-center gap-1 rounded-md px-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <ChevronRight className={cn('size-3.5 transition-transform', open && 'rotate-90')} />
+                  <span className="flex-1 truncate text-left">{schema}</span>
+                  <span className="tabular-nums">{items.length}</span>
+                </button>
+                {open && (
+                  <div className="mt-0.5 space-y-px">
+                    {items.map((t) => {
+                      const Icon = KIND_ICON[t.kind];
+                      const isActive = active === `${t.schema}.${t.name}`;
+                      return (
+                        <a
+                          key={t.name}
+                          href={tableHref(db, t.schema, t.name)}
+                          title={`${t.schema}.${t.name} · ${REL_KIND_LABEL[t.kind]}`}
+                          aria-current={isActive ? 'page' : undefined}
+                          className={cn(
+                            'flex h-7 items-center gap-2 rounded-md pr-2 pl-6 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
+                            isActive && 'bg-sidebar-accent font-medium text-foreground',
+                          )}
+                        >
+                          <Icon className="size-3.5 shrink-0 opacity-70" />
+                          <span className="truncate">{t.name}</span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+      </ScrollArea>
+    </div>
+  );
+}
