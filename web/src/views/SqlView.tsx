@@ -2,10 +2,14 @@ import { PostgreSQL, sql as sqlLanguage, type SQLNamespace } from '@codemirror/l
 import { Prec } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import CodeMirror from '@uiw/react-codemirror';
-import { History, Play } from 'lucide-react';
+import { ChevronDown, History, Play, Route } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { QueryResult } from '@shared/types';
-import { ApiError } from '@/api/client';
+import { api, ApiError } from '@/api/client';
+import { PlanView } from '@/components/app/plan/PlanView';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { autoExplainKey, draftKey as sqlDraftKey } from '@/lib/sql-draft';
 import { useRunQuery, useTables } from '@/api/hooks';
 import { DataGrid } from '@/components/app/DataGrid';
 import { ErrorAlert, Kbd, Spinner } from '@/components/app/feedback';
@@ -21,7 +25,7 @@ import { useTheme } from '@/lib/theme';
 const HISTORY_MAX = 30;
 
 export function SqlView({ db }: { db: string }) {
-  const draftKey = `pgdeck.sql.draft.${db}`;
+  const draftKey = sqlDraftKey(db);
   const historyKey = `pgdeck.sql.history.${db}`;
 
   const { resolved } = useTheme();
@@ -32,16 +36,31 @@ export function SqlView({ db }: { db: string }) {
   const [history, setHistory] = useState<string[]>(() => storage.getJson<string[]>(historyKey, []));
   // Where the last submitted text started in the editor, to map error positions back.
   const [lastRunFrom, setLastRunFrom] = useState(0);
+  // Which of the two actions produced what's shown below the editor.
+  const [output, setOutput] = useState<'run' | 'explain'>('run');
+  const explain = useMutation({ mutationFn: (v: { sql: string; analyze: boolean }) => api.explain(db, v.sql, v.analyze) });
 
   useEffect(() => storage.set(draftKey, sql), [draftKey, sql]);
 
-  const execute = () => {
+  /** The selection if there is one, else the whole editor. */
+  const currentText = () => {
     const view = viewRef.current;
     const sel = view?.state.selection.main;
     const useSelection = !!view && !!sel && !sel.empty;
-    const text = useSelection ? view.state.sliceDoc(sel.from, sel.to) : sql;
-    const from = useSelection ? sel.from : 0;
+    return { view, text: useSelection ? view.state.sliceDoc(sel.from, sel.to) : (view?.state.doc.toString() ?? sql), from: useSelection ? sel.from : 0 };
+  };
+
+  const runExplain = (analyze: boolean) => {
+    const { text } = currentText();
     if (!text.trim()) return;
+    setOutput('explain');
+    explain.mutate({ sql: text, analyze });
+  };
+
+  const execute = () => {
+    const { view, text, from } = currentText();
+    if (!text.trim()) return;
+    setOutput('run');
 
     setLastRunFrom(from);
     const nextHistory = [text, ...history.filter((h) => h !== text)].slice(0, HISTORY_MAX);
@@ -63,6 +82,16 @@ export function SqlView({ db }: { db: string }) {
   // The keymap is created once; route it through a ref so it sees fresh state.
   const executeRef = useRef(execute);
   executeRef.current = execute;
+  const explainRef = useRef(runExplain);
+  explainRef.current = runExplain;
+
+  // Arrived from "Explain" elsewhere (e.g. the slow queries list): explain once on open.
+  useEffect(() => {
+    if (storage.get(autoExplainKey(db)) !== '1') return;
+    storage.set(autoExplainKey(db), '');
+    const t = setTimeout(() => explainRef.current(false), 0);
+    return () => clearTimeout(t);
+  }, [db]);
 
   const schema = useMemo(() => {
     const ns: Record<string, Record<string, string[]>> = {};
@@ -73,7 +102,12 @@ export function SqlView({ db }: { db: string }) {
   const extensions = useMemo(
     () => [
       sqlLanguage({ dialect: PostgreSQL, schema, defaultSchema: 'public' }),
-      Prec.highest(keymap.of([{ key: 'Mod-Enter', run: () => (executeRef.current(), true) }])),
+      Prec.highest(
+        keymap.of([
+          { key: 'Mod-Enter', run: () => (executeRef.current(), true) },
+          { key: 'Mod-Shift-Enter', run: () => (explainRef.current(false), true) },
+        ]),
+      ),
       EditorView.lineWrapping,
     ],
     [schema],
@@ -105,6 +139,31 @@ export function SqlView({ db }: { db: string }) {
             {run.isPending ? <Spinner className="text-current" /> : <Play />}
             Run
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline" disabled={explain.isPending}>
+                {explain.isPending ? <Spinner /> : <Route />}
+                Explain
+                <ChevronDown className="size-3.5 opacity-60" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-72">
+              <DropdownMenuItem onSelect={() => runExplain(false)} className="items-start">
+                <div>
+                  <div className="flex items-center gap-2">
+                    Explain <span className="text-[11px] text-muted-foreground">⌘⇧Enter</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">The planner's estimate. Doesn't run the query.</p>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => runExplain(true)} className="items-start">
+                <div>
+                  Explain analyze
+                  <p className="text-xs text-muted-foreground">Runs the query for real timings, then rolls back, so writes are undone.</p>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
             <Kbd>⌘</Kbd>
             <Kbd>Enter</Kbd> runs the selection, or everything
@@ -128,7 +187,14 @@ export function SqlView({ db }: { db: string }) {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        {run.isError && (
+        {output === 'explain' && explain.isError && <ErrorAlert error={explain.error} title="Explain failed" className="m-4 w-auto md:mx-6" />}
+        {output === 'explain' && explain.isSuccess && <PlanView key={explain.submittedAt} result={explain.data} />}
+        {output === 'explain' && explain.isPending && (
+          <div className="flex flex-1 items-center justify-center gap-2 p-10 text-sm text-muted-foreground">
+            <Spinner /> {explain.variables?.analyze ? 'Running and timing the query…' : 'Planning…'}
+          </div>
+        )}
+        {output === 'run' && run.isError && (
           <ErrorAlert error={error} title="Query failed" className="m-4 w-auto md:mx-6">
             {errorAt && (
               <div className="mt-1 text-muted-foreground">
@@ -137,7 +203,8 @@ export function SqlView({ db }: { db: string }) {
             )}
           </ErrorAlert>
         )}
-        {run.isSuccess &&
+        {output === 'run' &&
+          run.isSuccess &&
           run.data.results.map((r, i) => (
             <ResultBlock
               key={i}
@@ -146,7 +213,7 @@ export function SqlView({ db }: { db: string }) {
               ms={i === run.data.results.length - 1 ? run.data.ms : undefined}
             />
           ))}
-        {(run.isIdle || run.isPending) && (
+        {output === 'run' && (run.isIdle || run.isPending) && (
           <div className="flex flex-1 items-center justify-center p-10 text-sm text-muted-foreground">
             {run.isPending ? (
               <span className="flex items-center gap-2">

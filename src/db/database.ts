@@ -9,6 +9,8 @@ import { exportRows, importRows, type ExportRequest, type ImportRequest } from '
 import { dumpSql, type DumpOptions } from './dump.js';
 import { restoreScript, type RestoreOptions } from './restore.js';
 import { alterTable, createTable, getCatalog } from './create-table.js';
+import { enableStatements, explainQuery, listStatements, resetStatements, signalSession } from './perf.js';
+import type { StatementSort } from '../shared/types.js';
 import type { AlterAction } from '../shared/alter.js';
 import type { NewTable } from '../shared/create-table.js';
 import { relationDdl, runMaintenance, runTableAction, type TableAction } from './table-actions.js';
@@ -43,6 +45,11 @@ export function createDatabase(config: DbConfig) {
     maintenance: (action: 'analyze' | 'vacuum', tables: { schema: string; table: string }[]) => runMaintenance(ctx, action, tables),
     createTable: (spec: NewTable) => createTable(ctx, spec),
     catalog: () => getCatalog(ctx),
+    explain: (sql: string, analyze: boolean) => explainQuery(ctx, sql, analyze),
+    statements: (sort: StatementSort, limit: number) => listStatements(ctx, sort, limit),
+    enableStatements: () => enableStatements(ctx),
+    resetStatements: () => resetStatements(ctx),
+    signalSession: (pid: number, terminate: boolean) => signalSession(ctx, pid, terminate),
     alter: (schema: string, table: string, a: AlterAction) => alterTable(ctx, schema, table, a),
     listDatabases: () => listDatabases(ctx),
     tables: () => listTables(ctx),

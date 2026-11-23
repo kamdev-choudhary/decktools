@@ -7,6 +7,7 @@ import { CenteredSpinner, ErrorAlert } from '@/components/app/feedback';
 import { DatabaseActionsMenu } from '@/components/app/DatabaseActions';
 import { CreateTableDialog } from '@/components/app/CreateTableDialog';
 import { ActiveSessions } from '@/components/app/overview/ActiveSessions';
+import { SlowQueries } from '@/components/app/overview/SlowQueries';
 import { HealthChecks } from '@/components/app/overview/HealthChecks';
 import { LiveChart } from '@/components/app/overview/LiveChart';
 import { StatTile } from '@/components/app/overview/StatTile';
@@ -206,7 +207,9 @@ export function OverviewView({ db }: { db: string }) {
           />
         </div>
 
-        <ActiveSessions activity={l?.activity ?? []} ready={!!l} />
+        <ActiveSessions db={db} readonly={info.data?.readonly ?? true} activity={l?.activity ?? []} ready={!!l} />
+
+        <SlowQueries db={db} readonly={info.data?.readonly ?? true} />
 
         {/* Storage + health */}
         {stats.isPending ? (

@@ -5,7 +5,7 @@ import { stream } from 'hono/streaming';
 import { EXPORT_META } from '../../shared/export.js';
 import type { Database, DatabaseManager } from '../../db/index.js';
 import { UserError } from '../../db/errors.js';
-import { alterBody, createDatabaseBody, createTableBody, databaseActionBody, deleteBody, dumpQuery, exportQuery, importQuery, insertBody, maintenanceBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
+import { alterBody, createDatabaseBody, explainBody, signalBody, statementsQuery, createTableBody, databaseActionBody, deleteBody, dumpQuery, exportQuery, importQuery, insertBody, maintenanceBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
 import { createGzip } from 'node:zlib';
 import yazl from 'yazl';
 
@@ -148,6 +148,20 @@ function databaseRoutes() {
     .post('/alter', async (c) => {
       const { schema, table, change } = parse(alterBody, await jsonBody(c.req));
       return c.json(await c.var.db.alter(schema, table, change));
+    })
+    .post('/explain', async (c) => {
+      const { sql, analyze } = parse(explainBody, await jsonBody(c.req));
+      return c.json(await c.var.db.explain(sql, analyze));
+    })
+    .get('/statements', async (c) => {
+      const { sort, limit } = parse(statementsQuery, c.req.query());
+      return c.json(await c.var.db.statements(sort, limit));
+    })
+    .post('/statements/enable', async (c) => c.json(await c.var.db.enableStatements()))
+    .post('/statements/reset', async (c) => c.json(await c.var.db.resetStatements()))
+    .post('/sessions/signal', async (c) => {
+      const { pid, terminate } = parse(signalBody, await jsonBody(c.req));
+      return c.json(await c.var.db.signalSession(pid, terminate));
     })
     .get('/catalog', async (c) => c.json(await c.var.db.catalog()))
     .post('/query', async (c) => {

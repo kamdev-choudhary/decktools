@@ -267,6 +267,15 @@ function annotate(err: unknown, line: number, sql: string): unknown {
 }
 
 /** Execute a psql-style SQL script (e.g. pg_dump --format=plain output) from a stream. */
+/** Split SQL into statements, honouring quotes, dollar-quotes and comments. */
+export function splitStatements(sql: string): string[] {
+  // The trailing newline closes a final line comment so its statement is kept.
+  return new ScriptScanner()
+    .push(`${sql}\n`, true)
+    .filter((e): e is Extract<typeof e, { type: 'stmt' }> => e.type === 'stmt')
+    .map((e) => e.sql);
+}
+
 export async function restoreScript(ctx: DbContext, body: Readable, opts: RestoreOptions): Promise<RestoreResponse> {
   if (ctx.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
 

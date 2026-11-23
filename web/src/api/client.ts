@@ -4,6 +4,9 @@ import type {
   DatabaseList,
   DbStats,
   DbInfo,
+  ExplainResponse,
+  StatementSort,
+  StatementsResponse,
   LoginRequest,
   MutationResponse,
   QueryResponse,
@@ -89,6 +92,12 @@ export const api = {
     request<{ ok: true; message: string; done: number; failed: { table: string; error: string }[] }>(db(database, 'maintenance'), { action, tables }),
   alter: (database: string, schema: string, table: string, change: AlterAction) =>
     request<{ ok: true; message: string }>(db(database, 'alter'), { schema, table, change }),
+  explain: (database: string, sql: string, analyze: boolean) => request<ExplainResponse>(db(database, 'explain'), { sql, analyze }),
+  statements: (database: string, sort: StatementSort) => request<StatementsResponse>(db(database, `statements?${new URLSearchParams({ sort })}`)),
+  enableStatements: (database: string) => request<{ ok: true; message: string }>(db(database, 'statements/enable'), {}),
+  resetStatements: (database: string) => request<{ ok: true; message: string }>(db(database, 'statements/reset'), {}),
+  signalSession: (database: string, pid: number, terminate: boolean) =>
+    request<{ ok: true; message: string }>(db(database, 'sessions/signal'), { pid, terminate }),
   catalog: (database: string) => request<{ schemas: string[]; types: { name: string; kind: string }[] }>(db(database, 'catalog')),
   ddl: (database: string, schema: string, table: string) =>
     request<{ sql: string }>(db(database, `ddl?${new URLSearchParams({ schema, table })}`)),

@@ -78,6 +78,15 @@ export const tableActionBody = z.object({
 
 const fkAction = z.enum(FK_ACTIONS);
 
+export const explainBody = z.object({ sql: z.string().min(1).max(1_000_000), analyze: z.boolean().default(false) });
+
+export const statementsQuery = z.object({
+  sort: z.enum(['total', 'mean', 'calls', 'rows']).default('total'),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+});
+
+export const signalBody = z.object({ pid: z.number().int().positive(), terminate: z.boolean().default(false) });
+
 /** POST /maintenance: ANALYZE / VACUUM many tables. */
 export const maintenanceBody = z.object({
   action: z.enum(['analyze', 'vacuum']),

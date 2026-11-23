@@ -30,6 +30,13 @@ watch live activity. Put it behind any reverse proxy to reach it remotely.
 - **SQL editor.** Syntax highlighting and table autocomplete, run the
   selection or everything (<kbd>⌘ Enter</kbd>), multiple statements, error
   position highlighting, per-database history.
+- **Query performance.** Explain any statement (<kbd>⌘ ⇧ Enter</kbd>) as a plan
+  tree with time per step, estimated vs. actual rows, the slowest step
+  highlighted and plain-language warnings (filters discarding rows, sorts
+  spilling to disk, bad row estimates). *Explain analyze* runs the query for
+  real timings inside a transaction that is always rolled back. The overview
+  lists the slowest queries from `pg_stat_statements` (with setup help if it's
+  off) and lets you cancel a running query or terminate a session.
 - **Import gigabytes.** Stream CSV, TSV or JSON Lines files (optionally gzipped)
   straight into Postgres with `COPY`. Nothing is buffered, so file size doesn't
   matter. Columns are matched by name, you choose append or replace, and it

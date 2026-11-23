@@ -312,3 +312,46 @@ export interface ApiErrorBody {
   position?: string;
   code?: string;
 }
+
+/* Query performance */
+
+/** One node of an EXPLAIN (FORMAT JSON) plan. Keys are Postgres' own. */
+export interface PlanNode {
+  'Node Type': string;
+  'Startup Cost'?: number;
+  'Total Cost'?: number;
+  'Plan Rows'?: number;
+  'Actual Total Time'?: number;
+  'Actual Rows'?: number;
+  'Actual Loops'?: number;
+  Plans?: PlanNode[];
+  [key: string]: unknown;
+}
+
+export interface ExplainResponse {
+  plan: { Plan: PlanNode; 'Planning Time'?: number; 'Execution Time'?: number; [key: string]: unknown };
+  analyzed: boolean;
+  /** Planned with GENERIC_PLAN because the query has $n parameters. */
+  generic: boolean;
+  ms: number;
+}
+
+export type StatementSort = 'total' | 'mean' | 'calls' | 'rows';
+
+export interface StatementStat {
+  id: string;
+  query: string;
+  calls: number;
+  totalMs: number;
+  meanMs: number;
+  rows: number;
+  cacheHitRatio: number | null;
+  tempWrittenBlocks: number;
+}
+
+export interface StatementsResponse {
+  /** not-preloaded: missing from shared_preload_libraries; not-created: needs CREATE EXTENSION. */
+  status: 'ok' | 'not-created' | 'not-preloaded' | 'unavailable';
+  statements: StatementStat[];
+  totalMs: number;
+}
