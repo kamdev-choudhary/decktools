@@ -4,7 +4,12 @@ import type {
   DatabaseList,
   DbStats,
   DbInfo,
+  AvailableExtension,
+  DbObjects,
   ExplainResponse,
+  ObjectAction,
+  ObjectDetail,
+  ObjectKind,
   SchemaGraph,
   StatementSort,
   StatementsResponse,
@@ -99,6 +104,10 @@ export const api = {
   resetStatements: (database: string) => request<{ ok: true; message: string }>(db(database, 'statements/reset'), {}),
   signalSession: (database: string, pid: number, terminate: boolean) =>
     request<{ ok: true; message: string }>(db(database, 'sessions/signal'), { pid, terminate }),
+  objects: (database: string) => request<DbObjects>(db(database, 'objects')),
+  object: (database: string, kind: ObjectKind, oid: number) => request<ObjectDetail>(db(database, `object?${new URLSearchParams({ kind, oid: String(oid) })}`)),
+  availableExtensions: (database: string) => request<AvailableExtension[]>(db(database, 'extensions/available')),
+  objectAction: (database: string, action: ObjectAction) => request<{ ok: true; message: string; oid?: number }>(db(database, 'object-action'), action),
   graph: (database: string) => request<SchemaGraph>(db(database, 'graph')),
   catalog: (database: string) => request<{ schemas: string[]; types: { name: string; kind: string }[] }>(db(database, 'catalog')),
   ddl: (database: string, schema: string, table: string) =>

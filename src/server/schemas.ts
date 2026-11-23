@@ -87,6 +87,21 @@ export const statementsQuery = z.object({
 
 export const signalBody = z.object({ pid: z.number().int().positive(), terminate: z.boolean().default(false) });
 
+export const objectQuery = z.object({
+  kind: z.enum(['function', 'trigger', 'sequence', 'extension']),
+  oid: z.coerce.number().int().positive(),
+});
+
+const oid = z.number().int().positive();
+export const objectActionBody = z.union([
+  z.object({ kind: z.literal('function'), oid, action: z.literal('replace'), sql: z.string().min(1).max(1_000_000) }),
+  z.object({ kind: z.enum(['function', 'trigger', 'sequence', 'extension']), oid, action: z.literal('drop'), cascade: z.boolean().default(false) }),
+  z.object({ kind: z.literal('trigger'), oid, action: z.enum(['enable', 'disable']) }),
+  z.object({ kind: z.literal('sequence'), oid, action: z.literal('restart'), value: z.string().min(1).max(40) }),
+  z.object({ kind: z.literal('extension'), oid, action: z.literal('update') }),
+  z.object({ kind: z.literal('extension'), action: z.literal('create'), name: z.string().min(1).max(63) }),
+]);
+
 /** POST /maintenance: ANALYZE / VACUUM many tables. */
 export const maintenanceBody = z.object({
   action: z.enum(['analyze', 'vacuum']),

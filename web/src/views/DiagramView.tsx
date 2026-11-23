@@ -15,10 +15,13 @@ import {
   useReactFlow,
   type Edge,
   type Node,
+  MarkerType,
+  type NodeChangeset,
   type NodeProps,
+  type XYPosition,
 } from '@xyflow/react';
 import { toPng, toSvg } from 'html-to-image';
-import { Download, ExternalLink, KeyRound, Link2, Maximize, Network, X } from 'lucide-react';
+import { Download, ExternalLink, KeyRound, Link2, Maximize, Network, RotateCcw, X } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/api/client';
@@ -30,17 +33,18 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { findHubs, HEADER_H, layoutDiagram, neighbourhood, ROW_H, tableId, type ColumnMode, type TableBox } from '@/lib/er-layout';
 import { diagramHref, navigate, tableHref } from '@/lib/router';
+import { storage } from '@/lib/storage';
 import { useTheme } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 
-type TableNodeData = { box: TableBox; state: 'normal' | 'active' | 'related' | 'dim'; db: string };
+type TableNodeData = { box: TableBox; state: 'normal' | 'active' | 'related' | 'dim'; db: string; hot: Set<string> };
 type TableNode = Node<TableNodeData, 'table'>;
 
 const compact = (n: number) => (n < 0 ? '' : n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1)}k` : String(Math.round(n)));
 
 /** One table: header plus its (key) columns, with a handle on each side of every column. */
 const TableCard = memo(function TableCard({ data }: NodeProps<TableNode>) {
-  const { box, state, db } = data;
+  const { box, state, db, hot } = data;
   const t = box.table;
   return (
     <div
@@ -74,12 +78,12 @@ const TableCard = memo(function TableCard({ data }: NodeProps<TableNode>) {
       </div>
       <div className="py-0.5">
         {box.columns.map((c) => (
-          <div key={c.name} className="relative flex items-center gap-1.5 px-3 text-xs" style={{ height: ROW_H }}>
+          <div key={c.name} className={cn('relative flex items-center gap-1.5 px-3 text-xs', hot.has(c.name) && 'bg-chart-data/12 text-foreground')} style={{ height: ROW_H }}>
             <Handle type="target" position={Position.Left} id={`t:${c.name}`} className="!size-1.5 !min-h-0 !min-w-0 !border-0 !bg-transparent" />
             <span className="flex w-3.5 shrink-0 justify-center">
               {c.pk ? <KeyRound className="size-3 text-warning" aria-label="Primary key" /> : c.fk ? <Link2 className="size-3 text-chart-data" aria-label="Foreign key" /> : null}
             </span>
-            <span className={cn('min-w-0 flex-1 truncate font-mono', c.pk && 'font-medium')}>{c.name}</span>
+            <span className={cn('min-w-0 flex-1 truncate font-mono', (c.pk || hot.has(c.name)) && 'font-medium', hot.has(c.name) && 'text-chart-data')}>{c.name}</span>
             <span className="max-w-[45%] shrink-0 truncate font-mono text-[10px] text-muted-foreground">
               {c.type}
             </span>
@@ -97,6 +101,7 @@ const TableCard = memo(function TableCard({ data }: NodeProps<TableNode>) {
 });
 
 const nodeTypes = { table: TableCard };
+const EMPTY = new Set<string>();
 
 export function DiagramView({ db, focus }: { db: string; focus: string | null }) {
   return (
@@ -115,6 +120,7 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
   const [depth, setDepth] = useState(1);
   const [selected, setSelected] = useState<string | null>(focus);
   const [showHubs, setShowHubs] = useState(false);
+  const [hoverEdge, setHoverEdge] = useState<string | null>(null);
 
   useEffect(() => setSelected(focus), [focus]);
 
@@ -132,13 +138,34 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
     return new Set(g.tables.filter((t) => schema === '*' || t.schema === schema).map((t) => tableId(t.schema, t.name)));
   }, [g, focus, depth, schema, allIds, globalHubs]);
 
-  // Links to hubs are hidden unless asked for, or the hub itself is focused or selected.
+  // Links to hubs are left out of the layout unless asked for (or the hub is the focus).
+  // Selecting a hub draws its links on top without moving anything.
   const hubs = useMemo(() => (g ? findHubs(g, visible) : new Map<string, number>()), [g, visible]);
-  const hidden = useMemo(
-    () => (showHubs ? new Set<string>() : new Set([...hubs.keys()].filter((h) => h !== focus && h !== selected))),
-    [showHubs, hubs, focus, selected],
-  );
+  const hidden = useMemo(() => (showHubs ? new Set<string>() : new Set([...hubs.keys()].filter((h) => h !== focus))), [showHubs, hubs, focus]);
   const laid = useMemo(() => (g ? layoutDiagram(g, visible, columnMode, hidden) : null), [g, visible, columnMode, hidden]);
+
+  // Cards the user dragged, remembered per database and view so a refresh keeps the arrangement.
+  const posKey = `pgdeck.diagram.${db}.${focus ? `focus:${focus}:${depth}` : `schema:${schema}`}.${columnMode}.${showHubs ? 'hubs' : 'nohubs'}`;
+  const [moved, setMoved] = useState<Record<string, XYPosition>>({});
+  useEffect(() => setMoved(storage.getJson<Record<string, XYPosition>>(posKey, {})), [posKey]);
+  const saveMoved = useCallback(
+    (next: Record<string, XYPosition>) => {
+      setMoved(next);
+      if (Object.keys(next).length) storage.setJson(posKey, next);
+      else storage.set(posKey, '{}');
+    },
+    [posKey],
+  );
+  const onNodesChange = useCallback(
+    (changes: NodeChangeset<TableNode>) => {
+      let next: Record<string, XYPosition> | null = null;
+      for (const c of changes.getByType('position')) {
+        if (c.position) (next ??= { ...moved })[c.id] = c.position;
+      }
+      if (next) saveMoved(next);
+    },
+    [moved, saveMoved],
+  );
 
   // Highlight the selected table and its direct neighbours.
   const related = useMemo(() => {
@@ -148,51 +175,103 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
       if (l.source === selected) s.add(l.target);
       if (l.target === selected) s.add(l.source);
     }
+    for (const f of g?.foreignKeys ?? []) {
+      const child = tableId(f.schema, f.table);
+      const parent = tableId(f.refSchema, f.refTable);
+      if (parent === selected) s.add(child);
+      if (child === selected) s.add(parent);
+    }
     return s;
-  }, [selected, laid]);
+  }, [selected, laid, g]);
+
+  // Every link that will be drawn, plus a selected hub's links on top of the layout.
+  const drawn = useMemo(() => {
+    if (!laid || !g) return [];
+    const links = [...laid.links];
+    if (selected && hidden.has(selected)) {
+      for (const f of g.foreignKeys) {
+        const child = tableId(f.schema, f.table);
+        if (tableId(f.refSchema, f.refTable) !== selected || child === selected || !visible.has(child)) continue;
+        links.push({ id: `${child}:${f.name}`, fk: f, source: selected, sourceColumn: f.refColumns[0]!, target: child, targetColumn: f.columns[0]! });
+      }
+    }
+    return links;
+  }, [laid, g, selected, hidden, visible]);
+
+  const isHot = useCallback((l: { id: string; source: string; target: string }) => l.id === hoverEdge || (!!selected && (l.source === selected || l.target === selected)), [hoverEdge, selected]);
+
+  // Columns at either end of highlighted links, per table.
+  const hot = useMemo(() => {
+    const m = new Map<string, Set<string>>();
+    const add = (id: string, cols: string[]) => {
+      const set = m.get(id) ?? m.set(id, new Set()).get(id)!;
+      for (const c of cols) set.add(c);
+    };
+    for (const l of drawn) {
+      if (!isHot(l)) continue;
+      add(l.source, l.fk.refColumns);
+      add(l.target, l.fk.columns);
+    }
+    return m;
+  }, [drawn, isHot]);
 
   const nodes = useMemo<TableNode[]>(
     () =>
       laid?.boxes.map((b) => ({
         id: b.id,
         type: 'table',
-        position: { x: b.x, y: b.y },
+        position: moved[b.id] ?? { x: b.x, y: b.y },
         width: b.width,
         height: b.height,
         data: {
           box: b,
           db,
+          hot: hot.get(b.id) ?? EMPTY,
           state: !selected ? 'normal' : b.id === selected ? 'active' : related.has(b.id) ? 'related' : 'dim',
         },
       })) ?? [],
-    [laid, selected, related, db],
+    [laid, selected, related, db, moved, hot],
   );
 
+  const accent = resolved === 'dark' ? '#3291ff' : '#0070f3';
+  const quiet = resolved === 'dark' ? '#525252' : '#b4b4b4';
   const edges = useMemo<Edge[]>(
     () =>
-      laid?.links.map((l) => {
-        const on = !!selected && (l.source === selected || l.target === selected);
+      drawn.map((l) => {
+        const on = isHot(l);
+        const dim = (!!selected || !!hoverEdge) && !on;
+        const color = on ? accent : quiet;
         return {
           id: l.id,
           source: l.source,
           target: l.target,
           sourceHandle: `s:${l.sourceColumn}`,
           targetHandle: `t:${l.targetColumn}`,
-          type: 'smoothstep',
+          // Curves keep each link distinct; right-angle routing merges them into shared trunks.
+          type: 'default',
           zIndex: on ? 10 : 0,
-          style: { stroke: on ? 'var(--chart-data)' : 'var(--diagram-edge)', strokeWidth: on ? 2 : 1.25, opacity: selected && !on ? 0.2 : 1 },
-          ariaLabel: `${l.fk.schema}.${l.fk.table}(${l.fk.columns.join(', ')}) references ${l.fk.refSchema}.${l.fk.refTable}(${l.fk.refColumns.join(', ')})`,
+          interactionWidth: 14,
+          // The arrow points at the referenced table.
+          markerStart: { type: MarkerType.ArrowClosed, width: 16, height: 16, color },
+          style: { stroke: color, strokeWidth: on ? 2 : 1.25, opacity: dim ? 0.15 : 1 },
+          label:
+            l.id === hoverEdge
+              ? `${l.fk.table}.${l.fk.columns.join(', ')} → ${l.fk.refTable}.${l.fk.refColumns.join(', ')}`
+              : undefined,
+          labelStyle: { fontFamily: 'var(--font-mono)', fontSize: 11, fill: 'var(--foreground)' },
+          labelBgStyle: { fill: 'var(--background)', stroke: 'var(--border)' },
+          labelBgPadding: [6, 3] as [number, number],
+          labelBgBorderRadius: 4,
         };
-      }) ?? [],
-    [laid, selected],
+      }),
+    [drawn, isHot, selected, hoverEdge, accent, quiet],
   );
 
   // Re-fit when the set of tables changes; centre on the focused table when there is one.
   useEffect(() => {
     if (!nodes.length) return;
     const t = setTimeout(() => {
-      if (focus && nodes.some((n) => n.id === focus) && nodes.length > 12) void flow.fitView({ nodes: [{ id: focus }], maxZoom: 1, duration: 300 });
-      else void flow.fitView({ padding: 0.08, duration: 300 });
+      void flow.fitView({ padding: 0.08, maxZoom: 1, duration: 300 });
     }, 30);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -241,6 +320,8 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
         forceColorMode={resolved}
         minZoom={0.05}
         maxZoom={2}
+        onNodesChange={onNodesChange}
+        nodesDraggable
         nodesConnectable={false}
         edgesFocusable={false}
         elementsSelectable
@@ -252,6 +333,8 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
           navigate(tableHref(db, t.schema, t.name));
         }}
         onPaneClick={() => setSelected(focus)}
+        onEdgeMouseEnter={(_, e) => setHoverEdge(e.id)}
+        onEdgeMouseLeave={() => setHoverEdge(null)}
       >
         <Background variant={BackgroundVariant.Dots} gap={22} size={1} />
         <Controls showInteractive={false} position="bottom-left" />
@@ -314,6 +397,11 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
               </button>
             ))}
           </div>
+          {Object.keys(moved).length > 0 && (
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => saveMoved({})} title="Put every table back where the automatic layout placed it">
+              <RotateCcw /> Reset layout
+            </Button>
+          )}
           <Button variant="outline" size="icon-sm" className="size-8" aria-label="Fit to screen" title="Fit to screen" onClick={() => void flow.fitView({ padding: 0.08, duration: 300 })}>
             <Maximize />
           </Button>
@@ -328,6 +416,23 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
               <DropdownMenuItem onSelect={() => void exportImage('svg')}>SVG (vector)</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+        </Panel>
+
+        <Panel position="bottom-center" className="!mb-3 hidden items-center gap-4 rounded-lg border bg-background/95 px-3 py-1.5 text-[11px] whitespace-nowrap text-muted-foreground backdrop-blur xl:flex">
+          <span className="flex items-center gap-1.5">
+            <KeyRound className="size-3 text-warning" /> primary key
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Link2 className="size-3 text-chart-data" /> foreign key
+          </span>
+          <span className="flex items-center gap-1.5">
+            <svg viewBox="0 0 24 8" className="h-2 w-6" aria-hidden="true">
+              <path d="M6 4h18" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M0 4l7-4v8z" fill="currentColor" />
+            </svg>
+            referenced table
+          </span>
+          <span>Click a table to trace its links. Drag to move, double-click to open.</span>
         </Panel>
 
         <Panel position="top-right" className="!m-3 hidden max-w-sm flex-col items-end gap-1.5 lg:flex">

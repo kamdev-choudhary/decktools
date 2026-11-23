@@ -10,6 +10,8 @@ import { dumpSql, type DumpOptions } from './dump.js';
 import { restoreScript, type RestoreOptions } from './restore.js';
 import { alterTable, createTable, getCatalog } from './create-table.js';
 import { getSchemaGraph } from './graph.js';
+import { availableExtensions, getObject, listObjects, runObjectAction } from './objects.js';
+import type { ObjectAction, ObjectKind } from '../shared/types.js';
 import { enableStatements, explainQuery, listStatements, resetStatements, signalSession } from './perf.js';
 import type { StatementSort } from '../shared/types.js';
 import type { AlterAction } from '../shared/alter.js';
@@ -48,6 +50,10 @@ export function createDatabase(config: DbConfig) {
     catalog: () => getCatalog(ctx),
     /** Tables, columns and foreign keys for the ER diagram. */
     graph: () => getSchemaGraph(ctx),
+    objects: () => listObjects(ctx),
+    object: (kind: ObjectKind, oid: number) => getObject(ctx, kind, oid),
+    availableExtensions: () => availableExtensions(ctx),
+    objectAction: (a: ObjectAction) => runObjectAction(ctx, a),
     explain: (sql: string, analyze: boolean) => explainQuery(ctx, sql, analyze),
     statements: (sort: StatementSort, limit: number) => listStatements(ctx, sort, limit),
     enableStatements: () => enableStatements(ctx),

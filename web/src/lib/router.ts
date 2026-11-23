@@ -1,4 +1,7 @@
 import { useMemo, useSyncExternalStore } from 'react';
+import type { ObjectKind } from '@shared/types';
+
+const OBJECT_KINDS: ObjectKind[] = ['function', 'trigger', 'sequence', 'extension'];
 
 /**
  * Hash routes keep the UI path-independent (works under any proxy prefix) and
@@ -10,6 +13,7 @@ import { useMemo, useSyncExternalStore } from 'react';
  *   #/<db>/import              → import data from files
  *   #/<db>/export              → export tables / back up the database
  *   #/<db>/diagram?focus=s.t   → ER diagram, optionally centred on one table
+ *   #/<db>/obj/<kind>/<oid>    → function / trigger / sequence / extension
  *   #/<db>/t/<schema>/<table>  → table
  *   …/<table>?col=value        → table pre-filtered with col = value (used by FK links)
  */
@@ -20,6 +24,7 @@ export type Route =
   | { view: 'import'; db: string }
   | { view: 'export'; db: string }
   | { view: 'diagram'; db: string; focus: string | null }
+  | { view: 'object'; db: string; kind: ObjectKind; oid: number }
   | { view: 'table'; db: string; schema: string; table: string; eq: Record<string, string> };
 
 function decode(s: string): string {
@@ -40,6 +45,9 @@ export function parseRoute(hash: string): Route {
   if (section === 'sql') return { view: 'sql', db };
   if (section === 'import') return { view: 'import', db };
   if (section === 'export') return { view: 'export', db };
+  if (section === 'obj' && OBJECT_KINDS.includes(schema as ObjectKind) && /^\d+$/.test(table ?? '')) {
+    return { view: 'object', db, kind: schema as ObjectKind, oid: Number(table) };
+  }
   if (section === 'diagram') return { view: 'diagram', db, focus: new URLSearchParams(query).get('focus') };
   if (section === 't' && schema && table) {
     return { view: 'table', db, schema, table, eq: Object.fromEntries(new URLSearchParams(query)) };
@@ -52,6 +60,7 @@ export const dbHref = (db: string) => `#/${enc(db)}`;
 export const sqlHref = (db: string) => `#/${enc(db)}/sql`;
 export const importHref = (db: string) => `#/${enc(db)}/import`;
 export const exportHref = (db: string) => `#/${enc(db)}/export`;
+export const objectHref = (db: string, kind: ObjectKind, oid: number) => `#/${enc(db)}/obj/${kind}/${oid}`;
 export const diagramHref = (db: string, focus?: string | null) => `#/${enc(db)}/diagram${focus ? `?${new URLSearchParams({ focus })}` : ''}`;
 export const tableHref = (db: string, schema: string, table: string, eq?: Record<string, string>) => {
   const qs = eq && Object.keys(eq).length ? `?${new URLSearchParams(eq)}` : '';

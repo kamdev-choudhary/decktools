@@ -5,7 +5,7 @@ import { stream } from 'hono/streaming';
 import { EXPORT_META } from '../../shared/export.js';
 import type { Database, DatabaseManager } from '../../db/index.js';
 import { UserError } from '../../db/errors.js';
-import { alterBody, createDatabaseBody, explainBody, signalBody, statementsQuery, createTableBody, databaseActionBody, deleteBody, dumpQuery, exportQuery, importQuery, insertBody, maintenanceBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
+import { alterBody, createDatabaseBody, objectActionBody, objectQuery, explainBody, signalBody, statementsQuery, createTableBody, databaseActionBody, deleteBody, dumpQuery, exportQuery, importQuery, insertBody, maintenanceBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
 import { createGzip } from 'node:zlib';
 import yazl from 'yazl';
 
@@ -163,6 +163,13 @@ function databaseRoutes() {
       const { pid, terminate } = parse(signalBody, await jsonBody(c.req));
       return c.json(await c.var.db.signalSession(pid, terminate));
     })
+    .get('/objects', async (c) => c.json(await c.var.db.objects()))
+    .get('/object', async (c) => {
+      const { kind, oid } = parse(objectQuery, c.req.query());
+      return c.json(await c.var.db.object(kind, oid));
+    })
+    .get('/extensions/available', async (c) => c.json(await c.var.db.availableExtensions()))
+    .post('/object-action', async (c) => c.json(await c.var.db.objectAction(parse(objectActionBody, await jsonBody(c.req)) as never)))
     .get('/graph', async (c) => c.json(await c.var.db.graph()))
     .get('/catalog', async (c) => c.json(await c.var.db.catalog()))
     .post('/query', async (c) => {

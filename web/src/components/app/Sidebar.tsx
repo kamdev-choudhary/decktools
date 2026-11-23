@@ -5,6 +5,7 @@ import { useInfo, useTables } from '@/api/hooks';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CreateTableDialog } from './CreateTableDialog';
+import { ObjectsNav } from './ObjectsNav';
 import { Input } from '@/components/ui/input';
 import { dbHref, diagramHref, exportHref, importHref, sqlHref, tableHref, type Route } from '@/lib/router';
 import { cn } from '@/lib/utils';
@@ -172,6 +173,7 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
               </div>
             );
           })}
+          {tables.isSuccess && <ObjectsNav db={db} filter={filter} route={route} />}
         </nav>
       </div>
     </div>

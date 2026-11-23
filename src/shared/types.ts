@@ -391,3 +391,84 @@ export interface SchemaGraph {
   tables: GraphTable[];
   foreignKeys: GraphForeignKey[];
 }
+
+/* Functions, triggers, sequences, extensions */
+
+export type ObjectKind = 'function' | 'trigger' | 'sequence' | 'extension';
+
+export interface FunctionRef {
+  oid: number;
+  schema: string;
+  name: string;
+  args: string;
+  /** f function, p procedure, a aggregate, w window */
+  kind: string;
+  returns: string | null;
+  language: string;
+}
+export interface TriggerRef {
+  oid: number;
+  schema: string;
+  table: string;
+  name: string;
+  enabled: boolean;
+  function: string;
+}
+export interface SequenceRef {
+  oid: number;
+  schema: string;
+  name: string;
+  /** table.column the sequence belongs to (serial / identity), if any */
+  ownedBy: string | null;
+  lastValue: string | null;
+}
+export interface ExtensionRef {
+  oid: number;
+  name: string;
+  version: string;
+  schema: string;
+  defaultVersion: string | null;
+  comment: string | null;
+}
+export interface DbObjects {
+  functions: FunctionRef[];
+  triggers: TriggerRef[];
+  sequences: SequenceRef[];
+  extensions: ExtensionRef[];
+}
+export interface AvailableExtension {
+  name: string;
+  defaultVersion: string;
+  comment: string | null;
+}
+
+/** Everything the object page shows: a definition plus labelled properties. */
+export interface ObjectDetail {
+  kind: ObjectKind;
+  oid: number;
+  name: string;
+  schema: string | null;
+  /** Display title, e.g. "calc_total(integer, text)". */
+  title: string;
+  definition: string;
+  /** Whether `definition` can be edited and re-run as-is (CREATE OR REPLACE). */
+  editable: boolean;
+  properties: [string, string][];
+  /** Trigger: its function, so it can be viewed and edited in place. */
+  triggerFunction?: { oid: number; title: string; definition: string } | null;
+  /** Sequence: settings for the "set next value" dialog. */
+  sequence?: { lastValue: string | null; increment: string; min: string; max: string };
+  /** Extension: newer version available. */
+  update?: string | null;
+}
+
+export type ObjectAction =
+  | { kind: 'function'; oid: number; action: 'replace'; sql: string }
+  | { kind: 'function'; oid: number; action: 'drop'; cascade: boolean }
+  | { kind: 'trigger'; oid: number; action: 'enable' | 'disable' }
+  | { kind: 'trigger'; oid: number; action: 'drop'; cascade: boolean }
+  | { kind: 'sequence'; oid: number; action: 'restart'; value: string }
+  | { kind: 'sequence'; oid: number; action: 'drop'; cascade: boolean }
+  | { kind: 'extension'; oid: number; action: 'update' }
+  | { kind: 'extension'; oid: number; action: 'drop'; cascade: boolean }
+  | { kind: 'extension'; action: 'create'; name: string };

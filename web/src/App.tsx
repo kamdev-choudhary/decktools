@@ -16,6 +16,8 @@ import { ImportView } from '@/views/ImportView';
 import { SqlView } from '@/views/SqlView';
 import { TableView } from '@/views/TableView';
 
+import { ObjectView } from './views/ObjectView';
+
 // The diagram pulls in React Flow and dagre; load them only when it's opened.
 const DiagramView = lazy(() => import('./views/DiagramView').then((m) => ({ default: m.DiagramView })));
 
@@ -74,7 +76,7 @@ function Shell({ db, session }: { db: string; session: SessionInfo }) {
   useEffect(() => setSidebarOpen(false), [route]);
 
   useEffect(() => {
-    const where = route.view === 'table' ? route.table : route.view === 'sql' ? 'SQL' : route.view === 'import' ? 'Import' : route.view === 'export' ? 'Export' : route.view === 'diagram' ? 'ER diagram' : db;
+    const where = route.view === 'table' ? route.table : route.view === 'sql' ? 'SQL' : route.view === 'import' ? 'Import' : route.view === 'export' ? 'Export' : route.view === 'diagram' ? 'ER diagram' : route.view === 'object' ? route.kind : db;
     document.title = `${where} · pgdeck`;
   }, [route, db]);
 
@@ -82,6 +84,7 @@ function Shell({ db, session }: { db: string; session: SessionInfo }) {
   if (route.view === 'sql') content = <SqlView db={db} />;
   else if (route.view === 'import') content = <ImportView db={db} />;
   else if (route.view === 'export') content = <ExportView db={db} />;
+  else if (route.view === 'object') content = <ObjectView key={`${route.kind}:${route.oid}`} db={db} kind={route.kind} oid={route.oid} readonly={info.data?.readonly ?? false} />;
   else if (route.view === 'diagram')
     content = (
       <Suspense fallback={<CenteredSpinner label="Loading diagram…" />}>
