@@ -6,7 +6,7 @@ const shared = {
   background: 'transparent',
   gutterBackground: 'transparent',
   gutterBorder: 'transparent',
-  fontFamily: "'Geist Mono Variable', ui-monospace, Menlo, monospace",
+  fontFamily: 'var(--font-mono)',
 };
 
 export const sqlThemeDark = createTheme({

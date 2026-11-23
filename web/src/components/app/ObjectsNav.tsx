@@ -92,7 +92,7 @@ export function ObjectsNav({ db, filter, route }: { db: string; filter: string; 
                     href={objectHref(db, kind, i.oid)}
                     aria-current={activeOid === i.oid ? 'page' : undefined}
                     className={cn(
-                      'flex h-8 min-w-0 items-center gap-2 rounded-md pr-2 pl-6 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
+                      'flex h-8 min-w-0 items-center gap-2 rounded-md pr-2 pl-6 text-[13px] text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground',
                       activeOid === i.oid && 'bg-sidebar-accent font-medium text-foreground',
                       i.muted && 'opacity-60',
                     )}

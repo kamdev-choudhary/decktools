@@ -6,6 +6,7 @@ import { isUnauthorized } from '@/api/client';
 import { keys } from '@/api/hooks';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { applyFonts, readFonts } from '@/lib/fonts';
 import { ThemeProvider } from '@/lib/theme';
 import { App } from './App';
 import './styles.css';
@@ -23,6 +24,9 @@ const queryClient = new QueryClient({
     queries: { retry: false, refetchOnWindowFocus: false, staleTime: 30_000 },
   },
 });
+
+// Apply the saved fonts before the first paint.
+applyFonts(readFonts());
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

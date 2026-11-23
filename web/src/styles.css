@@ -2,6 +2,11 @@
 @import 'tw-animate-css';
 @import '@fontsource-variable/geist';
 @import '@fontsource-variable/geist-mono';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -23,7 +28,7 @@
   --secondary: #f2f2f2;
   --secondary-foreground: #171717;
   --muted: #f2f2f2;
-  --muted-foreground: #666666;
+  --muted-foreground: #565656;
   --accent: #ebebeb;
   --accent-foreground: #171717;
   --destructive: #e5484d;
@@ -59,7 +64,7 @@
   --secondary: #1a1a1a;
   --secondary-foreground: #ededed;
   --muted: #1a1a1a;
-  --muted-foreground: #a1a1a1;
+  --muted-foreground: #b2b2b2;
   --accent: #1f1f1f;
   --accent-foreground: #ededed;
   --destructive: #e5484d;
@@ -84,8 +89,9 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* Set at runtime from the account menu (lib/fonts.ts); these are the defaults. */
+  --font-sans: var(--app-sans, 'Inter Variable', ui-sans-serif, system-ui, sans-serif);
+  --font-mono: var(--app-mono, 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -134,7 +140,8 @@
     @apply h-full;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    /* No `antialiased`: on macOS it drops the stroke thickening and makes small text look faint. */
+    @apply bg-background text-foreground font-sans;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
   ::selection {
@@ -247,4 +254,21 @@
 }
 .pgdeck-flow .react-flow__node-table {
   cursor: pointer;
+}
+
+/* Typography details for the chosen fonts. */
+@layer base {
+  /* Inter: open 4, 6 and 9, easier to tell apart in tables of numbers. */
+  :root[data-font-sans='inter'] body {
+    font-feature-settings: 'rlig' 1, 'calt' 1, 'cv02' 1, 'cv03' 1, 'cv04' 1;
+  }
+  /* No code ligatures: in SQL and data, != must stay != rather than become ≠. */
+  .font-mono,
+  code,
+  pre,
+  kbd,
+  .cm-editor {
+    font-variant-ligatures: none;
+    font-feature-settings: 'liga' 0, 'calt' 0;
+  }
 }

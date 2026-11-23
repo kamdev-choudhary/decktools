@@ -21,7 +21,7 @@ function NavLink({ href, active, icon: Icon, children }: { href: string; active:
       href={href}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'flex h-8 items-center gap-2 rounded-md px-2 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
+        'flex h-8 items-center gap-2 rounded-md px-2 text-[13px] text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground',
         active && 'bg-sidebar-accent font-medium text-foreground',
       )}
     >
@@ -141,7 +141,7 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
                         <div
                           key={t.name}
                           className={cn(
-                            'group/item flex h-8 min-w-0 items-center rounded-md pr-1 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
+                            'group/item flex h-8 min-w-0 items-center rounded-md pr-1 text-[13px] text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground',
                             isActive && 'bg-sidebar-accent font-medium text-foreground',
                           )}
                         >

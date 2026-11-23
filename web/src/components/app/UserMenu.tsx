@@ -1,4 +1,4 @@
-import { LogOut } from 'lucide-react';
+import { LogOut, Type } from 'lucide-react';
 import { toast } from 'sonner';
 import type { DbInfo, SessionInfo } from '@shared/types';
 import { useLogout } from '@/api/hooks';
@@ -8,15 +8,22 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { MONO_FONTS, SANS_FONTS, useFonts, type MonoFont, type SansFont } from '@/lib/fonts';
 import { errorMessage } from './feedback';
 import { ThemeSwitcher } from './ThemeSwitcher';
 
 export function UserMenu({ session, info }: { session: SessionInfo; info?: DbInfo }) {
   const logout = useLogout();
   const name = session.username ?? info?.user ?? 'local';
+  const fonts = useFonts();
 
   return (
     <DropdownMenu>
@@ -42,6 +49,38 @@ export function UserMenu({ session, info }: { session: SessionInfo; info?: DbInf
           Theme
           <ThemeSwitcher />
         </div>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Type /> Interface font
+            <span className="ml-auto pl-3 text-xs text-muted-foreground">{SANS_FONTS.find((f) => f.id === fonts.sans)?.label}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-52">
+            <DropdownMenuRadioGroup value={fonts.sans} onValueChange={(v) => fonts.setSans(v as SansFont)}>
+              {SANS_FONTS.map((f) => (
+                <DropdownMenuRadioItem key={f.id} value={f.id} onSelect={(e) => e.preventDefault()} style={{ fontFamily: f.stack }}>
+                  {f.label}
+                  <span className="ml-auto text-xs text-muted-foreground tabular-nums">Ag 0469</span>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Type /> Code font
+            <span className="ml-auto pl-3 text-xs text-muted-foreground">{MONO_FONTS.find((f) => f.id === fonts.mono)?.label}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-56">
+            <DropdownMenuRadioGroup value={fonts.mono} onValueChange={(v) => fonts.setMono(v as MonoFont)}>
+              {MONO_FONTS.map((f) => (
+                <DropdownMenuRadioItem key={f.id} value={f.id} onSelect={(e) => e.preventDefault()} style={{ fontFamily: f.stack }}>
+                  {f.label}
+                  <span className="ml-auto text-xs text-muted-foreground">0O1lI !=</span>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         {session.authRequired && (
           <>
             <DropdownMenuSeparator />
