@@ -25,6 +25,6 @@ export default defineConfig({
     port: 47616,
     strictPort: true,
     // `pnpm dev` starts the API on its default port 47615 with --no-auth.
-    proxy: { '/api': 'http://127.0.0.1:47615' },
+    proxy: { '/api': { target: 'http://127.0.0.1:47615', ws: true } },
   },
 });

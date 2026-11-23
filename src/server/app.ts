@@ -41,7 +41,7 @@ export function createApp({ manager, auth, basePath, webRoot }: AppOptions) {
   app.all(OUTSIDE_BASE, (c) => c.json({ error: 'Not found' }, 404));
   app.get('/healthz', (c) => c.json({ ok: true }));
 
-  const { routes: authRoutes, requireSession } = createAuth(auth);
+  const { routes: authRoutes, requireSession, authorizeCookieHeader } = createAuth(auth);
 
   // The UI itself is public (it's just the login screen until signed in);
   // everything under /api except the auth endpoints needs a session.
@@ -53,5 +53,5 @@ export function createApp({ manager, auth, basePath, webRoot }: AppOptions) {
 
   app.get('*', serveAssets(loadAssets(webRoot)));
 
-  return app;
+  return { app, authorizeCookieHeader };
 }

@@ -84,7 +84,7 @@ async function run(connection: string | undefined, opts: CliOptions): Promise<vo
     if (stopping) process.exit(1);
     stopping = true;
     console.log(pc.dim('\n  Shutting down...'));
-    started.server.close();
+    started.close();
     await manager.closeAll();
     process.exit(0);
   };
