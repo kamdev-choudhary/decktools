@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import { Combobox, type ComboOption } from './Combobox';
 import { errorMessage, Spinner } from './feedback';
 
-const COMMON_TYPES: ComboOption[] = [
+export const COMMON_TYPES: ComboOption[] = [
   { value: 'text', hint: 'string' },
   { value: 'varchar(255)', hint: 'string, max length' },
   { value: 'integer', hint: '4-byte int' },
@@ -42,7 +42,7 @@ const COMMON_TYPES: ComboOption[] = [
 ];
 
 /** Default expressions worth suggesting for a type. */
-function defaultSuggestions(type: string): string[] {
+export function defaultSuggestions(type: string): string[] {
   const t = type.toLowerCase();
   if (t.startsWith('timestamp')) return ['now()', 'CURRENT_TIMESTAMP'];
   if (t === 'date') return ['CURRENT_DATE'];
@@ -66,7 +66,7 @@ const starter = (): Col[] => [
   col({ name: 'created_at', type: 'timestamptz', nullable: false, default: 'now()' }),
 ];
 
-function Flag({ on, onToggle, title, disabled, children }: { on: boolean; onToggle: () => void; title: string; disabled?: boolean; children: React.ReactNode }) {
+export function Flag({ on, onToggle, title, disabled, children }: { on: boolean; onToggle: () => void; title: string; disabled?: boolean; children: React.ReactNode }) {
   return (
     <button
       type="button"
@@ -355,7 +355,7 @@ export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { d
   );
 }
 
-function ReferencePicker({
+export function ReferencePicker({
   db,
   value,
   onChange,

@@ -1,6 +1,7 @@
 import type { DbContext } from './client.js';
 import { UserError } from './errors.js';
 import { createTableSql, validateTable, type NewTable } from '../shared/create-table.js';
+import { alterSql, runsOutsideTransaction, validateAlter, type AlterAction } from '../shared/alter.js';
 
 export async function createTable(ctx: DbContext, spec: NewTable): Promise<{ ok: true; message: string }> {
   if (ctx.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
@@ -38,3 +39,38 @@ export async function getCatalog(ctx: DbContext): Promise<{ schemas: string[]; t
   ]);
   return { schemas: schemas.rows.map((r) => r.name), types: types.rows };
 }
+
+/** Apply one Structure-tab change (columns, indexes, constraints). */
+export async function alterTable(ctx: DbContext, schema: string, table: string, a: AlterAction): Promise<{ ok: true; message: string }> {
+  if (ctx.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
+  const errors = validateAlter(a);
+  if (errors.length) throw new UserError(errors.join(' '));
+  const statements = alterSql(schema, table, a);
+  if (!statements.length) return { ok: true, message: 'Nothing to change' };
+
+  if (runsOutsideTransaction(a)) {
+    for (const s of statements) await ctx.pool.query(s);
+  } else {
+    const client = await ctx.pool.connect();
+    try {
+      await client.query('begin');
+      for (const s of statements) await client.query(s);
+      await client.query('commit');
+    } catch (e) {
+      await client.query('rollback').catch(() => {});
+      throw e;
+    } finally {
+      client.release();
+    }
+  }
+  return { ok: true, message: ALTER_DONE[a.action] };
+}
+
+const ALTER_DONE: Record<AlterAction['action'], string> = {
+  addColumn: 'Column added',
+  alterColumn: 'Column updated',
+  dropColumn: 'Column dropped',
+  createIndex: 'Index created',
+  dropIndex: 'Index dropped',
+  dropConstraint: 'Constraint dropped',
+};

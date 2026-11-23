@@ -16,6 +16,7 @@ import type {
   TableRef,
 } from '@shared/types';
 import type { NewTable } from '@shared/create-table';
+import type { AlterAction } from '@shared/alter';
 
 /**
  * API calls are resolved against the page's own directory, so the UI works
@@ -86,6 +87,8 @@ export const api = {
   createTable: (database: string, spec: NewTable) => request<{ ok: true; message: string }>(db(database, 'create-table'), spec),
   maintenance: (database: string, action: 'analyze' | 'vacuum', tables: { schema: string; table: string }[]) =>
     request<{ ok: true; message: string; done: number; failed: { table: string; error: string }[] }>(db(database, 'maintenance'), { action, tables }),
+  alter: (database: string, schema: string, table: string, change: AlterAction) =>
+    request<{ ok: true; message: string }>(db(database, 'alter'), { schema, table, change }),
   catalog: (database: string) => request<{ schemas: string[]; types: { name: string; kind: string }[] }>(db(database, 'catalog')),
   ddl: (database: string, schema: string, table: string) =>
     request<{ sql: string }>(db(database, `ddl?${new URLSearchParams({ schema, table })}`)),

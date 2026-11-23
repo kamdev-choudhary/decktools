@@ -8,7 +8,8 @@ import type { Readable } from 'node:stream';
 import { exportRows, importRows, type ExportRequest, type ImportRequest } from './transfer.js';
 import { dumpSql, type DumpOptions } from './dump.js';
 import { restoreScript, type RestoreOptions } from './restore.js';
-import { createTable, getCatalog } from './create-table.js';
+import { alterTable, createTable, getCatalog } from './create-table.js';
+import type { AlterAction } from '../shared/alter.js';
 import type { NewTable } from '../shared/create-table.js';
 import { relationDdl, runMaintenance, runTableAction, type TableAction } from './table-actions.js';
 import { deleteRows, insertRow, selectRows, updateRow } from './rows.js';
@@ -42,6 +43,7 @@ export function createDatabase(config: DbConfig) {
     maintenance: (action: 'analyze' | 'vacuum', tables: { schema: string; table: string }[]) => runMaintenance(ctx, action, tables),
     createTable: (spec: NewTable) => createTable(ctx, spec),
     catalog: () => getCatalog(ctx),
+    alter: (schema: string, table: string, a: AlterAction) => alterTable(ctx, schema, table, a),
     listDatabases: () => listDatabases(ctx),
     tables: () => listTables(ctx),
     meta: (schema: string, table: string) => getTableMeta(ctx, schema, table),

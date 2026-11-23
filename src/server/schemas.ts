@@ -3,6 +3,7 @@ import { FILTER_OPS } from '../shared/types.js';
 import { EXPORT_FORMATS, IMPORT_FORMATS } from '../shared/export.js';
 import { UserError } from '../db/errors.js';
 import { FK_ACTIONS } from '../shared/create-table.js';
+import { INDEX_METHODS } from '../shared/alter.js';
 
 const ident = z.string().min(1).max(256);
 const cell = z.string().nullable();
@@ -107,6 +108,35 @@ export const createTableBody = z.object({
     )
     .min(1)
     .max(1600),
+});
+
+/** POST /alter: one Structure-tab change. */
+export const alterBody = tableRef.extend({
+  change: z.discriminatedUnion('action', [
+    z.object({ action: z.literal('addColumn'), column: createTableBody.shape.columns.element }),
+    z.object({
+      action: z.literal('alterColumn'),
+      column: ident,
+      newName: z.string().max(63).optional(),
+      type: z.string().min(1).max(128).optional(),
+      using: z.string().max(10_000).optional(),
+      nullable: z.boolean().optional(),
+      default: z.string().max(10_000).nullable().optional(),
+      comment: z.string().max(10_000).nullable().optional(),
+    }),
+    z.object({ action: z.literal('dropColumn'), column: ident, cascade: z.boolean().default(false) }),
+    z.object({
+      action: z.literal('createIndex'),
+      name: z.string().max(63).default(''),
+      columns: z.array(z.object({ name: ident, desc: z.boolean().default(false) })).min(1).max(32),
+      unique: z.boolean().default(false),
+      method: z.enum(INDEX_METHODS).default('btree'),
+      concurrently: z.boolean().default(false),
+      where: z.string().max(10_000).default(''),
+    }),
+    z.object({ action: z.literal('dropIndex'), name: ident, concurrently: z.boolean().default(false), cascade: z.boolean().default(false) }),
+    z.object({ action: z.literal('dropConstraint'), name: ident, cascade: z.boolean().default(false) }),
+  ]),
 });
 
 const dbName = z.string().min(1).max(63);
