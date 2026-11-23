@@ -105,6 +105,15 @@ any reverse proxy to reach it remotely.
   comment) and drop columns; create indexes (multi-column, ASC/DESC, unique,
   btree/gin/gist/brin/hash, partial, concurrently) and drop indexes and
   constraints.
+- **ER diagram.** An interactive map of tables and their foreign keys: auto
+  layout, key-only or full columns, focus on one table and its neighbours, click
+  to trace a table's links down to the exact columns, drag cards (positions are
+  remembered), and export as PNG or SVG. Tables referenced almost everywhere
+  (like `users`) have their links tucked away so the rest stays readable.
+- **Functions, triggers, sequences and extensions.** Listed in the sidebar with
+  their definitions. Edit and save functions (and trigger functions) in place,
+  enable or disable triggers, set a sequence's next value, install, update or
+  remove extensions, and drop any of them.
 - **Table and database actions.** Rename, duplicate, truncate, drop, vacuum and
   analyze tables from a ⋯ menu; create, copy, rename and drop databases. Health
   checks can analyze or vacuum the affected tables in one click.
