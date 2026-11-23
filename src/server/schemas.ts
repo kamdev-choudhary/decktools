@@ -59,6 +59,21 @@ export const dumpQuery = z.object({
   dataFormat: z.enum(EXPORT_FORMATS).default('csv'),
 });
 
+/** POST /table-action */
+export const tableActionBody = z.object({
+  schema: ident,
+  table: ident,
+  action: z.discriminatedUnion('action', [
+    z.object({ action: z.literal('truncate'), cascade: z.boolean().default(false), restartIdentity: z.boolean().default(false) }),
+    z.object({ action: z.literal('drop'), cascade: z.boolean().default(false) }),
+    z.object({ action: z.literal('rename'), newName: ident }),
+    z.object({ action: z.literal('duplicate'), newName: ident, withData: z.boolean().default(false) }),
+    z.object({ action: z.literal('vacuum'), full: z.boolean().default(false) }),
+    z.object({ action: z.literal('analyze') }),
+    z.object({ action: z.literal('refresh') }),
+  ]),
+});
+
 /** POST /restore: run an uploaded dump. */
 export const restoreQuery = z.object({
   gzip: flag,

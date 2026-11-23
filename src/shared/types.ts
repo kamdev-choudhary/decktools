@@ -225,6 +225,16 @@ export interface Filter {
 
 export type SortDir = 'asc' | 'desc';
 
+/** Whole-table operations from the table menu. */
+export type TableAction =
+  | { action: 'truncate'; cascade: boolean; restartIdentity: boolean }
+  | { action: 'drop'; cascade: boolean }
+  | { action: 'rename'; newName: string }
+  | { action: 'duplicate'; newName: string; withData: boolean }
+  | { action: 'vacuum'; full: boolean }
+  | { action: 'analyze' }
+  | { action: 'refresh' };
+
 /** How multiple filter conditions combine: every one must match, or any one. */
 export type FilterMatch = 'and' | 'or';
 

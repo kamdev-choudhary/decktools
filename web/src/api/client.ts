@@ -11,6 +11,7 @@ import type {
   RowsRequest,
   RowsResponse,
   SessionInfo,
+  TableAction,
   TableMeta,
   TableRef,
 } from '@shared/types';
@@ -76,4 +77,8 @@ export const api = {
     request<MutationResponse>(db(database, 'delete'), { schema, table, keys }),
   query: (database: string, sql: string) => request<QueryResponse>(db(database, 'query'), { sql }),
   stats: (database: string) => request<DbStats>(db(database, 'stats')),
+  tableAction: (database: string, schema: string, table: string, action: TableAction) =>
+    request<{ ok: true; message: string }>(db(database, 'table-action'), { schema, table, action }),
+  ddl: (database: string, schema: string, table: string) =>
+    request<{ sql: string }>(db(database, `ddl?${new URLSearchParams({ schema, table })}`)),
 };

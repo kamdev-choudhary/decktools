@@ -5,7 +5,7 @@ import { stream } from 'hono/streaming';
 import { EXPORT_META } from '../../shared/export.js';
 import type { Database, DatabaseManager } from '../../db/index.js';
 import { UserError } from '../../db/errors.js';
-import { deleteBody, dumpQuery, exportQuery, importQuery, insertBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, updateBody } from '../schemas.js';
+import { deleteBody, dumpQuery, exportQuery, importQuery, insertBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
 import { createGzip } from 'node:zlib';
 import yazl from 'yazl';
 
@@ -128,6 +128,14 @@ function databaseRoutes() {
       const body = c.req.raw.body;
       if (!body) throw new UserError('The upload is empty');
       return c.json(await c.var.db.importRows(q, Readable.fromWeb(body as unknown as WebReadableStream<Uint8Array>)));
+    })
+    .post('/table-action', async (c) => {
+      const { schema, table, action } = parse(tableActionBody, await jsonBody(c.req));
+      return c.json(await c.var.db.tableAction(schema, table, action));
+    })
+    .get('/ddl', async (c) => {
+      const { schema, table } = parse(metaQuery, c.req.query());
+      return c.json({ sql: await c.var.db.ddl(schema, table) });
     })
     .post('/query', async (c) => {
       const { sql } = parse(queryBody, await jsonBody(c.req));

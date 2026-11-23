@@ -7,6 +7,7 @@ import { CenteredSpinner, ErrorAlert } from '@/components/app/feedback';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatNumber } from '@/lib/format';
+import { TableActionsMenu } from '@/components/app/TableActionsMenu';
 import { DataTab } from './DataTab';
 import { StructureTab } from './StructureTab';
 
@@ -75,6 +76,7 @@ export function TableView({ db, schema, table, eq, readonly }: TableViewProps) {
           </TooltipContent>
         </Tooltip>
         <div ref={setActionsSlot} className="flex min-w-0 flex-1 items-center justify-end gap-2" />
+        <TableActionsMenu db={db} schema={schema} table={table} kind={m.kind} variant="toolbar" className="shrink-0" />
       </div>
 
       <TabsContent value="data" className="flex min-h-0 flex-col data-[state=inactive]:hidden">

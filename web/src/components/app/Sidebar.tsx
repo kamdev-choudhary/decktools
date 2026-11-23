@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { dbHref, exportHref, importHref, sqlHref, tableHref, type Route } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { ErrorAlert, Spinner } from './feedback';
+import { TableActionsMenu } from './TableActionsMenu';
 import { TruncatedText } from './TruncatedText';
 
 const KIND_ICON: Record<RelKind, LucideIcon> = { r: Table2, p: Table2, f: Table2, v: Eye, m: Layers };
@@ -117,29 +118,34 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
                       const Icon = KIND_ICON[t.kind];
                       const isActive = active === `${t.schema}.${t.name}`;
                       return (
-                        <a
+                        <div
                           key={t.name}
-                          href={tableHref(db, t.schema, t.name)}
-                          aria-current={isActive ? 'page' : undefined}
                           className={cn(
-                            'flex h-8 min-w-0 items-center gap-2 rounded-md pr-2 pl-6 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
+                            'group/item flex h-8 min-w-0 items-center rounded-md pr-1 text-[13px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground',
                             isActive && 'bg-sidebar-accent font-medium text-foreground',
                           )}
                         >
-                          <Icon className="size-4 shrink-0 opacity-70" />
-                          <TruncatedText
-                            text={t.name}
-                            side="right"
-                            tooltip={
-                              <>
-                                <span className="font-mono">
-                                  {t.schema}.{t.name}
-                                </span>
-                                <span className="opacity-60"> · {REL_KIND_LABEL[t.kind]}</span>
-                              </>
-                            }
-                          />
-                        </a>
+                          <a
+                            href={tableHref(db, t.schema, t.name)}
+                            aria-current={isActive ? 'page' : undefined}
+                            className="flex h-full min-w-0 flex-1 items-center gap-2 pl-6"
+                          >
+                            <Icon className="size-4 shrink-0 opacity-70" />
+                            <TruncatedText
+                              text={t.name}
+                              side="right"
+                              tooltip={
+                                <>
+                                  <span className="font-mono">
+                                    {t.schema}.{t.name}
+                                  </span>
+                                  <span className="opacity-60"> · {REL_KIND_LABEL[t.kind]}</span>
+                                </>
+                              }
+                            />
+                          </a>
+                          <TableActionsMenu db={db} schema={t.schema} table={t.name} kind={t.kind} variant="sidebar" className="shrink-0" />
+                        </div>
                       );
                     })}
                   </div>

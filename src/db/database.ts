@@ -8,6 +8,7 @@ import type { Readable } from 'node:stream';
 import { exportRows, importRows, type ExportRequest, type ImportRequest } from './transfer.js';
 import { dumpSql, type DumpOptions } from './dump.js';
 import { restoreScript, type RestoreOptions } from './restore.js';
+import { relationDdl, runTableAction, type TableAction } from './table-actions.js';
 import { deleteRows, insertRow, selectRows, updateRow } from './rows.js';
 
 
@@ -33,6 +34,9 @@ export function createDatabase(config: DbConfig) {
     dumpSql: (opts: DumpOptions) => dumpSql(ctx, opts),
     /** Run an uploaded SQL dump (or pg_dump custom file). */
     restore: (body: Readable, opts: RestoreOptions) => restoreScript(ctx, body, opts),
+    /** Truncate / drop / rename / duplicate / vacuum / analyze / refresh. */
+    tableAction: (schema: string, table: string, action: TableAction) => runTableAction(ctx, schema, table, action),
+    ddl: (schema: string, table: string) => relationDdl(ctx, schema, table),
     listDatabases: () => listDatabases(ctx),
     tables: () => listTables(ctx),
     meta: (schema: string, table: string) => getTableMeta(ctx, schema, table),

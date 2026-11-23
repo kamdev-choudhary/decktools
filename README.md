@@ -35,6 +35,13 @@ watch live activity. Put it behind any reverse proxy to reach it remotely.
   matter. Columns are matched by name, you choose append or replace, and it
   runs in one transaction: a bad row rolls everything back and tells you the
   line. Upload progress, speed and time left are shown, and you can cancel.
+- **Back up and restore whole databases.** The Export page writes a
+  `pg_dump`-style `.sql` (optionally `.gz`) with schemas, types, sequences,
+  functions, tables, data, indexes, foreign keys, views and triggers, from one
+  consistent snapshot, or a ZIP with `schema.sql` plus one data file per table.
+  Pick all tables or just some. The Import page restores `pg_dump` backups
+  (plain SQL, or custom format when `pg_restore` is installed), recognised by
+  content even without an extension, in a single transaction.
 - **Export anything.** All rows matching your filters (streamed from a server
   cursor, any size), the current page, or selected rows, as CSV, CSV for
   Excel, TSV, JSON, JSON Lines, SQL `INSERT` statements or Markdown.
