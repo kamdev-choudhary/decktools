@@ -34,6 +34,8 @@ export function startServer({ port, host, ...appOptions }: StartOptions): Promis
         },
       });
     });
+    // Large imports can take far longer than Node's default 5-minute request timeout.
+    (server as Server).requestTimeout = 0;
     (server as Server).on('upgrade', (req, socket, head) => {
       if (!live.handleUpgrade(req, socket, head)) socket.destroy();
     });

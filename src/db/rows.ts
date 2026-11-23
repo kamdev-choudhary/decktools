@@ -49,12 +49,11 @@ function buildKeyWhere(meta: TableMeta, key: RowKey, values: unknown[]): string 
     .join(' and ');
 }
 
-export async function selectRows(ctx: DbContext, req: RowsRequest): Promise<RowsResponse> {
-  const meta = await getTableMeta(ctx, req.schema, req.table);
-  const limit = Math.min(Math.max(req.limit, 1), ctx.maxRows);
-  const offset = Math.max(req.offset, 0);
-  const rel = qualified(req.schema, req.table);
-
+/** WHERE (with its parameters) and ORDER BY for a filtered/sorted read of a table. */
+export function buildQueryParts(
+  meta: TableMeta,
+  req: Pick<RowsRequest, 'filters' | 'match' | 'sort' | 'dir'>,
+): { where: string; values: unknown[]; orderBy: string } {
   const values: unknown[] = [];
   const where = buildWhere(meta, req.filters ?? [], req.match ?? 'and', values);
 
@@ -65,6 +64,16 @@ export async function selectRows(ctx: DbContext, req: RowsRequest): Promise<Rows
   } else if (meta.primaryKey.length) {
     orderBy = ` order by ${meta.primaryKey.map(quoteIdent).join(', ')}`;
   }
+  return { where, values, orderBy };
+}
+
+export async function selectRows(ctx: DbContext, req: RowsRequest): Promise<RowsResponse> {
+  const meta = await getTableMeta(ctx, req.schema, req.table);
+  const limit = Math.min(Math.max(req.limit, 1), ctx.maxRows);
+  const offset = Math.max(req.offset, 0);
+  const rel = qualified(req.schema, req.table);
+
+  const { where, values, orderBy } = buildQueryParts(meta, req);
 
   const withCtid = meta.keyMode === 'ctid';
   const select = `select ${withCtid ? 'ctid::text, ' : ''}* from ${rel}${where}${orderBy} limit ${limit} offset ${offset}`;

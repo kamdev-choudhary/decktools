@@ -4,6 +4,8 @@ import { getInfo, getTableMeta, listDatabases, listTables } from './introspect.j
 import { runQuery } from './query.js';
 import { getStats } from './stats.js';
 import { createLiveSampler } from './live.js';
+import type { Readable } from 'node:stream';
+import { exportRows, importRows, type ExportRequest, type ImportRequest } from './transfer.js';
 import { deleteRows, insertRow, selectRows, updateRow } from './rows.js';
 
 
@@ -21,6 +23,10 @@ export function createDatabase(config: DbConfig) {
     stats: () => getStats(ctx),
     /** A sampler that reports per-second rates since its previous call. */
     liveSampler: () => createLiveSampler(ctx),
+    /** Stream all matching rows, serialized (async iterator of text chunks). */
+    exportRows: (req: ExportRequest, signal?: AbortSignal) => exportRows(ctx, req, signal),
+    /** COPY an uploaded stream into a table. */
+    importRows: (req: ImportRequest, body: Readable) => importRows(ctx, req, body),
     listDatabases: () => listDatabases(ctx),
     tables: () => listTables(ctx),
     meta: (schema: string, table: string) => getTableMeta(ctx, schema, table),

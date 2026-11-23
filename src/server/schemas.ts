@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { FILTER_OPS } from '../shared/types.js';
+import { EXPORT_FORMATS, IMPORT_FORMATS } from '../shared/export.js';
 import { UserError } from '../db/errors.js';
 
 const ident = z.string().min(1).max(256);
@@ -20,6 +21,42 @@ export const rowsBody = tableRef.extend({
     .max(50)
     .default([]),
   match: z.enum(['and', 'or']).default('and'),
+});
+
+/** A JSON-encoded value inside a query-string parameter. */
+const jsonParam = <T extends z.ZodType>(inner: T, fallback: string) =>
+  z
+    .string()
+    .default(fallback)
+    .transform((s, ctx) => {
+      try {
+        return JSON.parse(s) as unknown;
+      } catch {
+        ctx.addIssue({ code: 'custom', message: 'must be JSON' });
+        return z.NEVER;
+      }
+    })
+    .pipe(inner);
+
+const flag = z.enum(['0', '1']).default('0').transform((v) => v === '1');
+
+/** GET /export: everything is in the query string so a plain download link works. */
+export const exportQuery = tableRef.extend({
+  format: z.enum(EXPORT_FORMATS),
+  filters: jsonParam(rowsBody.shape.filters, '[]'),
+  match: z.enum(['and', 'or']).default('and'),
+  sort: ident.optional(),
+  dir: z.enum(['asc', 'desc']).optional(),
+});
+
+/** POST /import: options in the query string, the raw file is the body. */
+export const importQuery = tableRef.extend({
+  format: z.enum(IMPORT_FORMATS),
+  columns: jsonParam(z.array(ident).min(1).max(1600), '[]'),
+  header: flag,
+  delimiter: z.string().min(1).max(1).default(','),
+  gzip: flag,
+  truncate: flag,
 });
 
 export const insertBody = tableRef.extend({ values: cellRecord });

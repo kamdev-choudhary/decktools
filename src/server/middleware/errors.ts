@@ -15,7 +15,14 @@ export const handleError: ErrorHandler = (err, c) => {
   // user's to fix, so pass through everything the server told us.
   if (err instanceof pg.DatabaseError) {
     return c.json<ApiErrorBody>(
-      { error: err.message, detail: err.detail, hint: err.hint, position: err.position, code: err.code },
+      {
+        error: err.message,
+        // `where` carries COPY context such as "COPY users, line 1042, column email".
+        detail: [err.detail, err.where].filter(Boolean).join('\n') || undefined,
+        hint: err.hint,
+        position: err.position,
+        code: err.code,
+      },
       400,
     );
   }
