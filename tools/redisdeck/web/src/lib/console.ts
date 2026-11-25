@@ -137,3 +137,61 @@ export function prettyJson(text: string): string | null {
     return null;
   }
 }
+
+/** The prompt redis-cli shows: `127.0.0.1:6379>`, or `127.0.0.1:6379[2]>` outside db0. */
+export const promptFor = (host: string, port: number, db: number) => `${host}:${port}${db ? `[${db}]` : ''}>`;
+
+/** Words in a command line, counting a quoted argument ("a b", 'a b') as one word. */
+export function wordCount(line: string): number {
+  let count = 0;
+  let inWord = false;
+  let quote: string | null = null;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i]!;
+    if (quote) {
+      if (c === '\\') i++;
+      else if (c === quote) quote = null;
+    } else if (/\s/.test(c)) {
+      inWord = false;
+    } else {
+      if (!inWord) count++;
+      inWord = true;
+      if (c === '"' || c === "'") quote = c;
+    }
+  }
+  return count;
+}
+
+/** Top-level pieces of a syntax string: `key [NX | XX] [GET]` → ["key", "[NX | XX]", "[GET]"]. */
+export function syntaxTokens(syntax: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let cur = '';
+  for (const c of syntax) {
+    if (c === '[' || c === '<') depth++;
+    else if (c === ']' || c === '>') depth--;
+    if (c === ' ' && depth === 0) {
+      if (cur) out.push(cur);
+      cur = '';
+    } else cur += c;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+/**
+ * The grey hint redis-cli prints after the cursor: the arguments still to type.
+ * Shown once the line ends with a space (or is exactly the command name).
+ */
+export function ghostHint(line: string, doc: CommandDoc): string {
+  const nameWords = doc.name.split(' ').length;
+  const words = wordCount(line);
+  const atBoundary = /\s$/.test(line);
+  if (!atBoundary && !(words === nameWords && line.trim().toLowerCase().replace(/\s+/g, ' ') === doc.name)) return '';
+  const tokens = syntaxTokens(doc.syntax);
+  const typed = Math.max(0, words - nameWords);
+  // A repeating last argument (`key [key ...]`) keeps hinting itself.
+  const rest = typed >= tokens.length ? tokens.filter((t) => t.endsWith('...]')).slice(-1) : tokens.slice(typed);
+  if (!rest.length) return '';
+  return (atBoundary ? '' : ' ') + rest.join(' ');
+}

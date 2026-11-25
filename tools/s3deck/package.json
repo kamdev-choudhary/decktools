@@ -46,7 +46,7 @@
     "lint": "oxlint -c ../../.oxlintrc.json src web test",
     "build": "pnpm build:web && pnpm build:cli",
     "build:web": "vite build --config web/vite.config.ts",
-    "build:cli": "tsdown",
+    "build:cli": "tsdown --config-loader tsx",
     "start": "node dist/cli.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p web/tsconfig.json --noEmit && tsc -p test/tsconfig.json --noEmit",
     "pack:check": "pnpm build && npm pack --dry-run",

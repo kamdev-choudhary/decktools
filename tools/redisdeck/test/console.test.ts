@@ -7,7 +7,9 @@ import {
   complete,
   danger,
   docForLine,
+  ghostHint,
   prettyJson,
+  promptFor,
   replyToText,
 } from '../web/src/lib/console.js';
 import { refusal } from '../src/redis/console.js';
@@ -117,5 +119,30 @@ describe('read-only guard', () => {
     assert.match(refusal('fcall', null, eval80, true) ?? '', /FCALL_RO/);
     assert.equal(refusal('eval_ro', null, [...eval80, 'readonly'], true), null);
     assert.equal(refusal('eval', null, eval80, false), null);
+  });
+});
+
+describe('ghostHint', () => {
+  const set = doc('set', { syntax: 'key value [NX | XX] [GET]' });
+  const del = doc('del', { syntax: 'key [key ...]' });
+  const cfg = doc('config get', { syntax: 'parameter [parameter ...]' });
+
+  it('hints the arguments still to type', () => {
+    assert.equal(ghostHint('SET', set), ' key value [NX | XX] [GET]');
+    assert.equal(ghostHint('set ', set), 'key value [NX | XX] [GET]');
+    assert.equal(ghostHint('SET k ', set), 'value [NX | XX] [GET]');
+    assert.equal(ghostHint('SET "a b" ', set), 'value [NX | XX] [GET]');
+    assert.equal(ghostHint('SET k v NX GET ', set), '');
+  });
+
+  it('waits while a word is being typed, and repeats repeating arguments', () => {
+    assert.equal(ghostHint('SET ke', set), '');
+    assert.equal(ghostHint('DEL a b ', del), '[key ...]');
+    assert.equal(ghostHint('CONFIG GET ', cfg), 'parameter [parameter ...]');
+  });
+
+  it('builds the redis-cli prompt', () => {
+    assert.equal(promptFor('127.0.0.1', 6379, 0), '127.0.0.1:6379>');
+    assert.equal(promptFor('127.0.0.1', 6379, 2), '127.0.0.1:6379[2]>');
   });
 });

@@ -1,4 +1,4 @@
-import { Braces, Copy, CornerDownLeft, Eraser, Pencil, RotateCw, TriangleAlert } from 'lucide-react';
+import { Braces, Copy, Eraser, Pencil, RotateCw } from 'lucide-react';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import type { CommandDoc, Reply } from '@shared/types';
@@ -17,9 +17,20 @@ import { Switch } from '@deck/ui/components/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@deck/ui/components/tooltip';
 import { storage } from '@deck/ui/lib/storage';
 import { cn } from '@deck/ui/lib/utils';
-import { useCommand, useCommandDocs } from '@/api/hooks';
-import { errorMessage, Kbd, Spinner } from '@/components/feedback';
-import { caretLine, commandsIn, complete, danger, docForLine, prettyJson, replySize, replyToText } from '@/lib/console';
+import { useCommand, useCommandDocs, useServer } from '@/api/hooks';
+import { errorMessage, Spinner } from '@/components/feedback';
+import {
+  caretLine,
+  commandsIn,
+  complete,
+  danger,
+  docForLine,
+  ghostHint,
+  prettyJson,
+  promptFor,
+  replySize,
+  replyToText,
+} from '@/lib/console';
 
 const HISTORY_KEY = 'redisdeck.history';
 const RAW_KEY = 'redisdeck.console.raw';
@@ -27,13 +38,20 @@ const HISTORY_MAX = 200;
 /** Array elements rendered before "Show all". */
 const ARRAY_PREVIEW = 100;
 
+/**
+ * One block of the transcript. `command` entries ran on the server; `help` is
+ * answered locally from the command docs; `echo` is a prompt line with nothing
+ * run (an empty Enter, or Ctrl+C).
+ */
 interface Entry {
   n: number;
-  db: number;
+  kind: 'command' | 'help' | 'echo';
+  prompt: string;
   command: string;
   reply?: Reply;
   error?: string;
   ms?: number;
+  cancelled?: boolean;
 }
 
 /** Transcripts per database, kept while the page is open so switching views doesn't lose them. */
@@ -53,13 +71,11 @@ function StringReply({ text, binary, raw }: { text: string; binary?: boolean; ra
         <button
           type="button"
           onClick={() => setFormatted(false)}
-          className="mb-1 inline-flex items-center gap-1 font-sans text-[11px] text-link hover:underline"
+          className="inline-flex items-center gap-1 text-link hover:underline"
         >
-          <Braces className="size-3" /> Show as stored
+          <Braces className="size-3" /> show as stored
         </button>
-        <pre className="rounded-md border bg-background p-3 text-[12px] leading-relaxed whitespace-pre-wrap">
-          {pretty}
-        </pre>
+        <pre className="whitespace-pre-wrap">{pretty}</pre>
       </div>
     );
   }
@@ -70,9 +86,9 @@ function StringReply({ text, binary, raw }: { text: string; binary?: boolean; ra
         <button
           type="button"
           onClick={() => setFormatted(true)}
-          className="ml-2 inline-flex items-center gap-1 align-middle font-sans text-[11px] text-link hover:underline"
+          className="ml-2 inline-flex items-center gap-1 align-middle text-[11px] text-link opacity-70 hover:underline hover:opacity-100"
         >
-          <Braces className="size-3" /> Format JSON
+          <Braces className="size-3" /> format
         </button>
       )}
     </span>
@@ -91,8 +107,8 @@ function ArrayReply({ items, raw }: { items: Reply[]; raw: boolean }) {
             <ReplyView reply={item} raw />
           </div>
         ) : (
-          <div key={i} className="flex gap-2">
-            <span className="shrink-0 whitespace-pre text-muted-foreground tabular-nums select-none">{`${String(i + 1).padStart(width)})`}</span>
+          <div key={i} className="flex">
+            <span className="shrink-0 whitespace-pre text-muted-foreground tabular-nums">{`${String(i + 1).padStart(width)}) `}</span>
             <div className="min-w-0">
               <ReplyView reply={item} raw={false} />
             </div>
@@ -100,8 +116,8 @@ function ArrayReply({ items, raw }: { items: Reply[]; raw: boolean }) {
         ),
       )}
       {!all && (
-        <button type="button" onClick={() => setAll(true)} className="mt-1 font-sans text-xs text-link hover:underline">
-          Show all {items.length.toLocaleString()} elements
+        <button type="button" onClick={() => setAll(true)} className="text-link hover:underline">
+          ... {(items.length - ARRAY_PREVIEW).toLocaleString()} more, show all
         </button>
       )}
     </div>
@@ -114,13 +130,7 @@ function ReplyView({ reply, raw }: { reply: Reply; raw: boolean }): ReactNode {
     case 'nil':
       return raw ? null : <span className="text-muted-foreground">(nil)</span>;
     case 'integer':
-      return raw ? (
-        <span>{reply.value}</span>
-      ) : (
-        <span>
-          <span className="text-muted-foreground">(integer)</span> {reply.value}
-        </span>
-      );
+      return raw ? <span>{reply.value}</span> : <span>(integer) {reply.value}</span>;
     case 'status':
       return <span>{reply.value}</span>;
     case 'error':
@@ -137,51 +147,112 @@ function ReplyView({ reply, raw }: { reply: Reply; raw: boolean }): ReactNode {
 }
 
 /* ------------------------------------------------------------------ */
-/* Input help                                                          */
+/* Help                                                                */
 /* ------------------------------------------------------------------ */
 
 const upper = (name: string) => name.toUpperCase();
 
-function Signature({ doc }: { doc: CommandDoc }) {
-  const writes = doc.flags.includes('write');
+/** `HELP <command>` output, laid out like redis-cli's. */
+function CommandHelp({ doc }: { doc: CommandDoc }) {
   return (
-    <div className="space-y-1">
-      <div className="font-mono text-[12.5px]">
-        <span className="font-semibold">{upper(doc.name)}</span>{' '}
+    <div className="py-0.5">
+      <div>
+        <span className="font-semibold text-warning">{upper(doc.name)}</span>{' '}
         <span className="text-muted-foreground">{doc.syntax}</span>
       </div>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-        {doc.summary && <span>{doc.summary}</span>}
-        {doc.group && <span className="rounded border px-1.5 font-mono text-[10.5px]">{doc.group}</span>}
-        {writes && <span className="rounded border border-warning/40 px-1.5 text-[10.5px] text-warning">writes</span>}
-        {doc.since && <span>since {doc.since}</span>}
-      </div>
-      {doc.refused && (
-        <div className="flex items-center gap-1.5 text-xs text-destructive">
-          <TriangleAlert className="size-3.5" /> {doc.refused}
-        </div>
-      )}
+      {doc.summary && <div className="pl-2 text-muted-foreground">summary: {doc.summary}</div>}
+      {doc.since && <div className="pl-2 text-muted-foreground">since: {doc.since}</div>}
+      {doc.group && <div className="pl-2 text-muted-foreground">group: {doc.group}</div>}
+      {doc.flags.includes('write') && <div className="pl-2 text-muted-foreground">writes data</div>}
+      {doc.refused && <div className="pl-2 text-destructive">not available here: {doc.refused}</div>}
     </div>
   );
+}
+
+function GeneralHelp() {
+  return (
+    <div className="text-muted-foreground">
+      <div>Type a Redis command and press Enter, the same as in redis-cli.</div>
+      <div>&nbsp;</div>
+      <div>
+        <span className="text-foreground">HELP &lt;command&gt;</span> usage of a command, e.g. HELP SET
+      </div>
+      <div>
+        <span className="text-foreground">CLEAR</span> clear the screen (also Ctrl+L)
+      </div>
+      <div>
+        <span className="text-foreground">Tab</span> complete · <span className="text-foreground">↑ ↓</span> history ·{' '}
+        <span className="text-foreground">Ctrl+C</span> cancel the line ·{' '}
+        <span className="text-foreground">Shift+Enter</span> new line
+      </div>
+      <div>&nbsp;</div>
+      <div>Paste several lines to run them in order. Commands that need their own connection</div>
+      <div>(SUBSCRIBE, MONITOR, MULTI, blocking pops) and SELECT aren&apos;t available here.</div>
+    </div>
+  );
+}
+
+/** What a HELP line prints. */
+function HelpOutput({ topic, byName }: { topic: string; byName: Map<string, CommandDoc> }) {
+  if (!topic) return <GeneralHelp />;
+  const exact = docForLine(topic, byName);
+  if (exact) {
+    // HELP CONFIG lists the subcommands too.
+    const subs = exact.container
+      ? [...byName.values()].filter((d) => d.name.startsWith(`${exact.name} `) && !d.name.endsWith(' help'))
+      : [];
+    return (
+      <div>
+        <CommandHelp doc={exact} />
+        {subs.map((d) => (
+          <CommandHelp key={d.name} doc={d} />
+        ))}
+      </div>
+    );
+  }
+  return <span className="text-muted-foreground">No help for &quot;{topic}&quot;. Try HELP with a command name.</span>;
 }
 
 /* ------------------------------------------------------------------ */
 /* View                                                                */
 /* ------------------------------------------------------------------ */
 
-const EXAMPLES = [
-  'INFO keyspace',
-  'SCAN 0 MATCH user:* COUNT 100',
-  'TYPE mykey',
-  'MEMORY USAGE mykey',
-  'CONFIG GET maxmemory*',
-];
+const EXAMPLES = ['INFO keyspace', 'SCAN 0 MATCH * COUNT 100', 'DBSIZE', 'CONFIG GET maxmemory*', 'HELP SET'];
+
+function Prompt({ text }: { text: string }) {
+  return <span className="shrink-0 text-success select-none">{text}&nbsp;</span>;
+}
+
+function IconAction({
+  label,
+  onClick,
+  disabled,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon-xs" onClick={onClick} disabled={disabled} aria-label={label}>
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function ConsoleView({ db }: { db: number }) {
   const run = useCommand(db);
+  const server = useServer().data;
   const docsQuery = useCommandDocs();
   const docs = useMemo(() => docsQuery.data ?? [], [docsQuery.data]);
   const byName = useMemo(() => new Map(docs.map((d) => [d.name, d])), [docs]);
+  const prompt = server ? promptFor(server.host, server.port, db) : `db${db}>`;
 
   const [entries, setEntriesState] = useState<Entry[]>(() => transcripts.get(db) ?? []);
   const setEntries = (update: (e: Entry[]) => Entry[]) =>
@@ -203,14 +274,16 @@ export function ConsoleView({ db }: { db: number }) {
   const input = useRef<HTMLTextAreaElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
 
-  // Keep the newest output in view (after React has rendered it).
+  // Keep the prompt in view (after React has rendered the new output).
   const scrollToEnd = () => requestAnimationFrame(() => bottom.current?.scrollIntoView({ block: 'end' }));
 
   const { start: lineStart, before } = caretLine(value, caret);
   const completion = dismissed ? null : complete(before, docs, byName);
   const picked = completion ? completion.items[Math.min(pick, completion.items.length - 1)] : null;
-  const fullLine = value.slice(lineStart).split('\n')[0] ?? '';
-  const hint = picked ?? docForLine(fullLine, byName);
+  const lineDoc = docForLine(value, byName);
+  // The grey argument hint, like redis-cli: single-line input with the caret at the end.
+  const ghost =
+    lineDoc && !completion && !value.includes('\n') && caret === value.length ? ghostHint(value, lineDoc) : '';
 
   const edit = (next: string, nextCaret = next.length) => {
     setValue(next);
@@ -221,12 +294,19 @@ export function ConsoleView({ db }: { db: number }) {
       input.current?.focus();
       input.current?.setSelectionRange(nextCaret, nextCaret);
     });
+    scrollToEnd();
   };
 
   const accept = (doc: CommandDoc) => {
     const from = lineStart + completion!.from;
     const insert = `${upper(doc.name)} `;
     edit(value.slice(0, from) + insert + value.slice(caret), from + insert.length);
+  };
+
+  const add = (entry: Omit<Entry, 'n'>) => {
+    const n = ++counter;
+    setEntries((e) => [...e, { ...entry, n }]);
+    return n;
   };
 
   const execute = async (lines: string[]) => {
@@ -237,8 +317,18 @@ export function ConsoleView({ db }: { db: number }) {
     setHistoryAt(-1);
     edit('', 0);
     for (const command of lines) {
-      const n = ++counter;
-      setEntries((e) => [...e, { n, db, command }]);
+      const [word = '', ...rest] = command.split(/\s+/);
+      const local = word.toLowerCase();
+      if (local === 'clear' && !rest.length) {
+        setEntries(() => []);
+        continue;
+      }
+      if (local === 'help') {
+        add({ kind: 'help', prompt, command });
+        scrollToEnd();
+        continue;
+      }
+      const n = add({ kind: 'command', prompt, command });
       scrollToEnd();
       try {
         const res = await run.mutateAsync(command);
@@ -249,12 +339,18 @@ export function ConsoleView({ db }: { db: number }) {
       scrollToEnd();
     }
     setRunning(false);
-    input.current?.focus();
+    requestAnimationFrame(() => input.current?.focus());
   };
 
   const submit = (text = value) => {
+    if (running) return;
     const lines = commandsIn(text);
-    if (!lines.length || running) return;
+    if (!lines.length) {
+      // An empty Enter prints a fresh prompt, as in a terminal.
+      add({ kind: 'echo', prompt, command: '' });
+      edit('', 0);
+      return;
+    }
     const reasons = lines.map((l) => danger(l, db)).filter((r): r is string => !!r);
     if (reasons.length) setConfirm({ lines, reasons: [...new Set(reasons)] });
     else void execute(lines);
@@ -280,7 +376,10 @@ export function ConsoleView({ db }: { db: number }) {
         return;
       }
     }
-    if (e.key === 'Enter' && !e.shiftKey) {
+    const t = e.currentTarget;
+    if (e.key === 'Tab') {
+      e.preventDefault(); // Never leave the terminal on Tab.
+    } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       submit();
     } else if (e.key === 'ArrowUp' && !value.includes('\n') && history.length) {
@@ -296,6 +395,15 @@ export function ConsoleView({ db }: { db: number }) {
     } else if (e.key === 'l' && e.ctrlKey) {
       e.preventDefault();
       setEntries(() => []);
+    } else if (e.key === 'c' && e.ctrlKey && t.selectionStart === t.selectionEnd) {
+      // Ctrl+C with nothing selected cancels the line, like a shell. (Cmd+C still copies.)
+      e.preventDefault();
+      add({ kind: 'echo', prompt, command: value, cancelled: true });
+      setHistoryAt(-1);
+      edit('', 0);
+    } else if (e.key === 'u' && e.ctrlKey) {
+      e.preventDefault();
+      edit(value.slice(caret), 0);
     }
   };
 
@@ -304,16 +412,15 @@ export function ConsoleView({ db }: { db: number }) {
     void navigator.clipboard.writeText(text).then(() => toast.success('Output copied'));
   };
 
-  const rows = Math.min(Math.max(value.split('\n').length, 1), 8);
-
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex h-12 shrink-0 items-center gap-3 border-b px-4">
         <h1 className="text-sm font-medium">Console</h1>
-        <span className="hidden truncate text-xs text-muted-foreground lg:inline">
-          <Kbd>Tab</Kbd> complete · <Kbd>↑</Kbd> <Kbd>↓</Kbd> history · <Kbd>Shift ↵</Kbd> new line · <Kbd>Ctrl L</Kbd>{' '}
-          clear
-        </span>
+        {server && (
+          <span className="hidden truncate font-mono text-xs text-muted-foreground sm:inline">
+            {server.product} {server.version} · {server.host}:{server.port} · db{db}
+          </span>
+        )}
         <div className="flex-1" />
         <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
           <Switch
@@ -322,7 +429,7 @@ export function ConsoleView({ db }: { db: number }) {
               setRaw(v);
               storage.set(RAW_KEY, v ? '1' : '0');
             }}
-            aria-label="Raw output"
+            aria-label="Raw output, like redis-cli --raw"
           />
           Raw
         </label>
@@ -331,173 +438,154 @@ export function ConsoleView({ db }: { db: number }) {
         </Button>
       </div>
 
+      {/* The terminal: dark in both themes, output and prompt in one scrolling surface. */}
       <div
-        className="min-h-0 flex-1 overflow-y-auto bg-grid-header/50 font-mono text-[12.5px] leading-relaxed"
+        className="dark min-h-0 flex-1 cursor-text overflow-y-auto bg-background font-mono text-[13px] leading-[1.6] text-foreground [color-scheme:dark]"
         onClick={() => window.getSelection()?.isCollapsed && input.current?.focus()}
       >
-        <div className="space-y-4 p-4">
+        <div className="px-4 py-3">
+          <div className="text-muted-foreground">
+            {server ? `${server.product} ${server.version}` : 'redis'} at{' '}
+            {server ? `${server.host}:${server.port}` : '…'}, database {db}. Type HELP for help.
+          </div>
           {entries.length === 0 && (
-            <div className="max-w-2xl space-y-3 font-sans text-sm text-muted-foreground">
-              <p>Run any Redis command, the same as in redis-cli. Start typing for suggestions, or try one of these:</p>
-              <div className="flex flex-wrap gap-2">
-                {EXAMPLES.map((ex) => (
-                  <button
-                    key={ex}
-                    type="button"
-                    onClick={() => edit(ex)}
-                    className="rounded-md border bg-background px-2 py-1 font-mono text-xs text-foreground hover:bg-accent"
-                  >
-                    {ex}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs">
-                Paste several lines to run them in order. Commands that hold the connection (SUBSCRIBE, MONITOR, MULTI,
-                blocking pops) aren't available here; switch databases with the menu at the top instead of SELECT.
-              </p>
+            <div className="mb-1 flex flex-wrap gap-x-3 text-muted-foreground">
+              <span>try:</span>
+              {EXAMPLES.map((ex) => (
+                <button key={ex} type="button" onClick={() => edit(ex)} className="text-link hover:underline">
+                  {ex}
+                </button>
+              ))}
             </div>
           )}
+
           {entries.map((e) => {
             const size = e.reply ? replySize(e.reply) : null;
             return (
-              <div key={e.n} className="group space-y-1">
-                <div className="flex items-start gap-2">
-                  <span className="shrink-0 text-muted-foreground select-none">db{e.db}&gt;</span>
-                  <span className="min-w-0 flex-1 font-medium break-all">{e.command}</span>
-                  <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon-xs" onClick={() => edit(e.command)} aria-label="Edit">
-                          <Pencil />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Edit</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={() => submit(e.command)}
-                          disabled={running}
-                          aria-label="Run again"
-                        >
-                          <RotateCw />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Run again</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={() => copy(e)}
-                          disabled={!e.reply && !e.error}
-                          aria-label="Copy output"
-                        >
-                          <Copy />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Copy output</TooltipContent>
-                    </Tooltip>
-                  </div>
-                  {e.ms !== undefined && (
-                    <span className="shrink-0 pt-px font-sans text-xs text-muted-foreground tabular-nums">
-                      {size !== null && `${size.toLocaleString()} item${size === 1 ? '' : 's'} · `}
-                      {e.ms < 1 ? '<1' : e.ms.toFixed(0)} ms
-                    </span>
+              <div key={e.n} className="group">
+                <div className="relative flex items-start">
+                  <Prompt text={e.prompt} />
+                  <span className="min-w-0 flex-1 break-all whitespace-pre-wrap">
+                    {e.command}
+                    {e.cancelled && <span className="text-muted-foreground">^C</span>}
+                  </span>
+                  {e.kind === 'command' && (
+                    <div className="absolute top-0 right-0 flex items-center gap-0.5 rounded-md bg-background pl-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                      {e.ms !== undefined && (
+                        <span className="mr-1 font-sans text-xs text-muted-foreground tabular-nums">
+                          {size !== null && `${size.toLocaleString()} item${size === 1 ? '' : 's'} · `}
+                          {e.ms < 1 ? '<1' : e.ms.toFixed(0)} ms
+                        </span>
+                      )}
+                      <IconAction label="Edit" onClick={() => edit(e.command)}>
+                        <Pencil />
+                      </IconAction>
+                      <IconAction label="Run again" onClick={() => submit(e.command)} disabled={running}>
+                        <RotateCw />
+                      </IconAction>
+                      <IconAction label="Copy output" onClick={() => copy(e)} disabled={!e.reply && !e.error}>
+                        <Copy />
+                      </IconAction>
+                    </div>
                   )}
                 </div>
-                <div className="pl-2">
-                  {e.error ? (
-                    <span className="text-destructive">{e.error}</span>
+                {e.kind === 'help' && <HelpOutput topic={e.command.replace(/^\s*help\s*/i, '')} byName={byName} />}
+                {e.kind === 'command' &&
+                  (e.error ? (
+                    <div className="text-destructive">(error) {e.error}</div>
                   ) : e.reply ? (
                     <ReplyView reply={e.reply} raw={raw} />
                   ) : (
-                    <Spinner className="size-3.5" />
-                  )}
-                </div>
+                    <Spinner className="my-1 size-3.5" />
+                  ))}
               </div>
             );
           })}
+
+          {/* The live prompt. Hidden, not unmounted, while commands run so it keeps focus. */}
+          <div className={cn(running && 'invisible')}>
+            <div className="flex items-start">
+              <Prompt text={prompt} />
+              {/* Input and grey hint share one grid cell, so a hint that wraps makes the row taller. */}
+              <div className="grid min-w-0 flex-1 *:[grid-area:1/1]">
+                <textarea
+                  ref={input}
+                  autoFocus
+                  rows={1}
+                  value={value}
+                  onChange={(e) => {
+                    setValue(e.target.value);
+                    setCaret(e.target.selectionStart);
+                    setHistoryAt(-1);
+                    setPick(0);
+                    setDismissed(false);
+                    scrollToEnd();
+                  }}
+                  onSelect={(e) => setCaret(e.currentTarget.selectionStart)}
+                  onKeyDown={onKeyDown}
+                  spellCheck={false}
+                  autoCapitalize="off"
+                  autoComplete="off"
+                  aria-label="Redis command"
+                  aria-autocomplete="list"
+                  className="z-10 block w-full resize-none overflow-hidden bg-transparent p-0 break-all whitespace-pre-wrap caret-success outline-none field-sizing-content"
+                />
+                {ghost && (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none break-all whitespace-pre-wrap text-muted-foreground/70"
+                  >
+                    <span className="invisible">{value}</span>
+                    {ghost}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {completion && (
+              <div
+                className="mt-1 ml-1 max-w-3xl border-l-2 border-success/40"
+                role="listbox"
+                aria-label="Command suggestions"
+              >
+                {completion.items.map((d, i) => (
+                  <button
+                    key={d.name}
+                    type="button"
+                    role="option"
+                    aria-selected={d === picked}
+                    onMouseDown={(ev) => ev.preventDefault()}
+                    onClick={() => accept(d)}
+                    onMouseEnter={() => setPick(i)}
+                    className={cn('flex w-full items-baseline gap-3 px-2 text-left', d === picked && 'bg-accent')}
+                  >
+                    <span className={cn('shrink-0 font-medium', d.refused && 'text-muted-foreground line-through')}>
+                      {upper(d.name)}
+                    </span>
+                    <span className="min-w-0 truncate text-muted-foreground">{d.syntax}</span>
+                    <span className="ml-auto hidden max-w-[45%] shrink-0 truncate font-sans text-xs text-muted-foreground md:block">
+                      {d.summary}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {!completion && lineDoc && (
+              <div className="mt-0.5 truncate font-sans text-xs text-muted-foreground">
+                {lineDoc.refused ? (
+                  <span className="text-destructive">{lineDoc.refused}</span>
+                ) : (
+                  <>
+                    {lineDoc.summary}
+                    {lineDoc.flags.includes('write') && <span className="ml-2 text-warning">writes</span>}
+                    {lineDoc.group && <span className="ml-2">· {lineDoc.group}</span>}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
           <div ref={bottom} />
         </div>
-      </div>
-
-      <div className="relative shrink-0 border-t bg-background">
-        {completion && (
-          <div
-            className="absolute inset-x-3 bottom-full mb-2 overflow-hidden rounded-lg border bg-popover shadow-none"
-            role="listbox"
-            aria-label="Command suggestions"
-          >
-            {completion.items.map((d, i) => (
-              <button
-                key={d.name}
-                type="button"
-                role="option"
-                aria-selected={d === picked}
-                onMouseDown={(ev) => ev.preventDefault()}
-                onClick={() => accept(d)}
-                onMouseEnter={() => setPick(i)}
-                className={cn('flex w-full items-baseline gap-3 px-3 py-1.5 text-left', d === picked && 'bg-accent')}
-              >
-                <span
-                  className={cn(
-                    'shrink-0 font-mono text-[12.5px] font-medium',
-                    d.refused && 'text-muted-foreground line-through',
-                  )}
-                >
-                  {upper(d.name)}
-                </span>
-                <span className="min-w-0 truncate font-mono text-[11.5px] text-muted-foreground">{d.syntax}</span>
-                <span className="ml-auto hidden max-w-[40%] shrink-0 truncate text-xs text-muted-foreground md:block">
-                  {d.summary}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-        {hint && (
-          <div className="border-b bg-grid-header px-4 py-2">
-            <Signature doc={hint} />
-          </div>
-        )}
-        <form
-          className="flex items-start gap-2 px-4 py-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            submit();
-          }}
-        >
-          <span className="pt-[3px] font-mono text-[12.5px] text-muted-foreground select-none">db{db}&gt;</span>
-          <textarea
-            ref={input}
-            autoFocus
-            rows={rows}
-            value={value}
-            onChange={(e) => {
-              setValue(e.target.value);
-              setCaret(e.target.selectionStart);
-              setHistoryAt(-1);
-              setPick(0);
-              setDismissed(false);
-            }}
-            onSelect={(e) => setCaret(e.currentTarget.selectionStart)}
-            onKeyDown={onKeyDown}
-            spellCheck={false}
-            autoCapitalize="off"
-            autoComplete="off"
-            aria-label="Redis command"
-            aria-autocomplete="list"
-            placeholder="GET mykey"
-            className="min-w-0 flex-1 resize-none bg-transparent font-mono text-[13px] leading-relaxed outline-none placeholder:text-muted-foreground/60"
-          />
-          <Button type="submit" size="sm" disabled={!value.trim() || running}>
-            {running ? <Spinner className="text-current" /> : <CornerDownLeft />} Run
-          </Button>
-        </form>
       </div>
 
       <AlertDialog open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>
@@ -520,7 +608,9 @@ export function ConsoleView({ db }: { db: number }) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => requestAnimationFrame(() => input.current?.focus())}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={() => {
