@@ -10,6 +10,7 @@ import {
   prettyJson,
   replyToText,
 } from '../web/src/lib/console.js';
+import { refusal } from '../src/redis/console.js';
 
 const doc = (name: string, extra: Partial<CommandDoc> = {}): CommandDoc => ({
   name,
@@ -105,5 +106,16 @@ describe('console output', () => {
     assert.equal(prettyJson('{"a":1}'), '{\n  "a": 1\n}');
     assert.equal(prettyJson('hello'), null);
     assert.equal(prettyJson('{broken'), null);
+  });
+});
+
+describe('read-only guard', () => {
+  it('refuses scripts whatever flags the server reports', () => {
+    // EVAL's flags on Redis 8.0, which has no script_runner flag yet.
+    const eval80 = ['noscript', 'stale', 'skip_monitor', 'no_mandatory_keys', 'movablekeys'];
+    assert.match(refusal('eval', null, eval80, true) ?? '', /EVAL_RO/);
+    assert.match(refusal('fcall', null, eval80, true) ?? '', /FCALL_RO/);
+    assert.equal(refusal('eval_ro', null, [...eval80, 'readonly'], true), null);
+    assert.equal(refusal('eval', null, eval80, false), null);
   });
 });

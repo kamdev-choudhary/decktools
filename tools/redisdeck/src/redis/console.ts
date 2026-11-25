@@ -112,6 +112,13 @@ const READONLY_ADMIN = new Set([
   'role',
 ]);
 
+/**
+ * Scripts and functions that may write. Matched by name because their flags
+ * vary by version: only newer Redis versions mark them `script_runner`, and none
+ * mark them `write`. The read-only variants (EVAL_RO, FCALL_RO...) are fine.
+ */
+const SCRIPT_RUNNERS = new Set(['eval', 'evalsha', 'fcall']);
+
 type CommandInfo = [name: string, arity: number, flags: string[], ...rest: unknown[]] | null;
 
 /** Why a command can't run from the console, or null when it can. */
@@ -127,7 +134,7 @@ export function refusal(name: string, sub: string | null, flags: string[] | null
   if (!readonly) return null;
   const full = sub ? `${name}|${sub}` : name;
   if (flags.includes('write') || flags.includes('may_replicate') || flags.includes('pubsub')) return READONLY_ERROR;
-  if (flags.includes('script_runner') && !flags.includes('readonly'))
+  if (SCRIPT_RUNNERS.has(name) || (flags.includes('script_runner') && !flags.includes('readonly')))
     return `${READONLY_ERROR} (use EVAL_RO / FCALL_RO)`;
   if (flags.includes('admin') && !READONLY_ADMIN.has(full) && !READONLY_ADMIN.has(name)) return READONLY_ERROR;
   return null;
