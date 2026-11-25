@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { Skeleton } from '@deck/ui/components/skeleton';
-import { cn } from '@deck/ui/lib/utils';
+import { Skeleton } from './skeleton';
+import { cn } from '../lib/utils';
 
 interface StatTileProps {
   label: string;
