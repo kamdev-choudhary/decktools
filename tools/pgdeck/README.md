@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/public/favicon.svg" alt="pgdeck logo" width="72" height="72" />
+<img src="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/public/favicon.svg" alt="pgdeck logo" width="72" height="72" />
 
 # pgdeck
 
@@ -16,13 +16,13 @@ import and back up gigabytes, and watch live activity, all from your browser.
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/npm/l/pgdeck?style=flat-square&color=blue)](./LICENSE)
 <br />
-[![GitHub stars](https://img.shields.io/github/stars/kamdev-choudhary/pgdeck?style=flat-square&logo=github)](https://github.com/kamdev-choudhary/pgdeck/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/kamdev-choudhary/pgdeck?style=flat-square&logo=github)](https://github.com/kamdev-choudhary/pgdeck/issues)
-[![Last commit](https://img.shields.io/github/last-commit/kamdev-choudhary/pgdeck?style=flat-square&logo=git&logoColor=white)](https://github.com/kamdev-choudhary/pgdeck/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/kamdev-choudhary/decktools?style=flat-square&logo=github)](https://github.com/kamdev-choudhary/decktools/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/kamdev-choudhary/decktools?style=flat-square&logo=github)](https://github.com/kamdev-choudhary/decktools/issues)
+[![Last commit](https://img.shields.io/github/last-commit/kamdev-choudhary/decktools?style=flat-square&logo=git&logoColor=white)](https://github.com/kamdev-choudhary/decktools/commits/main)
 [![Install size](https://img.shields.io/npm/unpacked-size/pgdeck?style=flat-square&label=install%20size)](https://www.npmjs.com/package/pgdeck)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/kamdev-choudhary/pgdeck/pulls)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/kamdev-choudhary/decktools/pulls)
 
-[**Website**](https://kamdev-choudhary.github.io/pgdeck/) ·
+[**Website**](https://kamdev-choudhary.github.io/decktools/pgdeck/) ·
 [**Quick start**](#quick-start) ·
 [**Features**](#features) ·
 [**Usage**](#usage) ·
@@ -33,8 +33,8 @@ import and back up gigabytes, and watch live activity, all from your browser.
 <br />
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/src/assets/shots/overview-dark.png" />
-  <img src="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/src/assets/shots/overview-light.png" alt="pgdeck live overview: connections, transactions per second, cache hit ratio and table storage" width="900" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/src/decks/pgdeck/assets/shots/overview-dark.png" />
+  <img src="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/src/decks/pgdeck/assets/shots/overview-light.png" alt="pgdeck live overview: connections, transactions per second, cache hit ratio and table storage" width="900" />
 </picture>
 
 </div>
@@ -170,15 +170,15 @@ any reverse proxy to reach it remotely.
   <tr>
     <td width="50%">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/src/assets/shots/table-dark.png" />
-        <img src="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/src/assets/shots/table-light.png" alt="Data grid with filters" />
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/src/decks/pgdeck/assets/shots/table-dark.png" />
+        <img src="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/src/decks/pgdeck/assets/shots/table-light.png" alt="Data grid with filters" />
       </picture>
       <p align="center"><sub><b>Data grid</b> with filters and type-aware editing</sub></p>
     </td>
     <td width="50%">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/src/assets/shots/sql-dark.png" />
-        <img src="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/src/assets/shots/sql-light.png" alt="SQL editor" />
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/src/decks/pgdeck/assets/shots/sql-dark.png" />
+        <img src="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/src/decks/pgdeck/assets/shots/sql-light.png" alt="SQL editor" />
       </picture>
       <p align="center"><sub><b>SQL editor</b> with autocomplete and history</sub></p>
     </td>
@@ -186,15 +186,15 @@ any reverse proxy to reach it remotely.
   <tr>
     <td width="50%">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/src/assets/shots/structure-dark.png" />
-        <img src="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/src/assets/shots/structure-light.png" alt="Table structure" />
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/src/decks/pgdeck/assets/shots/structure-dark.png" />
+        <img src="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/src/decks/pgdeck/assets/shots/structure-light.png" alt="Table structure" />
       </picture>
       <p align="center"><sub><b>Structure</b>: columns, indexes, constraints, references</sub></p>
     </td>
     <td width="50%">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/src/assets/shots/import-dark.png" />
-        <img src="https://raw.githubusercontent.com/kamdev-choudhary/pgdeck/main/site/src/assets/shots/import-light.png" alt="Streaming import" />
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/src/decks/pgdeck/assets/shots/import-dark.png" />
+        <img src="https://raw.githubusercontent.com/kamdev-choudhary/decktools/main/site/src/decks/pgdeck/assets/shots/import-light.png" alt="Streaming import" />
       </picture>
       <p align="center"><sub><b>Import</b>: stream gigabytes straight into Postgres</sub></p>
     </td>
@@ -353,7 +353,7 @@ Caddy forwards WebSockets automatically.
   editor.
 
 Found a vulnerability? Please report it privately through
-[GitHub security advisories](https://github.com/kamdev-choudhary/pgdeck/security/advisories/new)
+[GitHub security advisories](https://github.com/kamdev-choudhary/decktools/security/advisories/new)
 rather than a public issue.
 
 ## How values are handled
@@ -367,16 +367,23 @@ edited.
 
 ## Development
 
+pgdeck lives in the [decktools](https://github.com/kamdev-choudhary/decktools) monorepo, under
+`tools/pgdeck`. Shared pieces (CLI flags, login, CSRF, static serving, the UI
+kit) come from the internal `packages/*`, which are bundled into the published
+package.
+
 ```bash
-git clone https://github.com/kamdev-choudhary/pgdeck.git
-cd pgdeck
+git clone https://github.com/kamdev-choudhary/decktools.git
+cd decktools
 pnpm install
 
 # API on :47615 (no login) + Vite UI with hot reload on :47616
-DATABASE_URL=postgres://postgres@localhost:5432 pnpm dev
+DATABASE_URL=postgres://postgres@localhost:5432 pnpm --filter pgdeck dev
 ```
 
 Open <http://localhost:47616>.
+
+Run these in `tools/pgdeck` (or from the root with `pnpm --filter pgdeck <script>`):
 
 | Script | What it does |
 | --- | --- |
@@ -384,8 +391,11 @@ Open <http://localhost:47616>.
 | `pnpm build` | Build the UI (Vite) and the CLI (tsdown) into `dist/` |
 | `pnpm start` | Run the built CLI |
 | `pnpm typecheck` | Type-check the server and the UI |
+| `pnpm lint` | Lint with oxlint |
+| `pnpm test` | Unit and HTTP contract tests (node:test) |
 | `pnpm pack:check` | Build and list exactly what would be published |
-| `pnpm site:dev` | Run the landing page (Astro) locally |
+
+From the repository root, `pnpm site:dev` runs the website (Astro).
 
 ### Project layout
 
@@ -400,9 +410,12 @@ web/
     api/          typed API client, React Query hooks, live socket hook
     components/   shadcn/ui primitives (ui/) and app components (app/)
     views/        overview, table (data + structure), SQL editor, login
-    lib/          router, theme, formatting, storage helpers
-site/         landing page (Astro), deployed to GitHub Pages
+    lib/          router, formatting, import/export helpers
+test/         node:test suites
 ```
+
+Generic UI primitives, theme, fonts and design tokens live in `packages/ui`
+(`@deck/ui`); pgdeck's landing page is in `site/src/decks/pgdeck`.
 
 ### Built with
 
@@ -419,11 +432,11 @@ site/         landing page (Astro), deployed to GitHub Pages
 ## Contributing
 
 Contributions are welcome! Bug reports and feature requests go in
-[issues](https://github.com/kamdev-choudhary/pgdeck/issues). For code changes:
+[issues](https://github.com/kamdev-choudhary/decktools/issues). For code changes:
 
 1. Fork the repo and create a branch from `main`.
 2. Run `pnpm dev` against a local Postgres and make your change.
-3. Make sure `pnpm typecheck` and `pnpm build` pass.
+3. Make sure `pnpm check` passes at the repository root (lint, typecheck, tests, build).
 4. Open a pull request describing what changed and why.
 
 If pgdeck saves you time, consider giving it a ⭐ on GitHub.

@@ -5,13 +5,14 @@
   "type": "module",
   "license": "MIT",
   "author": "kamdev-bharatai",
-  "homepage": "https://github.com/kamdev-bharatai/s3deck#readme",
+  "homepage": "https://github.com/kamdev-choudhary/decktools/tree/main/tools/s3deck#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kamdev-bharatai/s3deck.git"
+    "url": "git+https://github.com/kamdev-choudhary/decktools.git",
+    "directory": "tools/s3deck"
   },
   "bugs": {
-    "url": "https://github.com/kamdev-bharatai/s3deck/issues"
+    "url": "https://github.com/kamdev-choudhary/decktools/issues"
   },
   "bin": {
     "s3deck": "./dist/cli.mjs"

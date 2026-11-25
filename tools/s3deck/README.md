@@ -10,11 +10,11 @@ all from your browser.
 
 [![npm version](https://img.shields.io/npm/v/s3deck?style=flat-square&logo=npm&color=cb3837)](https://www.npmjs.com/package/s3deck)
 [![npm downloads](https://img.shields.io/npm/dm/s3deck?style=flat-square&color=cb3837)](https://www.npmjs.com/package/s3deck)
-[![CI](https://img.shields.io/github/actions/workflow/status/kamdev-bharatai/s3deck/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/kamdev-bharatai/s3deck/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/kamdev-choudhary/decktools/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/kamdev-choudhary/decktools/actions/workflows/ci.yml)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](./LICENSE)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/kamdev-bharatai/s3deck/pulls)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/kamdev-choudhary/decktools/pulls)
 
 [**Quick start**](#quick-start) ·
 [**Features**](#features) ·
@@ -29,7 +29,7 @@ all from your browser.
 > [!NOTE]
 > s3deck is pre-1.0. It is usable today, but options and APIs may change
 > between minor versions until 1.0. Check the
-> [releases](https://github.com/kamdev-bharatai/s3deck/releases) before upgrading.
+> [releases](https://github.com/kamdev-choudhary/decktools/releases) before upgrading.
 
 ---
 
@@ -414,7 +414,7 @@ example.com {
   boundary is the key's IAM policy. A read-only key is the safest choice.
 
 Found a vulnerability? Please report it privately through
-[GitHub security advisories](https://github.com/kamdev-bharatai/s3deck/security/advisories/new)
+[GitHub security advisories](https://github.com/kamdev-choudhary/decktools/security/advisories/new)
 rather than a public issue.
 
 ## Troubleshooting
@@ -430,10 +430,14 @@ rather than a public issue.
 
 ## Development
 
+s3deck lives in the [decktools](https://github.com/kamdev-choudhary/decktools) monorepo, under
+`tools/s3deck`.
+
 ```bash
-git clone https://github.com/kamdev-bharatai/s3deck.git
-cd s3deck
+git clone https://github.com/kamdev-choudhary/decktools.git
+cd decktools
 pnpm install
+cd tools/s3deck
 
 # Optional: a local MinIO to develop against
 docker run -d -p 9000:9000 -p 9001:9001 minio/minio server /data --console-address :9001
@@ -451,6 +455,7 @@ Open <http://localhost:47716>.
 | `pnpm build` | Build the UI (Vite) and the CLI (tsdown) into `dist/` |
 | `pnpm start` | Run the built CLI |
 | `pnpm typecheck` | Type-check the server, the UI and the tests |
+| `pnpm lint` | Lint with oxlint |
 | `pnpm test` | Unit and API tests (Vitest). Add `S3DECK_TEST_ENDPOINT` to also run the S3 integration tests |
 | `pnpm test:integration` | Integration tests against `http://localhost:9000` (or `$S3DECK_TEST_ENDPOINT`) |
 | `pnpm pack:check` | Build and list exactly what would be published |
@@ -489,12 +494,12 @@ web/
 ## Contributing
 
 Contributions are welcome! Bug reports and feature requests go in
-[issues](https://github.com/kamdev-bharatai/s3deck/issues). For code changes:
+[issues](https://github.com/kamdev-choudhary/decktools/issues). For code changes:
 
 1. Fork the repo and create a branch from `main`.
 2. Run `pnpm dev` against a local MinIO (see [Development](#development)) and
    make your change.
-3. Make sure `pnpm typecheck` and `pnpm build` pass.
+3. Make sure `pnpm check` passes at the repository root (lint, typecheck, tests, build).
 4. Open a pull request describing what changed and why.
 
 ## License

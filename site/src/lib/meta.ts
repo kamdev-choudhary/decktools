@@ -2,7 +2,7 @@
  * Facts fetched once at build time: GitHub stars and published npm versions.
  * Network failures fall back so the build never breaks.
  */
-export const REPO = 'kamdev-choudhary/pgdeck';
+export const REPO = 'kamdev-choudhary/decktools';
 export const REPO_URL = `https://github.com/${REPO}`;
 
 /** Folder of a deck's docs (its README) in the monorepo. */
