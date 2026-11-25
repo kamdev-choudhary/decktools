@@ -1,5 +1,5 @@
 import { CornerDownLeft, Eraser } from 'lucide-react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import type { Reply } from '@shared/types';
 import { Button } from '@deck/ui/components/button';
 import { storage } from '@deck/ui/lib/storage';
@@ -71,7 +71,8 @@ export function ConsoleView({ db }: { db: number }) {
   const bottom = useRef<HTMLDivElement>(null);
   const counter = useRef(0);
 
-  useEffect(() => bottom.current?.scrollIntoView({ block: 'end' }), [entries]);
+  // Keep the newest output in view (after React has rendered it).
+  const scrollToEnd = () => requestAnimationFrame(() => bottom.current?.scrollIntoView({ block: 'end' }));
 
   const submit = (command: string) => {
     const text = command.trim();
@@ -83,10 +84,14 @@ export function ConsoleView({ db }: { db: number }) {
     storage.setJson(HISTORY_KEY, next);
     setLine('');
     setCursor(-1);
+    scrollToEnd();
     run.mutate(text, {
       onSuccess: (res) => setEntries((e) => e.map((x) => (x.n === n ? { ...x, reply: res.reply, ms: res.ms } : x))),
       onError: (err) => setEntries((e) => e.map((x) => (x.n === n ? { ...x, error: errorMessage(err) } : x))),
-      onSettled: () => input.current?.focus(),
+      onSettled: () => {
+        input.current?.focus();
+        scrollToEnd();
+      },
     });
   };
 

@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@deck/ui/components/tooltip';
 import { cn } from '@deck/ui/lib/utils';
 import { useCreateKey, useDbSize, useKeyAction, useKeyDetail, useKeyList, useServer } from '@/api/hooks';
-import { CenteredSpinner, ErrorAlert, errorMessage, Spinner } from '@/components/feedback';
+import { CenteredSpinner, ErrorAlert, Spinner } from '@/components/feedback';
 import { FormDialog, type Field } from '@/components/FormDialog';
 import { TypeBadge } from '@/components/TypeBadge';
 import { formatBytes, formatDuration, formatNumber, formatTtl } from '@/lib/format';
@@ -62,7 +62,7 @@ function KeyList({ db, selected, readonly, onNew }: { db: number; selected: stri
     });
     io.observe(el);
     return () => io.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, keys.length]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]); // re-armed after each page, so a still-visible end loads the next
 
   const scanning = list.isFetching && !list.isPending;
 
@@ -416,17 +416,17 @@ function NewKeyDialog({ db, open, onOpenChange }: { db: number; open: boolean; o
         const base = { name: v.name!, ttl };
         const spec: NewKey =
           type === 'hash'
-            ? { type, ...base, field: v.field!, value: v.value! }
+            ? { type: 'hash', ...base, field: v.field!, value: v.value! }
             : type === 'list'
-              ? { type, ...base, value: v.value! }
+              ? { type: 'list', ...base, value: v.value! }
               : type === 'set'
-                ? { type, ...base, member: v.member! }
+                ? { type: 'set', ...base, member: v.member! }
                 : type === 'zset'
-                  ? { type, ...base, member: v.member!, score: Number(v.score) }
+                  ? { type: 'zset', ...base, member: v.member!, score: Number(v.score) }
                   : type === 'stream'
-                    ? { type, ...base, field: v.field!, value: v.value! }
+                    ? { type: 'stream', ...base, field: v.field!, value: v.value! }
                     : type === 'ReJSON-RL'
-                      ? { type, ...base, json: v.json! }
+                      ? { type: 'ReJSON-RL', ...base, json: v.json! }
                       : { type: 'string', ...base, value: v.value! };
         create.mutate(spec, {
           onSuccess: (k) => {

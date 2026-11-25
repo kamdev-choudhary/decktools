@@ -83,7 +83,7 @@ export class RedisManager {
     } catch (err) {
       probe.disconnect();
       const reason = cause ?? (err as Error);
-      throw new Error(reason.message || (reason as AggregateError).errors?.map((e: Error) => e.message).join(', ') || String(reason));
+      throw new Error(reason.message || (reason as AggregateError).errors?.map((e: Error) => e.message).join(', ') || String(reason), { cause: err });
     }
     probe.disconnect();
     const client = await this.get(this.defaultDb);
