@@ -33,6 +33,7 @@ export async function serverInfo(manager: RedisManager, client: Redis): Promise<
     rdbLastSave: i.rdb_last_save_time ? num(i.rdb_last_save_time) * 1000 : null,
     rdbChangesSinceSave: num(i.rdb_changes_since_last_save),
     databases: Math.max(manager.databases, (keyspace.at(-1)?.index ?? -1) + 1),
+    defaultDb: manager.defaultDb,
     keyspace,
     readonly: manager.readonly,
     modules,

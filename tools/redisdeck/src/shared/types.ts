@@ -75,6 +75,8 @@ export interface ServerInfo {
   rdbChangesSinceSave: number;
   /** Number of logical databases (CONFIG GET databases, or a best guess). */
   databases: number;
+  /** The database from the connection URL (redis://host/2), where the UI opens. */
+  defaultDb: number;
   keyspace: DbSummary[];
   readonly: boolean;
   modules: string[];
