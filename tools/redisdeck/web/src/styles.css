@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@deck/ui/styles.css';
+
+/* redisdeck-specific styles. Shared tokens and base styles live in @deck/ui. */
+
+/* Key type colours: distinct hues, readable as text on both themes. */
+:root {
+  --type-string: #0070f3;
+  --type-hash: #7c3aed;
+  --type-list: #0d9488;
+  --type-set: #c2410c;
+  --type-zset: #be185d;
+  --type-stream: #4d7c0f;
+  --type-json: #a16207;
+  --type-other: #565656;
+}
+.dark {
+  --type-string: #52a8ff;
+  --type-hash: #a78bfa;
+  --type-list: #2dd4bf;
+  --type-set: #fb923c;
+  --type-zset: #f472b6;
+  --type-stream: #a3e635;
+  --type-json: #facc15;
+  --type-other: #a1a1a1;
+}
