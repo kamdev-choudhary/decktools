@@ -14,13 +14,15 @@
   },
   "scripts": {
     "build": "pnpm --filter \"./tools/*\" build",
-    "dev": "pnpm --filter pgdeck dev",
+    "dev": "pnpm --filter \"./tools/*\" --parallel dev",
+    "dev:pgdeck": "pnpm --filter pgdeck dev",
+    "dev:s3deck": "pnpm --filter s3deck dev",
+    "dev:redisdeck": "pnpm --filter redisdeck dev",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r test",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "pgdeck": "pnpm --filter pgdeck",
     "site:dev": "pnpm --filter deck-site dev",
     "site:build": "pnpm --filter deck-site build"
   },
