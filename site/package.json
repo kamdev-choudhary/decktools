@@ -1,8 +1,8 @@
 {
-  "name": "pgdeck-site",
+  "name": "deck-site",
   "private": true,
   "type": "module",
-  "description": "Landing page for pgdeck, deployed to GitHub Pages.",
+  "description": "Website featuring every deck, deployed to GitHub Pages. One folder per deck under src/decks.",
   "scripts": {
     "dev": "astro dev --port 47617",
     "build": "astro check && astro build",
