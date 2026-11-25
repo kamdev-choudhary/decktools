@@ -1,13 +1,13 @@
 import { PanelLeft } from 'lucide-react';
 import type { DbInfo, SessionInfo } from '@shared/types';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@deck/ui/components/tooltip';
 import { dbHref, type Route } from '@/lib/router';
 import { DatabaseSwitcher } from './DatabaseSwitcher';
 import { Slash } from './feedback';
 import { Logo } from './Logo';
-import { TruncatedText } from './TruncatedText';
+import { TruncatedText } from '@deck/ui/components/truncated-text';
 import { UserMenu } from './UserMenu';
 
 interface HeaderProps {

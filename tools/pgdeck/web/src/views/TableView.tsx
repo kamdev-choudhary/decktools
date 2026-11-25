@@ -1,11 +1,11 @@
 import { HardDrive, Lock, Rows3, Table2 } from 'lucide-react';
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@deck/ui/components/badge';
 import { REL_KIND_LABEL } from '@shared/types';
 import { useMeta } from '@/api/hooks';
 import { CenteredSpinner, ErrorAlert } from '@/components/app/feedback';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@deck/ui/components/tooltip';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@deck/ui/components/tabs';
 import { formatNumber } from '@/lib/format';
 import { TableActionsMenu } from '@/components/app/TableActionsMenu';
 import { DataTab } from './DataTab';

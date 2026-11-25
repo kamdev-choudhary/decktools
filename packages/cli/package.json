@@ -1,0 +1,26 @@
+{
+  "name": "@deck/cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "CLI infrastructure for decks: standard web-UI flags, startup banner, shutdown handling.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "tsx --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@deck/config": "workspace:*",
+    "@deck/logger": "workspace:*",
+    "commander": "^15.1.0",
+    "open": "^11.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

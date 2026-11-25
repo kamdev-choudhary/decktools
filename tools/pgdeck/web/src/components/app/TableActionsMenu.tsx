@@ -27,10 +27,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+} from '@deck/ui/components/alert-dialog';
+import { Button } from '@deck/ui/components/button';
+import { Checkbox } from '@deck/ui/components/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,11 +38,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@deck/ui/components/dropdown-menu';
+import { Input } from '@deck/ui/components/input';
+import { Label } from '@deck/ui/components/label';
 import { dbHref, diagramHref, navigate, parseRoute, tableHref } from '@/lib/router';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 import { errorMessage, Spinner } from './feedback';
 
 type Dialogs = 'rename' | 'duplicate' | 'truncate' | 'drop' | null;

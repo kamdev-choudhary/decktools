@@ -1,12 +1,10 @@
-import type { ErrorHandler } from 'hono';
-import { HTTPException } from 'hono/http-exception';
+import type { Context } from 'hono';
 import pg from 'pg';
 import type { ApiErrorBody } from '../../shared/types.js';
 import { UserError } from '../../db/errors.js';
 
-export const handleError: ErrorHandler = (err, c) => {
-  if (err instanceof HTTPException) return err.getResponse();
-
+/** Map pgdeck's own and Postgres' errors to responses; anything else becomes a logged 500. */
+export function mapError(err: Error, c: Context): Response | undefined {
   if (err instanceof UserError) {
     return c.json<ApiErrorBody>({ error: err.message }, err.status);
   }
@@ -26,7 +24,5 @@ export const handleError: ErrorHandler = (err, c) => {
       400,
     );
   }
-
-  console.error('[pgdeck]', err);
-  return c.json<ApiErrorBody>({ error: err.message || 'Internal error' }, 500);
-};
+  return undefined;
+}

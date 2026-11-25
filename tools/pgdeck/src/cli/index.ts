@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { Command, InvalidArgumentError, Option } from 'commander';
-import open from 'open';
-import pc from 'picocolors';
+import { listenErrorMessage, onShutdown, openBrowser, parsePositiveInt, serverOptions } from '@deck/cli';
+import { serverUrl } from '@deck/config';
+import { printFatal } from '@deck/logger';
+import { Command, Option } from 'commander';
 import pkg from '../../package.json' with { type: 'json' };
 import { DatabaseManager } from '../db/index.js';
 import { startServer } from '../server/index.js';
@@ -10,18 +11,6 @@ import { redact, resolveConfig, type CliOptions } from './config.js';
 
 /** Deliberately uncommon so it doesn't collide with typical dev servers. */
 const DEFAULT_PORT = 47615;
-
-function parsePort(value: string): number {
-  const n = Number(value);
-  if (!Number.isInteger(n) || n < 0 || n > 65535) throw new InvalidArgumentError('must be an integer between 0 and 65535');
-  return n;
-}
-
-function parsePositiveInt(value: string): number {
-  const n = Number(value);
-  if (!Number.isInteger(n) || n < 1) throw new InvalidArgumentError('must be a positive integer');
-  return n;
-}
 
 const EXAMPLES = `
 Examples:
@@ -51,7 +40,7 @@ async function run(connection: string | undefined, opts: CliOptions): Promise<vo
     info = await (await manager.connect()).info();
     databaseCount = (await manager.list()).databases.length;
   } catch (err) {
-    console.error(`\n  ${pc.red('✗')} Could not connect to ${redact(config.connectionString)}\n    ${(err as Error).message}\n`);
+    printFatal(`Could not connect to ${redact(config.connectionString)}`, (err as Error).message);
     await manager.closeAll();
     process.exit(1);
   }
@@ -67,47 +56,39 @@ async function run(connection: string | undefined, opts: CliOptions): Promise<vo
       host: config.host,
     });
   } catch (err) {
-    const e = err as NodeJS.ErrnoException;
-    const msg = e.code === 'EADDRINUSE' ? `Port ${config.port} is already in use. Try --port ${config.port + 1}` : e.message;
-    console.error(`\n  ${pc.red('✗')} ${msg}\n`);
+    printFatal(listenErrorMessage(err, config.port));
     await manager.closeAll();
     process.exit(1);
   }
 
-  const shownHost = config.host === '0.0.0.0' || config.host === '::' ? 'localhost' : config.host;
-  const url = `http://${shownHost}:${started.port}${config.basePath}/`;
+  const url = serverUrl(config.host, started.port, config.basePath);
   printBanner(pkg.version, config, info, databaseCount, url, started.port);
 
-  if (config.open) open(url).catch(() => {});
+  if (config.open) openBrowser(url);
 
-  let stopping = false;
-  const shutdown = async () => {
-    if (stopping) process.exit(1);
-    stopping = true;
-    console.log(pc.dim('\n  Shutting down...'));
+  onShutdown(async () => {
     started.close();
     await manager.closeAll();
-    process.exit(0);
-  };
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  });
 }
+
+const server = serverOptions({ defaultPort: DEFAULT_PORT });
 
 const program = new Command()
   .name('pgdeck')
   .description(pkg.description)
   .version(pkg.version, '-v, --version')
   .argument('[connection-string]', 'postgres:// URL (default: $DATABASE_URL, then PG* variables)')
-  .addOption(new Option('-p, --port <port>', 'port for the web UI').argParser(parsePort).default(Number(process.env.PORT) || DEFAULT_PORT))
-  .option('-H, --host <host>', 'interface to bind (0.0.0.0 for containers/LAN)', '127.0.0.1')
-  .option('-u, --user <name>', 'login username', 'admin')
-  .option('-P, --password <password>', 'login password (default: random, printed at startup)')
-  .option('--no-auth', 'disable the login prompt (only on a trusted host)')
+  .addOption(server.port)
+  .addOption(server.host)
+  .addOption(server.user)
+  .addOption(server.password)
+  .addOption(server.noAuth)
   .option('--readonly', 'open every session read-only and disable editing', false)
   .option('--ssl', 'connect with SSL without verifying the certificate', false)
-  .option('--base-path <path>', 'serve under a path prefix, e.g. /db, if your proxy does not strip it', '')
+  .addOption(server.basePath)
   .addOption(new Option('--max-rows <n>', 'max rows returned per query').argParser(parsePositiveInt).default(2000))
-  .option('--open', 'open the UI in your browser', false)
+  .addOption(server.open)
   .addHelpText('after', EXAMPLES)
   .action(run);
 

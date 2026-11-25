@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { MiddlewareHandler } from 'hono';
+import { contentSecurityPolicy } from '@deck/security';
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -15,17 +16,7 @@ const MIME: Record<string, string> = {
   '.map': 'application/json',
 };
 
-const CSP = [
-  "default-src 'self'",
-  "script-src 'self'",
-  "style-src 'self' 'unsafe-inline'", // CodeMirror injects style tags
-  "img-src 'self' data:",
-  "connect-src 'self'",
-  "frame-ancestors 'self'",
-  "base-uri 'none'",
-].join('; ');
-
-interface Asset {
+export interface Asset {
   body: Uint8Array<ArrayBuffer>;
   type: string;
 }
@@ -45,10 +36,17 @@ export function loadAssets(root: string): Map<string, Asset> | null {
   return assets;
 }
 
-export function serveAssets(assets: Map<string, Asset> | null): MiddlewareHandler {
+export interface ServeAssetsOptions {
+  /** Tool name for the "not built" message. */
+  name: string;
+  /** Content-Security-Policy for index.html (default: contentSecurityPolicy()). */
+  csp?: string;
+}
+
+export function serveAssets(assets: Map<string, Asset> | null, { name, csp = contentSecurityPolicy() }: ServeAssetsOptions): MiddlewareHandler {
   return async (c) => {
     if (!assets) {
-      return c.text('pgdeck UI is not built. Run "pnpm build", or use "pnpm dev" during development.', 503);
+      return c.text(`${name} UI is not built. Run "pnpm build", or use "pnpm dev" during development.`, 503);
     }
     const p = c.req.path === '/' ? '/index.html' : c.req.path;
     const asset = assets.get(p);
@@ -58,7 +56,7 @@ export function serveAssets(assets: Map<string, Asset> | null): MiddlewareHandle
     c.header('x-content-type-options', 'nosniff');
     if (p === '/index.html') {
       c.header('cache-control', 'no-store');
-      c.header('content-security-policy', CSP);
+      c.header('content-security-policy', csp);
       c.header('referrer-policy', 'no-referrer');
     } else if (p.startsWith('/assets/')) {
       c.header('cache-control', 'public, max-age=31536000, immutable'); // content-hashed by Vite

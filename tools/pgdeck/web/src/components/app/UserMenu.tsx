@@ -2,7 +2,7 @@ import { LogOut, Type } from 'lucide-react';
 import { toast } from 'sonner';
 import type { DbInfo, SessionInfo } from '@shared/types';
 import { useLogout } from '@/api/hooks';
-import { Button } from '@/components/ui/button';
+import { Button } from '@deck/ui/components/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,10 +15,10 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@deck/ui/components/dropdown-menu';
 import { MONO_FONTS, SANS_FONTS, useFonts, type MonoFont, type SansFont } from '@/lib/fonts';
 import { errorMessage } from './feedback';
-import { ThemeSwitcher } from './ThemeSwitcher';
+import { ThemeSwitcher } from '@deck/ui/components/theme-switcher';
 
 export function UserMenu({ session, info }: { session: SessionInfo; info?: DbInfo }) {
   const logout = useLogout();

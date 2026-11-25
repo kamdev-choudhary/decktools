@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import type { DbStats } from '@shared/types';
 import { api } from '@/api/client';
 import { keys } from '@/api/hooks';
-import { Button } from '@/components/ui/button';
+import { Button } from '@deck/ui/components/button';
 import { errorMessage, Spinner } from '../feedback';
 import { formatBytes, formatNumber, formatPercent } from '@/lib/format';
 import { tableHref } from '@/lib/router';

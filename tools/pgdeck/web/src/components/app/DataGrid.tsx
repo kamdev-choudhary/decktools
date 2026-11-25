@@ -1,9 +1,9 @@
 import { ArrowDown, ArrowUp, ChevronsUpDown, KeyRound } from 'lucide-react';
 import { useRef } from 'react';
 import type { Cell, SortDir } from '@shared/types';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Checkbox } from '@deck/ui/components/checkbox';
 import { isNumericType } from '@/lib/format';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 import { FkHeaderLink, FkPeek, type FkTarget } from './ForeignKey';
 
 const MAX_CELL_CHARS = 300;

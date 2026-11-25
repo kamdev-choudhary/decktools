@@ -12,14 +12,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+} from '@deck/ui/components/alert-dialog';
+import { Button } from '@deck/ui/components/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@deck/ui/components/dropdown-menu';
 import { openInSqlEditor } from '@/lib/sql-draft';
 import { errorMessage, Spinner } from '../feedback';
 import { formatDuration } from '@/lib/format';
-import { cn } from '@/lib/utils';
-import { TruncatedText } from '../TruncatedText';
+import { cn } from '@deck/ui/lib/utils';
+import { TruncatedText } from '@deck/ui/components/truncated-text';
 
 function StateDot({ state }: { state: string | null }) {
   const tone =

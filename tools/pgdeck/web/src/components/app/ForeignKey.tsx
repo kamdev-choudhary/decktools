@@ -4,14 +4,14 @@ import { useDeferredValue, useState } from 'react';
 import type { Column, Filter, TableMeta } from '@shared/types';
 import { api } from '@/api/client';
 import { useMeta } from '@/api/hooks';
-import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@deck/ui/components/button';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@deck/ui/components/command';
+import { Input } from '@deck/ui/components/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@deck/ui/components/popover';
 import { tableHref } from '@/lib/router';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 import { ErrorAlert, Spinner } from './feedback';
-import { TruncatedText } from './TruncatedText';
+import { TruncatedText } from '@deck/ui/components/truncated-text';
 
 /** Where a single-column foreign key points. */
 export interface FkTarget {

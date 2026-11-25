@@ -5,5 +5,5 @@ dist/
 .env
 *.tgz
 
-# Astro site
+# Astro sites
 .astro/

@@ -2,16 +2,16 @@ import { ChevronRight, Eye, FileDown, FileUp, Layers, LayoutGrid, Network, Plus,
 import { useMemo, useState } from 'react';
 import { REL_KIND_LABEL, type RelKind, type TableRef } from '@shared/types';
 import { useInfo, useTables } from '@/api/hooks';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@deck/ui/components/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@deck/ui/components/tooltip';
 import { CreateTableDialog } from './CreateTableDialog';
 import { ObjectsNav } from './ObjectsNav';
-import { Input } from '@/components/ui/input';
+import { Input } from '@deck/ui/components/input';
 import { dbHref, diagramHref, exportHref, importHref, rolesHref, sqlHref, tableHref, type Route } from '@/lib/router';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 import { ErrorAlert, Spinner } from './feedback';
 import { TableActionsMenu } from './TableActionsMenu';
-import { TruncatedText } from './TruncatedText';
+import { TruncatedText } from '@deck/ui/components/truncated-text';
 
 const KIND_ICON: Record<RelKind, LucideIcon> = { r: Table2, p: Table2, f: Table2, v: Eye, m: Layers };
 

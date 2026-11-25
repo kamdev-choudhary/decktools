@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useInfo } from '@/api/hooks';
-import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@deck/ui/components/button';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@deck/ui/components/command';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
 import { openInSqlEditor } from '@/lib/sql-draft';
 import { errorMessage, Spinner } from './feedback';
 import { Blocks, ChevronRight, Hash, Plus, SquareFunction, Zap, type LucideIcon } from 'lucide-react';
@@ -12,8 +12,8 @@ import type { ObjectKind } from '@shared/types';
 import { api } from '@/api/client';
 import { keys } from '@/api/hooks';
 import { navigate, objectHref, type Route } from '@/lib/router';
-import { cn } from '@/lib/utils';
-import { TruncatedText } from './TruncatedText';
+import { cn } from '@deck/ui/lib/utils';
+import { TruncatedText } from '@deck/ui/components/truncated-text';
 
 interface Item {
   oid: number;

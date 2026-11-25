@@ -4,10 +4,10 @@ import { createRoot } from 'react-dom/client';
 import type { SessionInfo } from '@shared/types';
 import { isUnauthorized } from '@/api/client';
 import { keys } from '@/api/hooks';
-import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from '@deck/ui/components/sonner';
+import { TooltipProvider } from '@deck/ui/components/tooltip';
 import { applyFonts, readFonts } from '@/lib/fonts';
-import { ThemeProvider } from '@/lib/theme';
+import { ThemeProvider } from '@deck/ui/components/theme-provider';
 import { App } from './App';
 import './styles.css';
 
@@ -31,7 +31,7 @@ applyFonts(readFonts());
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
+      <ThemeProvider storageKey="pgdeck.theme">
         <TooltipProvider delayDuration={300}>
           <App />
           <Toaster position="bottom-right" />

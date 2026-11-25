@@ -38,12 +38,8 @@ export interface DatabaseList {
   databases: DatabaseSummary[];
 }
 
-export interface SessionInfo {
-  /** False when pgdeck runs with --no-auth. */
-  authRequired: boolean;
-  authenticated: boolean;
-  username: string | null;
-}
+/** Auth wire contract, shared by every deck. */
+export type { SessionInfo } from '@deck/server/types';
 
 export interface LoginRequest {
   username: string;

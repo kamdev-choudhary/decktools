@@ -1,10 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { storage } from './storage';
+import { storage } from '../lib/storage';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type ResolvedTheme = 'light' | 'dark';
 
-const KEY = 'pgdeck.theme';
 const darkQuery = () => window.matchMedia('(prefers-color-scheme: dark)');
 
 interface ThemeContextValue {
@@ -19,13 +18,17 @@ const ThemeContext = createContext<ThemeContextValue>({
   setPreference: () => {},
 });
 
-function readPreference(): ThemePreference {
-  const v = storage.get(KEY);
+function readPreference(key: string): ThemePreference {
+  const v = storage.get(key);
   return v === 'light' || v === 'dark' || v === 'system' ? v : 'system';
 }
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [preference, setPref] = useState<ThemePreference>(readPreference);
+/**
+ * Light/dark/system theme: toggles the `dark` class on <html> and remembers the
+ * choice in localStorage under `storageKey` (e.g. "pgdeck.theme").
+ */
+export function ThemeProvider({ storageKey, children }: { storageKey: string; children: ReactNode }) {
+  const [preference, setPref] = useState<ThemePreference>(() => readPreference(storageKey));
   const [systemDark, setSystemDark] = useState(() => darkQuery().matches);
 
   useEffect(() => {
@@ -48,11 +51,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       preference,
       resolved,
       setPreference: (p) => {
-        storage.set(KEY, p);
+        storage.set(storageKey, p);
         setPref(p);
       },
     }),
-    [preference, resolved],
+    [preference, resolved, storageKey],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

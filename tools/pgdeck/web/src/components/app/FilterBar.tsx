@@ -1,13 +1,13 @@
 import { ListFilter, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { FILTER_OPS, LIST_OPS, UNARY_OPS, type Column, type Filter, type FilterMatch, type FilterOp } from '@shared/types';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
-import { Combobox } from './Combobox';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
+import { Input } from '@deck/ui/components/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@deck/ui/components/popover';
+import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@deck/ui/components/select';
+import { cn } from '@deck/ui/lib/utils';
+import { Combobox } from '@deck/ui/components/combobox';
 import { fieldKind } from './FieldInput';
 
 const needsValue = (f: Filter) => !UNARY_OPS.includes(f.op);

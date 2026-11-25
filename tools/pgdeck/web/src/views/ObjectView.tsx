@@ -18,17 +18,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@deck/ui/components/alert-dialog';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
+import { Checkbox } from '@deck/ui/components/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import { Input } from '@deck/ui/components/input';
+import { Label } from '@deck/ui/components/label';
 import { dbHref, navigate, objectHref } from '@/lib/router';
 import { sqlThemeDark, sqlThemeLight } from '@/lib/sql-theme';
 import { openInSqlEditor } from '@/lib/sql-draft';
-import { useTheme } from '@/lib/theme';
+import { useTheme } from '@deck/ui/components/theme-provider';
 
 const KIND: Record<ObjectKind, { label: string; icon: LucideIcon }> = {
   function: { label: 'Function', icon: SquareFunction },

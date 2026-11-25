@@ -2,12 +2,12 @@ import { Check, ChevronsUpDown, Database, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDatabases, useInfo } from '@/api/hooks';
 import { CreateDatabaseDialog } from './DatabaseActions';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@deck/ui/components/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@deck/ui/components/popover';
 import { dbHref, navigate } from '@/lib/router';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 import { Kbd, Spinner } from './feedback';
 
 /** Searchable database picker. ⌘K / Ctrl+K opens it from anywhere. */

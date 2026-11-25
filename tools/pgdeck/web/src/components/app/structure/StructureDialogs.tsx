@@ -15,15 +15,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
-import { Combobox, type ComboOption } from '../Combobox';
+} from '@deck/ui/components/alert-dialog';
+import { Button } from '@deck/ui/components/button';
+import { Checkbox } from '@deck/ui/components/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import { Input } from '@deck/ui/components/input';
+import { Label } from '@deck/ui/components/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@deck/ui/components/select';
+import { cn } from '@deck/ui/lib/utils';
+import { Combobox, type ComboOption } from '@deck/ui/components/combobox';
 import { COMMON_TYPES, defaultSuggestions, Flag, ReferencePicker } from '../CreateTableDialog';
 import { errorMessage, Spinner } from '../feedback';
 

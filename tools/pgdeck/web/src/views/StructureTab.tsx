@@ -4,17 +4,17 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useInfo } from '@/api/hooks';
 import { ColumnDialog, DropStructureDialog, IndexDialog } from '@/components/app/structure/StructureDialogs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@deck/ui/components/dropdown-menu';
 import { tableHref } from '@/lib/router';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 
 const CONSTRAINT_TYPE: Record<string, string> = {
   p: 'primary key',

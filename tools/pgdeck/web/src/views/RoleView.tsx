@@ -15,18 +15,18 @@ import {
 } from '@shared/roles';
 import { api } from '@/api/client';
 import { keys } from '@/api/hooks';
-import { Combobox } from '@/components/app/Combobox';
+import { Combobox } from '@deck/ui/components/combobox';
 import { CenteredSpinner, ErrorAlert, errorMessage, Spinner } from '@/components/app/feedback';
 import { DropRoleDialog, EditRoleDialog, PasswordDialog, rolesKey, SchemaPresetDialog, useRoleAction } from '@/components/app/roles/RoleDialogs';
 import { SqlPreview } from '@/components/app/structure/StructureDialogs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
+import { Checkbox } from '@deck/ui/components/checkbox';
+import { Input } from '@deck/ui/components/input';
+import { Tabs, TabsList, TabsTrigger } from '@deck/ui/components/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@deck/ui/components/tooltip';
 import { navigate, roleHref, rolesHref } from '@/lib/router';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 import { expiry, roleBadges } from './RolesView';
 
 type Tab = 'database' | 'table' | 'sequence' | 'function';

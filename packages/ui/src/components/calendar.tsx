@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { cn } from "../lib/utils"
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -11,7 +11,7 @@ import {
   type DayButton,
 } from "react-day-picker"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "./button"
 
 function Calendar({
   className,

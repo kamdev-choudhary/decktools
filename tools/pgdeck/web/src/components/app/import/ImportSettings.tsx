@@ -2,12 +2,12 @@ import { ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { IMPORT_FORMATS, type ImportFormat } from '@shared/export';
 import type { TableMeta } from '@shared/types';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@deck/ui/components/checkbox';
+import { Label } from '@deck/ui/components/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@deck/ui/components/select';
 import { autoMap, buildPreview, detectFormat, readHead, sniffDelimiter, type FilePreview } from '@/lib/file-preview';
-import { cn } from '@/lib/utils';
-import { Combobox } from '../Combobox';
+import { cn } from '@deck/ui/lib/utils';
+import { Combobox } from '@deck/ui/components/combobox';
 import { ErrorAlert, Spinner } from '../feedback';
 
 const FORMAT_LABEL: Record<ImportFormat, string> = { csv: 'CSV', tsv: 'TSV (Postgres text)', ndjson: 'JSON Lines' };

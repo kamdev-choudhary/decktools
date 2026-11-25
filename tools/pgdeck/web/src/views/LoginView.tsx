@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useLogin } from '@/api/hooks';
 import { ErrorAlert, Spinner } from '@/components/app/feedback';
 import { Logo } from '@/components/app/Logo';
-import { ThemeSwitcher } from '@/components/app/ThemeSwitcher';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { ThemeSwitcher } from '@deck/ui/components/theme-switcher';
+import { Button } from '@deck/ui/components/button';
+import { Input } from '@deck/ui/components/input';
+import { Label } from '@deck/ui/components/label';
 
 export function LoginView() {
   const login = useLogin();

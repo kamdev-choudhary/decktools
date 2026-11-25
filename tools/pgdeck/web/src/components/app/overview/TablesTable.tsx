@@ -1,12 +1,12 @@
 import { ArrowDown, ArrowUp, Eye, Layers, Search, Table2, type LucideIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { RelKind, TableStats } from '@shared/types';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { Badge } from '@deck/ui/components/badge';
+import { Input } from '@deck/ui/components/input';
 import { formatBytes, formatCompact, formatNumber, formatPercent, formatRelative } from '@/lib/format';
 import { navigate, tableHref } from '@/lib/router';
-import { cn } from '@/lib/utils';
-import { TruncatedText } from '../TruncatedText';
+import { cn } from '@deck/ui/lib/utils';
+import { TruncatedText } from '@deck/ui/components/truncated-text';
 
 const KIND_ICON: Record<RelKind, LucideIcon> = { r: Table2, p: Table2, f: Table2, v: Eye, m: Layers };
 

@@ -1,0 +1,29 @@
+{
+  "name": "@deck/server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Hono app shell for decks: base-path routing, cookie login, CSRF guard, static UI, listen().",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "tsx --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@deck/config": "workspace:*",
+    "@deck/logger": "workspace:*",
+    "@deck/security": "workspace:*",
+    "@hono/node-server": "^2.1.11",
+    "hono": "^4.13.20",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

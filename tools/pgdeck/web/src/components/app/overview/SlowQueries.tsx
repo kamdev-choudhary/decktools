@@ -5,14 +5,14 @@ import { toast } from 'sonner';
 import type { StatementSort, StatementStat } from '@shared/types';
 import { api } from '@/api/client';
 import { keys } from '@/api/hooks';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@deck/ui/components/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@deck/ui/components/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@deck/ui/components/select';
 import { formatPercent } from '@/lib/format';
 import { openInSqlEditor } from '@/lib/sql-draft';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 import { errorMessage, ErrorAlert, Spinner } from '../feedback';
-import { TruncatedText } from '../TruncatedText';
+import { TruncatedText } from '@deck/ui/components/truncated-text';
 
 const SORTS: { value: StatementSort; label: string }[] = [
   { value: 'total', label: 'Total time' },

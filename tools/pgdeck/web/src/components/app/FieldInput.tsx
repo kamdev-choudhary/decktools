@@ -1,11 +1,11 @@
 import { Braces, Shuffle } from 'lucide-react';
 import { useState } from 'react';
 import type { Column } from '@shared/types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
+import { Button } from '@deck/ui/components/button';
+import { Input } from '@deck/ui/components/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@deck/ui/components/select';
+import { Textarea } from '@deck/ui/components/textarea';
+import { cn } from '@deck/ui/lib/utils';
 import { generateUuid, preferredUuidVersion } from '@/lib/uuid';
 import { DateTimeField } from './DateTimeField';
 import { FkField, type FkTarget } from './ForeignKey';

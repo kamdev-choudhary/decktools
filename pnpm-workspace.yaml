@@ -1,4 +1,9 @@
 packages:
+  # Published CLIs, one per tool (pgdeck, later s3deck, redisdeck, ...).
+  - tools/*
+  # Internal shared libraries. Private and source-only: each tool bundles them.
+  - packages/*
+  # The shared website featuring every deck (one folder per deck inside it).
   - site
 allowBuilds:
   esbuild: true

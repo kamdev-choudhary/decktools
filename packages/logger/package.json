@@ -1,0 +1,22 @@
+{
+  "name": "@deck/logger",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Terminal output for deck CLIs: colors, aligned labels, prefixed logging.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

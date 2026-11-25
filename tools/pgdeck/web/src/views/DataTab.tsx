@@ -22,10 +22,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+} from '@deck/ui/components/alert-dialog';
+import { Button } from '@deck/ui/components/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@deck/ui/components/tooltip';
+import { cn } from '@deck/ui/lib/utils';
 
 type EditorState = { mode: 'insert' } | { mode: 'edit'; index: number; focusField: string };
 

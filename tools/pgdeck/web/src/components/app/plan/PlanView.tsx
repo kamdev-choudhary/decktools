@@ -2,10 +2,10 @@ import { AlertTriangle, ChevronRight, ChevronsDownUp, ChevronsUpDown, Copy, Flam
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import type { ExplainResponse } from '@shared/types';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
 import { analyzePlan, DETAIL_KEYS, type AnalyzedNode } from '@/lib/plan';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 
 const ms = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(2)} s` : v >= 10 ? `${v.toFixed(1)} ms` : `${v.toFixed(2)} ms`);
 const cost = (v: number) => (v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e4 ? `${(v / 1e3).toFixed(0)}k` : v.toFixed(v < 10 ? 2 : 0));

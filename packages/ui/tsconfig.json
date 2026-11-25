@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.web.json",
+  "compilerOptions": {
+    // Lets the shadcn CLI resolve the aliases in components.json.
+    "paths": { "@deck/ui/*": ["./src/*"] }
+  },
+  "include": ["src"]
+}

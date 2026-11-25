@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 
 /** pgdeck mark: three stacked slabs, a "deck" of tables. */
 export function Logo({ className }: { className?: string }) {

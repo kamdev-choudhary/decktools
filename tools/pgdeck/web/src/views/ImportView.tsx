@@ -5,18 +5,18 @@ import { toast } from 'sonner';
 import type { ImportResponse, RestoreResponse } from '@shared/export';
 import type { TableRef } from '@shared/types';
 import { keys, useInfo, useMeta, useTables } from '@/api/hooks';
-import { Combobox } from '@/components/app/Combobox';
+import { Combobox } from '@deck/ui/components/combobox';
 import { ErrorAlert, Spinner } from '@/components/app/feedback';
 import { ImportSettings, type ImportPlan } from '@/components/app/import/ImportSettings';
 import { UploadProgress, type Progress } from '@/components/app/import/UploadProgress';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
+import { Checkbox } from '@deck/ui/components/checkbox';
 import { detectFile, type DumpInfo, type FileKind } from '@/lib/dump-detect';
 import { formatBytes, formatNumber } from '@/lib/format';
 import { uploadFile, UploadCancelled } from '@/lib/import-upload';
 import { tableHref } from '@/lib/router';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 
 type Status = 'ready' | 'uploading' | 'done' | 'failed' | 'cancelled';
 

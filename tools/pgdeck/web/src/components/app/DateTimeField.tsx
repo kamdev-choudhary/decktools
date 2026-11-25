@@ -1,11 +1,11 @@
 import { CalendarDays, Clock } from 'lucide-react';
 import { useState } from 'react';
 import type { Column } from '@shared/types';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { Button } from '@deck/ui/components/button';
+import { Calendar } from '@deck/ui/components/calendar';
+import { Input } from '@deck/ui/components/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@deck/ui/components/popover';
+import { cn } from '@deck/ui/lib/utils';
 
 export type DateTimeMode = 'date' | 'datetime' | 'time';
 

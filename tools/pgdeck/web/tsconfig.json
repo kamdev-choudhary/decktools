@@ -1,22 +1,11 @@
 {
+  "extends": "../../../tsconfig.web.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "jsx": "react-jsx",
     "types": ["vite/client"],
     "paths": {
       "@/*": ["./src/*"],
       "@shared/*": ["../src/shared/*"]
-    },
-    "strict": true,
-    "noFallthroughCasesInSwitch": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "allowImportingTsExtensions": true,
-    "skipLibCheck": true,
-    "noEmit": true
+    }
   },
   "include": ["src", "../src/shared"]
 }

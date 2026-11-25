@@ -5,11 +5,11 @@ import type { RoleSummary } from '@shared/roles';
 import { api } from '@/api/client';
 import { CenteredSpinner, ErrorAlert } from '@/components/app/feedback';
 import { CreateRoleDialog, rolesKey } from '@/components/app/roles/RoleDialogs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
+import { Checkbox } from '@deck/ui/components/checkbox';
+import { Input } from '@deck/ui/components/input';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@deck/ui/components/tooltip';
 import { navigate, roleHref } from '@/lib/router';
 
 /** Short labels for the attributes worth calling out in the list. */

@@ -1,5 +1,5 @@
 import type { TableStats } from '@shared/types';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@deck/ui/components/tooltip';
 import { formatBytes, formatNumber } from '@/lib/format';
 import { tableHref } from '@/lib/router';
 

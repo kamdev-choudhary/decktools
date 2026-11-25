@@ -1,9 +1,9 @@
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { Button } from './button';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './command';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { cn } from '../lib/utils';
 
 export interface ComboOption {
   value: string;

@@ -29,12 +29,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { Combobox } from '../Combobox';
+} from '@deck/ui/components/alert-dialog';
+import { Button } from '@deck/ui/components/button';
+import { Checkbox } from '@deck/ui/components/checkbox';
+import { Input } from '@deck/ui/components/input';
+import { cn } from '@deck/ui/lib/utils';
+import { Combobox } from '@deck/ui/components/combobox';
 import { errorMessage, Spinner } from '../feedback';
 import { DialogShell, Field } from '../structure/StructureDialogs';
 

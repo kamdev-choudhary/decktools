@@ -10,7 +10,7 @@ interface Session {
 }
 
 /**
- * In-memory login sessions. pgdeck is a single process started on demand, so
+ * In-memory login sessions. A deck is a single process started on demand, so
  * restarting it logging everyone out is the desired behaviour.
  */
 export class SessionStore {
@@ -77,8 +77,3 @@ export class LoginLimiter {
     this.failures.delete(key);
   }
 }
-
-const sha256 = (s: string) => crypto.createHash('sha256').update(s).digest();
-
-/** Constant-time string comparison (hashing first equalizes lengths). */
-export const safeEqual = (a: string, b: string): boolean => crypto.timingSafeEqual(sha256(a), sha256(b));

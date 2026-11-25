@@ -3,16 +3,9 @@ import { getConnInfo } from '@hono/node-server/conninfo';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { parse as parseCookie } from 'hono/utils/cookie';
 import { z } from 'zod';
-import type { SessionInfo } from '../../shared/types.js';
-import { parse } from '../schemas.js';
-import { LoginLimiter, SessionStore, safeEqual } from './sessions.js';
-
-export interface AuthConfig {
-  username: string;
-  password: string;
-}
-
-const COOKIE = 'pgdeck_session';
+import type { AuthConfig } from '@deck/config';
+import { LoginLimiter, SessionStore, safeEqual } from '@deck/security';
+import type { SessionInfo } from './types.js';
 
 const loginBody = z.object({
   username: z.string().min(1).max(256),
@@ -32,11 +25,15 @@ function clientKey(c: Context): string {
 
 const isHttps = (c: Context) => c.req.header('x-forwarded-proto') === 'https' || new URL(c.req.url).protocol === 'https:';
 
-/**
- * Cookie-session auth for the UI's own login page. With `auth === null`
- * (--no-auth) every request is let through.
- */
-export function createAuth(auth: AuthConfig | null) {
+export interface AuthOptions {
+  /** Credentials, or null for --no-auth (every request is let through). */
+  auth: AuthConfig | null;
+  /** Session cookie name, e.g. "pgdeck_session". Keep it stable across releases or users get logged out. */
+  cookieName: string;
+}
+
+/** Cookie-session auth for the UI's own login page, mounted at /api/auth. */
+export function createAuth({ auth, cookieName: COOKIE }: AuthOptions) {
   const sessions = new SessionStore();
   const limiter = new LoginLimiter();
 
@@ -62,7 +59,9 @@ export function createAuth(auth: AuthConfig | null) {
         return c.json({ error: `Too many failed attempts. Try again in ${Math.ceil(wait / 60)} min.` }, 429);
       }
 
-      const { username, password } = parse(loginBody, await c.req.json().catch(() => ({})));
+      const body = loginBody.safeParse(await c.req.json().catch(() => ({})));
+      if (!body.success) return c.json({ error: `Invalid request: ${z.prettifyError(body.error)}` }, 400);
+      const { username, password } = body.data;
       // Evaluate both comparisons so timing doesn't reveal which one failed.
       const userOk = safeEqual(username, auth.username);
       const passOk = safeEqual(password, auth.password);

@@ -15,6 +15,8 @@ export default defineConfig({
       '@': here('./src'),
       '@shared': here('../src/shared'),
     },
+    // @deck/ui is a separate workspace package; make sure it shares our React.
+    dedupe: ['react', 'react-dom'],
   },
   build: {
     outDir: here('../dist/web'),

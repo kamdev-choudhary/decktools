@@ -1,12 +1,14 @@
-import { Hono } from 'hono';
+import { createDeckApp } from '@deck/server';
+import type { AuthConfig } from '@deck/config';
 import type { DatabaseManager } from '../db/index.js';
-import { createAuth, type AuthConfig } from './auth/routes.js';
-import { requireCsrfHeader } from './middleware/csrf.js';
-import { handleError } from './middleware/errors.js';
+import { mapError } from './middleware/errors.js';
 import { apiRoutes } from './routes/api.js';
-import { loadAssets, serveAssets } from './static.js';
 
-export type { AuthConfig } from './auth/routes.js';
+export type { AuthConfig } from '@deck/config';
+
+/** Session cookie, CSRF header: part of the contract with existing browsers and the UI. */
+export const SESSION_COOKIE = 'pgdeck_session';
+export const CSRF_HEADER = 'x-pgdeck';
 
 export interface AppOptions {
   manager: DatabaseManager;
@@ -17,41 +19,18 @@ export interface AppOptions {
   webRoot: string;
 }
 
-// Internal paths the prefix-aware router maps requests to.
-const ADD_SLASH = '/__pgdeck_add_slash';
-const OUTSIDE_BASE = '/__pgdeck_outside_base';
+// Exports are plain GET downloads (<a href download>), which can't send headers.
+const isExport = (method: string, path: string) => method === 'GET' && /^\/api\/db\/[^/]+\/(export|dump)$/.test(path);
 
 export function createApp({ manager, auth, basePath, webRoot }: AppOptions) {
-  const app = new Hono({
-    // Strip the base path ourselves so every route below is written as if
-    // the app were mounted at "/". The UI uses relative URLs, so it works
-    // under any prefix as long as the page URL ends with a slash.
-    getPath: (req) => {
-      const pathname = new URL(req.url).pathname;
-      if (!basePath) return pathname;
-      if (pathname === basePath) return ADD_SLASH;
-      if (!pathname.startsWith(basePath + '/')) return OUTSIDE_BASE;
-      return pathname.slice(basePath.length);
-    },
+  return createDeckApp({
+    name: 'pgdeck',
+    auth,
+    basePath,
+    webRoot,
+    cookieName: SESSION_COOKIE,
+    csrf: { header: CSRF_HEADER, exempt: (c) => isExport(c.req.method, c.req.path) },
+    api: apiRoutes(manager),
+    mapError,
   });
-
-  app.onError(handleError);
-
-  app.get(ADD_SLASH, (c) => c.redirect(`${basePath}/${new URL(c.req.url).search}`, 301));
-  app.all(OUTSIDE_BASE, (c) => c.json({ error: 'Not found' }, 404));
-  app.get('/healthz', (c) => c.json({ ok: true }));
-
-  const { routes: authRoutes, requireSession, authorizeCookieHeader } = createAuth(auth);
-
-  // The UI itself is public (it's just the login screen until signed in);
-  // everything under /api except the auth endpoints needs a session.
-  app.use('/api/*', requireCsrfHeader);
-  app.route('/api/auth', authRoutes);
-  app.use('/api/*', requireSession);
-  app.route('/api', apiRoutes(manager));
-  app.all('/api/*', (c) => c.json({ error: 'Not found' }, 404));
-
-  app.get('*', serveAssets(loadAssets(webRoot)));
-
-  return { app, authorizeCookieHeader };
 }

@@ -8,19 +8,19 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { QueryResult } from '@shared/types';
 import { api, ApiError } from '@/api/client';
 import { PlanView } from '@/components/app/plan/PlanView';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@deck/ui/components/dropdown-menu';
 import { autoExplainKey, draftKey as sqlDraftKey } from '@/lib/sql-draft';
 import { useRunQuery, useTables } from '@/api/hooks';
 import { DataGrid } from '@/components/app/DataGrid';
 import { ErrorAlert, Kbd, Spinner } from '@/components/app/feedback';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@deck/ui/components/select';
 import { formatNumber, lineCol } from '@/lib/format';
 import { ExportMenu } from '@/components/app/ExportMenu';
 import { sqlThemeDark, sqlThemeLight } from '@/lib/sql-theme';
-import { storage } from '@/lib/storage';
-import { useTheme } from '@/lib/theme';
+import { storage } from '@deck/ui/lib/storage';
+import { useTheme } from '@deck/ui/components/theme-provider';
 
 const HISTORY_MAX = 30;
 

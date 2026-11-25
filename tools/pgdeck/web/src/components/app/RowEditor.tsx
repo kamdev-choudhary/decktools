@@ -1,14 +1,14 @@
 import { KeyRound } from 'lucide-react';
 import { useRef, useState } from 'react';
 import type { Cell, Column, TableMeta } from '@shared/types';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import { Label } from '@deck/ui/components/label';
 import { errorMessage, Kbd, Spinner } from './feedback';
 import { FieldInput } from './FieldInput';
 import type { FkTarget } from './ForeignKey';
-import { TruncatedText } from './TruncatedText';
+import { TruncatedText } from '@deck/ui/components/truncated-text';
 
 interface FieldState {
   text: string;

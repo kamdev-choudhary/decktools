@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { EXPORT_FORMATS, EXPORT_META, serializeAll, type ExportColumn, type ExportFormat } from '@shared/export';
 import type { Cell } from '@shared/types';
-import { Button } from '@/components/ui/button';
+import { Button } from '@deck/ui/components/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@deck/ui/components/dropdown-menu';
 import { downloadText, formatNumber } from '@/lib/format';
 
 /** A set of rows the user can export: either in memory, or streamed by the server. */

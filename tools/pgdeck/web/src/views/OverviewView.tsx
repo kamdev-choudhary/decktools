@@ -13,11 +13,11 @@ import { LiveChart } from '@/components/app/overview/LiveChart';
 import { StatTile } from '@/components/app/overview/StatTile';
 import { StorageChart } from '@/components/app/overview/StorageChart';
 import { TablesTable } from '@/components/app/overview/TablesTable';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@deck/ui/components/badge';
+import { Button } from '@deck/ui/components/button';
 import { formatBytes, formatCompact, formatDuration, formatNumber, formatPercent } from '@/lib/format';
 import { sqlHref } from '@/lib/router';
-import { cn } from '@/lib/utils';
+import { cn } from '@deck/ui/lib/utils';
 
 function LiveBadge({ status }: { status: LiveStatus }) {
   const label = status === 'live' ? 'Live' : status === 'connecting' ? 'Connecting' : 'Reconnecting';

@@ -5,15 +5,15 @@ import { toast } from 'sonner';
 import { createTableSql, emptyColumn, FK_ACTIONS, isIntegerType, validateTable, type FkAction, type NewColumn } from '@shared/create-table';
 import { api } from '@/api/client';
 import { keys, useTables } from '@/api/hooks';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@deck/ui/components/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import { Input } from '@deck/ui/components/input';
+import { Label } from '@deck/ui/components/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@deck/ui/components/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@deck/ui/components/select';
 import { navigate, tableHref } from '@/lib/router';
-import { cn } from '@/lib/utils';
-import { Combobox, type ComboOption } from './Combobox';
+import { cn } from '@deck/ui/lib/utils';
+import { Combobox, type ComboOption } from '@deck/ui/components/combobox';
 import { errorMessage, Spinner } from './feedback';
 
 export const COMMON_TYPES: ComboOption[] = [
