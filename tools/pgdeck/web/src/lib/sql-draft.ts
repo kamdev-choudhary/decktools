@@ -1,5 +1,5 @@
 import { navigate, sqlHref } from './router';
-import { storage } from './storage';
+import { storage } from '@deck/ui/lib/storage';
 
 export const draftKey = (db: string) => `pgdeck.sql.draft.${db}`;
 export const autoExplainKey = (db: string) => `pgdeck.sql.autoExplain.${db}`;
