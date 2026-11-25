@@ -22,6 +22,7 @@
     "react/exhaustive-effect-dependencies": "warn",
     "react/memo-dependencies": "warn",
     "react/no-unstable-nested-components": "warn",
+    "react/incompatible-library": "warn", // react-hook-form watch()
 
     // Deliberate patterns in this codebase.
     "import/no-named-as-default-member": "off", // pg is CommonJS: pg.Pool / pg.DatabaseError is the supported form
@@ -29,6 +30,7 @@
     "unicorn/consistent-function-scoping": "off", // small closures kept next to their only use
     "unicorn/prefer-add-event-listener": "off", // onmessage/onload on XHR, WebSocket and FileReader
     "unicorn/no-array-sort": "off", // sorting fresh local arrays in place is intended
+    "unicorn/no-new-array": "off", // new Array(n) to preallocate results by index
     "eslint/no-shadow": "off"
   },
   "ignorePatterns": ["**/dist/**", "**/.astro/**", "**/node_modules/**"]

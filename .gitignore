@@ -7,3 +7,4 @@ dist/
 
 # Astro sites
 .astro/
+.env.*

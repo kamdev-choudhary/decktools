@@ -1,0 +1,138 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Neutral zinc surfaces with a blue accent */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.21 0.006 285.9);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.546 0.215 262.9);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.967 0.001 286.4);
+  --secondary-foreground: oklch(0.21 0.006 285.9);
+  --muted: oklch(0.967 0.001 286.4);
+  --muted-foreground: oklch(0.552 0.016 285.9);
+  --accent: oklch(0.962 0.018 254.6);
+  --accent-foreground: oklch(0.424 0.181 265.6);
+  --destructive: oklch(0.577 0.245 27.3);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.92 0.004 286.3);
+  --input: oklch(0.9 0.004 286.3);
+  --ring: oklch(0.623 0.214 259.8);
+  --sidebar: oklch(0.985 0.001 286.4);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: oklch(0.141 0.005 285.8);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.17 0.005 285.8);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.19 0.006 285.9);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.623 0.214 259.8);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.24 0.006 286);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.22 0.006 286);
+  --muted-foreground: oklch(0.705 0.015 286.1);
+  --accent: oklch(0.27 0.06 263);
+  --accent-foreground: oklch(0.88 0.06 254.6);
+  --destructive: oklch(0.704 0.191 22.2);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.623 0.214 259.8);
+  --sidebar: oklch(0.165 0.005 285.8);
+}
+
+/* Flat design: no shadow utilities anywhere (shadcn's shadow-xs/sm/md/lg become no-ops). */
+@theme {
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+}
+
+@layer base {
+  /* A clicked tab is already highlighted; don't also draw the keyboard focus ring on it. */
+  [data-slot='tabs-trigger'][data-state='active']:focus-visible {
+    box-shadow: none;
+    outline: none;
+    border-color: transparent;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+}
+
+/* highlight.js tokens, tuned for both themes */
+.hljs-keyword, .hljs-selector-tag, .hljs-built_in { color: oklch(0.55 0.17 300); }
+.hljs-string, .hljs-attr-value, .hljs-template-tag { color: oklch(0.55 0.13 150); }
+.hljs-number, .hljs-literal { color: oklch(0.6 0.15 50); }
+.hljs-comment, .hljs-quote { color: var(--muted-foreground); font-style: italic; }
+.hljs-title, .hljs-section, .hljs-function .hljs-title { color: oklch(0.55 0.13 250); }
+.hljs-attr, .hljs-attribute, .hljs-property, .hljs-name, .hljs-tag { color: oklch(0.55 0.12 200); }
+.dark .hljs-keyword, .dark .hljs-selector-tag, .dark .hljs-built_in { color: oklch(0.75 0.13 300); }
+.dark .hljs-string, .dark .hljs-attr-value { color: oklch(0.78 0.12 150); }
+.dark .hljs-number, .dark .hljs-literal { color: oklch(0.78 0.12 60); }
+.dark .hljs-title, .dark .hljs-section { color: oklch(0.75 0.11 250); }
+.dark .hljs-attr, .dark .hljs-attribute, .dark .hljs-property, .dark .hljs-name, .dark .hljs-tag { color: oklch(0.78 0.1 200); }
+
+.prose-md h1 { @apply mt-4 mb-2 text-xl font-semibold; }
+.prose-md h2 { @apply mt-4 mb-2 text-lg font-semibold; }
+.prose-md h3 { @apply mt-3 mb-1 font-semibold; }
+.prose-md p { @apply my-2 leading-relaxed; }
+.prose-md ul { @apply my-2 list-disc pl-5; }
+.prose-md ol { @apply my-2 list-decimal pl-5; }
+.prose-md code { @apply rounded bg-muted px-1 py-0.5 font-mono text-[0.85em]; }
+.prose-md pre { @apply my-2 overflow-auto rounded-md bg-muted p-3; }
+.prose-md pre code { @apply bg-transparent p-0; }
+.prose-md a { @apply text-primary underline; }
+.prose-md blockquote { @apply border-l-2 pl-3 text-muted-foreground; }
+.prose-md table { @apply my-2 text-sm; }
+.prose-md th, .prose-md td { @apply border px-2 py-1; }
+.prose-md img { @apply max-w-full; }
