@@ -1,6 +1,6 @@
 {
   "name": "s3deck",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A fast, modern web UI for S3 and S3-compatible storage, started with one command.",
   "type": "module",
   "license": "MIT",
