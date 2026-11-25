@@ -14,7 +14,7 @@
   },
   "scripts": {
     "build": "pnpm --filter \"./tools/*\" build",
-    "dev": "pnpm --filter \"./tools/*\" --parallel dev",
+    "dev": "pnpm --filter \"./tools/*\" --parallel --no-bail dev",
     "dev:pgdeck": "pnpm --filter pgdeck dev",
     "dev:s3deck": "pnpm --filter s3deck dev",
     "dev:redisdeck": "pnpm --filter redisdeck dev",

@@ -59,8 +59,9 @@ pnpm check            # lint + typecheck + test + build, everything
 | `pnpm typecheck` | Type-check every package |
 | `pnpm test` | Run every package's tests |
 | `pnpm build` | Build every deck in `tools/` |
-| `pnpm dev` | Run pgdeck in dev mode (API + hot-reloading UI) |
-| `pnpm --filter <deck> <script>` | Run any script of one deck, e.g. `pnpm --filter s3deck dev` |
+| `pnpm dev` | Run every deck in dev mode at once (API + hot-reloading UI each; ports never collide, and one deck failing doesn't stop the others) |
+| `pnpm dev:pgdeck` / `dev:s3deck` / `dev:redisdeck` | Run one deck in dev mode |
+| `pnpm --filter <deck> <script>` | Run any script of one deck, e.g. `pnpm --filter s3deck test` |
 | `pnpm site:dev` / `pnpm site:build` | Work on the website |
 | `npx pgdeck` / `npx s3deck` / `npx redisdeck` | Run your local build of a deck (after `pnpm build`) |
 
