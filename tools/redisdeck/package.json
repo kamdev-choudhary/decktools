@@ -45,7 +45,7 @@
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "pnpm clean && pnpm build:web && pnpm build:server",
     "build:web": "vite build --config web/vite.config.ts",
-    "build:server": "tsdown --config-loader tsx",
+    "build:server": "tsdown",
     "dev": "concurrently -k -n api,web -c red,magenta \"pnpm:dev:server\" \"pnpm:dev:web\"",
     "dev:server": "tsx watch src/cli/index.ts --no-auth",
     "dev:web": "vite --config web/vite.config.ts",

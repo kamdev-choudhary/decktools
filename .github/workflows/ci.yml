@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   check:
-    name: Lint, typecheck, test, build (Node ${{ matrix.node }})
+    name: Lint, typecheck, test (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -68,7 +68,60 @@ jobs:
           S3DECK_TEST_ACCESS_KEY: minioadmin
           S3DECK_TEST_SECRET_KEY: minioadmin
 
+  # Building needs Node 22+ (tsdown/rolldown); the built CLIs support Node 20+.
+  build:
+    name: Build and pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
       - run: pnpm build
+
+      - name: Check the published package contents
+        run: |
+          (cd tools/pgdeck && pnpm pack --dry-run)
+          (cd tools/s3deck && pnpm pack --dry-run)
+          (cd tools/redisdeck && pnpm pack --dry-run)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: tools/*/dist
+          retention-days: 1
+
+  smoke:
+    name: Run the built CLIs (Node ${{ matrix.node }})
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: tools
 
       - name: Smoke-test the built CLIs
         run: |
@@ -78,9 +131,3 @@ jobs:
           node tools/s3deck/dist/cli.mjs --help > /dev/null
           node tools/redisdeck/dist/cli.js --version
           node tools/redisdeck/dist/cli.js --help > /dev/null
-
-      - name: Check the published package contents
-        run: |
-          (cd tools/pgdeck && pnpm pack --dry-run)
-          (cd tools/s3deck && pnpm pack --dry-run)
-          (cd tools/redisdeck && pnpm pack --dry-run)

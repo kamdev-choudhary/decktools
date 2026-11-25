@@ -46,7 +46,8 @@ piece.
 
 ## Development
 
-Requires Node.js 20+ and pnpm (the version is pinned in `packageManager`).
+Developing needs Node.js 22+ (the build tools need it) and pnpm (the version is pinned in
+`packageManager`). The published decks run on Node.js 20+, which CI checks.
 
 ```bash
 pnpm install
