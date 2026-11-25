@@ -8,7 +8,7 @@ import { after, before, describe, it } from 'node:test';
 import { Redis } from 'ioredis';
 import { RedisManager } from '../src/redis/index.js';
 import { createApp } from '../src/server/app.js';
-import type { CommandResult, KeyDetail, KeyPage, ServerInfo } from '../src/shared/types.js';
+import type { CommandDoc, CommandResult, KeyDetail, KeyPage, ServerInfo } from '../src/shared/types.js';
 
 // These tests start their own throwaway redis-server (no persistence, random
 // port), so they never touch a real instance. Without redis-server they skip.
@@ -186,6 +186,21 @@ describe('redisdeck against a real Redis', { skip: !hasRedis && 'redis-server no
     assert.equal((await cmd('SELECT 2')).status, 400);
     assert.equal((await cmd('BLPOP queue 0')).status, 400);
     assert.equal((await cmd('SUBSCRIBE news')).status, 400);
+  });
+
+  it('lists commands with redis-cli style syntax, subcommands and refusals', async () => {
+    const docs = (await rw().get<CommandDoc[]>('commands')).body;
+    const by = new Map(docs.map((d) => [d.name, d]));
+    assert.match(by.get('get')!.syntax, /^key$/);
+    assert.match(by.get('set')!.syntax, /^key value \[NX \| XX/);
+    assert.match(by.get('del')!.syntax, /^key \[key \.\.\.\]$/);
+    assert.ok(by.get('config')!.container);
+    assert.ok(by.has('config get'));
+    assert.equal(by.get('get')!.refused, null);
+    assert.match(by.get('subscribe')!.refused!, /dedicated connection/);
+    const ro = new Map((await apps.ro.get<CommandDoc[]>('commands')).body.map((d) => [d.name, d]));
+    assert.match(ro.get('set')!.refused!, /readonly/);
+    assert.equal(ro.get('config get')!.refused, null);
   });
 
   it('refuses every change in --readonly mode', async () => {

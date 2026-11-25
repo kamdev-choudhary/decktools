@@ -163,6 +163,22 @@ export type Reply =
   | { kind: 'error'; value: string }
   | { kind: 'array'; items: Reply[] };
 
+/** A command (or subcommand, e.g. "config get") for console autocomplete and hints. */
+export interface CommandDoc {
+  /** Lower-case; subcommands are "container sub". */
+  name: string;
+  summary: string;
+  /** Arguments as redis-cli shows them, e.g. "key value [NX | XX]". Empty when unknown. */
+  syntax: string;
+  group: string;
+  since: string;
+  flags: string[];
+  /** Why the console won't run it here (stateful, blocking, read-only mode), or null. */
+  refused: string | null;
+  /** Takes a subcommand (CONFIG, CLIENT...). */
+  container: boolean;
+}
+
 export interface CommandResult {
   reply: Reply;
   ms: number;
