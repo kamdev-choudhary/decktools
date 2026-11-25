@@ -8,6 +8,7 @@ and you're in.
 | --- | --- | --- | --- |
 | [**pgdeck**](tools/pgdeck) | PostgreSQL | `npx pgdeck postgres://localhost:5432` | [README](tools/pgdeck#readme) |
 | [**s3deck**](tools/s3deck) | S3 and S3-compatible storage | `npx s3deck` | [README](tools/s3deck#readme) |
+| [**redisdeck**](tools/redisdeck) | Redis (and Valkey) | `npx redisdeck` | [README](tools/redisdeck#readme) |
 
 Website: <https://kamdev-choudhary.github.io/decktools/>
 
@@ -17,6 +18,7 @@ Website: <https://kamdev-choudhary.github.io/decktools/>
 tools/                 one folder per deck, each published to npm under its own name
   pgdeck/              → npm "pgdeck"
   s3deck/              → npm "s3deck"
+  redisdeck/           → npm "redisdeck"
 packages/              internal shared libraries (private, never published)
   cli/       @deck/cli       standard web-UI flags, startup banner, shutdown, open browser
   config/    @deck/config    base path, host and auth credential resolution
@@ -38,7 +40,7 @@ deck's `dependencies` and are installed by npm as usual. A `beforePacking`
 hook in [`.pnpmfile.cjs`](.pnpmfile.cjs) strips the internal packages from the
 published `package.json`.
 
-Currently pgdeck is built on the shared packages. s3deck was moved in as-is
+pgdeck and redisdeck are built on the shared packages. s3deck was moved in as-is
 and keeps its own server and UI code for now; it can adopt `@deck/*` piece by
 piece.
 
@@ -60,7 +62,7 @@ pnpm check            # lint + typecheck + test + build, everything
 | `pnpm dev` | Run pgdeck in dev mode (API + hot-reloading UI) |
 | `pnpm --filter <deck> <script>` | Run any script of one deck, e.g. `pnpm --filter s3deck dev` |
 | `pnpm site:dev` / `pnpm site:build` | Work on the website |
-| `npx pgdeck` / `npx s3deck` | Run your local build of a deck (after `pnpm build`) |
+| `npx pgdeck` / `npx s3deck` / `npx redisdeck` | Run your local build of a deck (after `pnpm build`) |
 
 Each deck can also be worked on from its own folder (`cd tools/pgdeck && pnpm dev`).
 

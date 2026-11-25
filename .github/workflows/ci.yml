@@ -43,6 +43,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # redisdeck's tests start their own throwaway redis-server.
+      - name: Install redis-server
+        run: sudo apt-get update && sudo apt-get install -y redis-server
+
       - run: pnpm lint
 
       - run: pnpm typecheck
@@ -70,8 +74,11 @@ jobs:
           node tools/pgdeck/dist/cli.js --help > /dev/null
           node tools/s3deck/dist/cli.mjs --version
           node tools/s3deck/dist/cli.mjs --help > /dev/null
+          node tools/redisdeck/dist/cli.js --version
+          node tools/redisdeck/dist/cli.js --help > /dev/null
 
       - name: Check the published package contents
         run: |
           (cd tools/pgdeck && pnpm pack --dry-run)
           (cd tools/s3deck && pnpm pack --dry-run)
+          (cd tools/redisdeck && pnpm pack --dry-run)
