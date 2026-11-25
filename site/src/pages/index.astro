@@ -2,7 +2,10 @@
 import Base from '../layouts/Base.astro';
 import Corners from '../components/Corners.astro';
 import CopyCommand from '../components/CopyCommand.astro';
+import Cross from '../components/Cross.astro';
 import Logo from '../components/Logo.astro';
+import Shot from '../components/Shot.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
 import { DECKS } from '../decks';
 import { docsUrl, getVersion, REPO_URL } from '../lib/meta';
 
@@ -17,6 +20,13 @@ const decks = await Promise.all(
 );
 const available = decks.filter((d) => d.status === 'available');
 const planned = decks.filter((d) => d.status === 'planned');
+
+const principles = [
+  ['One command', 'npx downloads and runs it. Nothing to install.'],
+  ['No account', 'No sign-up, no cloud dashboard in between.'],
+  ['No agent', 'Connects like any other client. Your servers stay untouched.'],
+  ['Open source', 'MIT licensed. Read it, fork it, self-host it.'],
+] as const;
 ---
 
 <Base
@@ -30,22 +40,46 @@ const planned = decks.filter((d) => d.status === 'planned');
         Deck tools
       </a>
       <div class="ml-auto flex items-center gap-2">
-        <a href={REPO_URL} class="btn btn-ghost h-9 px-3.5 text-sm">GitHub</a>
+        <ThemeToggle />
+        <a href={REPO_URL} class="btn btn-ghost h-9 px-3.5 text-sm max-sm:hidden">GitHub</a>
         <a href="#decks" class="btn btn-primary h-9 px-4 text-sm">Browse decks</a>
       </div>
     </nav>
   </header>
 
-  <main class="rails">
+  <main id="main" class="rails">
     <section id="top" class="relative isolate overflow-hidden">
       <div class="grid-bg pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_70%_80%_at_50%_0%,#000_30%,transparent_80%)]" aria-hidden="true"></div>
       <div class="pad pt-20 pb-20 text-center md:pt-28 md:pb-24">
-        <h1 class="display mx-auto max-w-[16ch] text-[clamp(2.6rem,1.2rem+5.6vw,5.5rem)]">Web UIs for your infrastructure, one command away.</h1>
-        <p class="lede mx-auto mt-7 md:text-[1.2rem]">
+        <p class="intro inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface px-3 py-1 text-[0.8rem] text-muted" style="--d:0">
+          <span class="size-1.5 rounded-full bg-green"></span>
+          {available.length} decks available, {planned.length} in the works
+        </p>
+        <h1 class="intro display mx-auto mt-8 max-w-[16ch] text-[clamp(2.6rem,1.2rem+5.6vw,5.5rem)]" style="--d:1">
+          Web UIs for your infrastructure, <span class="brand-text">one command</span> away.
+        </h1>
+        <p class="intro lede mx-auto mt-7 md:text-[1.2rem]" style="--d:2">
           Each deck is a small, open source admin panel for one system. Run it with npx, open the link it prints, and you're in.
           No install, no account, no agent on the server.
         </p>
+        <div class="intro mt-10 flex flex-wrap justify-center gap-3" style="--d:3">
+          <a href="#decks" class="btn btn-primary">Browse decks</a>
+          <a href={REPO_URL} class="btn btn-ghost">Star on GitHub</a>
+        </div>
       </div>
+
+      <dl class="section grid grid-cols-2 lg:grid-cols-4">
+        <Corners />
+        {
+          principles.map(([title, body], i) => (
+            <div class:list={['relative px-5 py-7 md:px-8 md:py-9', i % 2 === 1 && 'border-l border-line', i === 2 && 'lg:border-l', i >= 2 && 'border-t border-line lg:border-t-0']}>
+              {i > 0 && <Cross class="-top-[7px] -left-[7px] hidden lg:block" />}
+              <dt class="text-[1.05rem] font-semibold tracking-tight">{title}</dt>
+              <dd class="mt-1 text-sm text-muted">{body}</dd>
+            </div>
+          ))
+        }
+      </dl>
     </section>
 
     <section id="decks" class="section">
@@ -55,20 +89,31 @@ const planned = decks.filter((d) => d.status === 'planned');
         <div class="mt-8 grid gap-4">
           {
             available.map((d) => (
-              <article class="brand-border relative rounded-2xl bg-surface p-6 md:p-8">
-                <div class="flex flex-wrap items-center gap-3">
-                  <Logo class="size-8" />
-                  <h3 class="text-xl font-semibold tracking-tight">{d.name}</h3>
-                  {d.version && <span class="rounded-full border border-line-strong px-2 py-0.5 font-mono text-xs text-muted">v{d.version}</span>}
-                  <span class="text-sm text-faint">for {d.target}</span>
+              <article class:list={['reveal brand-border elevate relative overflow-hidden rounded-2xl bg-surface', d.preview && 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]']}>
+                <div class="p-6 md:p-8">
+                  <div class="flex flex-wrap items-center gap-3">
+                    <Logo class="size-8" />
+                    <h3 class="text-xl font-semibold tracking-tight">{d.name}</h3>
+                    {d.version && <span class="rounded-full border border-line-strong px-2 py-0.5 font-mono text-xs text-muted">v{d.version}</span>}
+                    <span class="text-sm text-faint">for {d.target}</span>
+                  </div>
+                  <p class="mt-4 max-w-[60ch] text-muted">{d.tagline}</p>
+                  <div class:list={['mt-6 flex flex-col gap-3', !d.preview && 'sm:flex-row sm:items-center']}>
+                    <CopyCommand command={d.command} class="flex-1 text-left" />
+                    <a href={d.href} class:list={['btn btn-primary h-[3.1rem] shrink-0', d.preview && 'sm:self-start']}>
+                      {d.cta}
+                      <svg viewBox="0 0 16 16" class="size-3.5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 3 5 5-5 5"></path></svg>
+                    </a>
+                  </div>
                 </div>
-                <p class="mt-4 max-w-[60ch] text-muted">{d.tagline}</p>
-                <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <CopyCommand command={d.command} class="flex-1 text-left" />
-                  <a href={d.href} class="btn btn-primary h-[3.1rem] shrink-0">
-                    {d.cta}
+                {d.preview && (
+                  <a href={d.href} class="group relative block min-h-56 overflow-hidden border-t border-line lg:border-t-0 lg:border-l" tabindex="-1" aria-hidden="true">
+                    <div class="absolute inset-0 bg-surface-2" />
+                    <div class="absolute top-8 left-8 w-[150%] overflow-hidden rounded-tl-xl border-t border-l border-line-strong transition-transform duration-500 group-hover:-translate-x-2 group-hover:-translate-y-1 lg:w-[180%]">
+                      <Shot deck={d.slug} name={d.preview.shot} alt={d.preview.alt} sizes="(min-width: 1024px) 900px, 140vw" />
+                    </div>
                   </a>
-                </div>
+                )}
               </article>
             ))
           }
@@ -81,17 +126,23 @@ const planned = decks.filter((d) => d.status === 'planned');
         <section class="section">
           <Corners />
           <div class="pad py-16 md:py-20">
-            <h2 class="h2">In the works</h2>
-            <p class="lede mt-4">Same idea, more systems. Watch the repository to hear when they ship.</p>
-            <div class="mt-8 grid gap-4 md:grid-cols-3">
+            <div class="flex flex-wrap items-end justify-between gap-6">
+              <div>
+                <h2 class="h2">In the works</h2>
+                <p class="lede mt-4">Same idea, more systems. Watch the repository to hear when they ship.</p>
+              </div>
+              <a href={REPO_URL} class="btn btn-ghost">Watch on GitHub</a>
+            </div>
+            <div class="reveal mt-8 grid gap-4 md:grid-cols-3">
               {planned.map((d) => (
-                <article class="rounded-2xl border border-line bg-surface p-6">
+                <article class="elevate rounded-2xl border border-line bg-surface p-6">
                   <div class="flex items-center justify-between gap-3">
                     <h3 class="font-semibold tracking-tight">{d.name}</h3>
                     <span class="rounded-full border border-line-strong px-2 py-0.5 text-xs text-faint">Planned</span>
                   </div>
                   <p class="mt-1 text-sm text-faint">for {d.target}</p>
                   <p class="mt-4 text-sm text-muted">{d.tagline}</p>
+                  <code class="mt-5 block truncate rounded-lg border border-line bg-bg px-3 py-2 font-mono text-[0.75rem] text-faint">$ {d.command}</code>
                 </article>
               ))}
             </div>
@@ -113,3 +164,16 @@ const planned = decks.filter((d) => d.status === 'planned');
     </div>
   </footer>
 </Base>
+
+<style>
+  .intro {
+    animation: intro 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--d) * 0.07s);
+  }
+  @keyframes intro {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+</style>

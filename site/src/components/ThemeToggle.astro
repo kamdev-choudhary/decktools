@@ -1,0 +1,69 @@
+---
+/**
+ * Light/dark switch. The site follows the system until this is pressed; it then
+ * stores the opposite of what's on screen, or clears the override when that
+ * opposite is the system's own choice. Both icons are in the markup and CSS
+ * (.light-only / .dark-only) shows the current one, so it never needs JS to
+ * stay right when the system theme changes.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<button
+  type="button"
+  data-theme-toggle
+  class:list={['inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-line-strong text-muted transition-colors hover:bg-surface-2 hover:text-fg', className]}
+>
+  <span class="light-only">
+    <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+    </svg>
+    <span class="sr-only">Switch to dark theme</span>
+  </span>
+  <span class="dark-only">
+    <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20.5 14.1A8.5 8.5 0 1 1 9.9 3.5a7 7 0 0 0 10.6 10.6Z"></path>
+    </svg>
+    <span class="sr-only">Switch to light theme</span>
+  </span>
+</button>
+
+<script>
+  const KEY = 'color-scheme';
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]')!;
+  const systemDark = matchMedia('(prefers-color-scheme: dark)');
+
+  const rendered = () => (meta.content === 'light' || meta.content === 'dark' ? meta.content : systemDark.matches ? 'dark' : 'light');
+  const apply = (stored: string | null) => {
+    meta.content = stored === 'light' || stored === 'dark' ? stored : 'light dark';
+  };
+
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+    btn.addEventListener('click', () => {
+      const target = rendered() === 'dark' ? 'light' : 'dark';
+      // Matching the system means "undo my override", not "pin this forever".
+      const stored = target === (systemDark.matches ? 'dark' : 'light') ? null : target;
+      try {
+        if (stored) localStorage.setItem(KEY, stored);
+        else localStorage.removeItem(KEY);
+      } catch {
+        // Storage blocked: still switch for this page view.
+      }
+      const swap = () => apply(stored);
+      if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.startViewTransition(swap);
+      } else {
+        swap();
+      }
+    });
+  }
+
+  // Keep other open tabs in step.
+  addEventListener('storage', (e) => {
+    if (e.key === KEY || e.key === null) apply(e.newValue);
+  });
+</script>

@@ -1,4 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Lets tests import the UI's pure helpers (web/src/lib), which use this alias for types.
+    "paths": { "@shared/*": ["./src/shared/*.ts"] }
+  },
   "include": ["src", "test", "tsdown.config.ts", "web/vite.config.ts"]
 }

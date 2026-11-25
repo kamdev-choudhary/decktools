@@ -20,6 +20,8 @@ export interface Deck {
   hasPage?: boolean;
   /** Shown while no version can be fetched from npm. */
   fallbackVersion?: string;
+  /** Screenshot shown on the home page card: src/decks/<slug>/assets/shots/<preview>-{dark,light}.png. */
+  preview?: { shot: string; alt: string };
 }
 
 export const DECKS: Deck[] = [
@@ -32,6 +34,7 @@ export const DECKS: Deck[] = [
     status: 'available',
     hasPage: true,
     fallbackVersion: '0.1.5',
+    preview: { shot: 'overview', alt: 'The pgdeck overview with live transaction charts and active sessions.' },
   },
   {
     slug: 's3deck',

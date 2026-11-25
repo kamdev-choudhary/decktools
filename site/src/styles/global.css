@@ -3,25 +3,90 @@
 @import '@fontsource-variable/geist-mono';
 
 /*
- * pgdeck site. Monochrome on black with hairline structure; the only colors
- * are the product's own chart pair (blue / pink) and the amber of its
- * primary-key icon.
+ * Deck site. Monochrome with hairline structure; the only colors are the
+ * product's own chart pair (blue / pink) and the amber of its primary-key icon.
+ *
+ * Theming: follows the system by default. <meta name="color-scheme"> in
+ * Base.astro holds "light dark" (system), "light" or "dark" (a stored
+ * override), and the :has() rules below map it onto the color-scheme
+ * property, which every light-dark() token keys off.
  */
 :root {
-  color-scheme: dark;
-  --bg: #000000;
-  --surface: #0a0a0a;
-  --surface-2: #111111;
-  --line: #1f1f1f;
-  --line-strong: #2e2e2e;
-  --fg: #ededed;
-  --muted: #a1a1a1;
-  --faint: #6e6e6e;
-  --blue: #3291ff;
-  --pink: #e5489e;
-  --amber: #f5b544;
-  --green: #3ecf8e;
+  color-scheme: light dark;
+
+  &:has(> head > meta[name='color-scheme'][content='dark']) {
+    color-scheme: dark;
+  }
+  &:has(> head > meta[name='color-scheme'][content='light']) {
+    color-scheme: light;
+  }
+
+  --bg: light-dark(#ffffff, #000000);
+  --surface: light-dark(#fafafa, #0a0a0a);
+  --surface-2: light-dark(#f1f1f1, #111111);
+  --line: light-dark(#ebebeb, #1f1f1f);
+  --line-strong: light-dark(#dadada, #2e2e2e);
+  --fg: light-dark(#0a0a0a, #ededed);
+  --muted: light-dark(#525252, #a1a1a1);
+  --faint: light-dark(#767676, #6e6e6e);
+  /* Light values are darkened to keep 4.5:1 as text on white. */
+  --blue: light-dark(#0068d6, #3291ff);
+  --pink: light-dark(#c41d7f, #e5489e);
+  --amber: light-dark(#a35c00, #f5b544);
+  --green: light-dark(#007a4d, #3ecf8e);
   --brand: linear-gradient(90deg, var(--blue), var(--pink));
+  /* Blurred blobs behind screenshots: quieter on white, where they read as stains. */
+  --glow-blue: light-dark(color-mix(in oklab, #3291ff 30%, transparent), color-mix(in oklab, #3291ff 55%, transparent));
+  --glow-pink: light-dark(color-mix(in oklab, #e5489e 22%, transparent), color-mix(in oklab, #e5489e 45%, transparent));
+  /* Elevation only matters on white; on black the hairlines do the work. */
+  --shadow: light-dark(rgb(0 0 0 / 0.07), transparent);
+  --elevate: 0 1px 2px var(--shadow), 0 16px 40px -20px var(--shadow);
+}
+
+/* Browsers without light-dark() get the original all-dark site. */
+@supports not (color: light-dark(#fff, #000)) {
+  :root {
+    color-scheme: dark;
+    --bg: #000000;
+    --surface: #0a0a0a;
+    --surface-2: #111111;
+    --line: #1f1f1f;
+    --line-strong: #2e2e2e;
+    --fg: #ededed;
+    --muted: #a1a1a1;
+    --faint: #6e6e6e;
+    --blue: #3291ff;
+    --pink: #e5489e;
+    --amber: #f5b544;
+    --green: #3ecf8e;
+    --glow-blue: color-mix(in oklab, #3291ff 55%, transparent);
+    --glow-pink: color-mix(in oklab, #e5489e 45%, transparent);
+    --shadow: transparent;
+  }
+}
+
+/*
+ * Theme-specific markup (screenshots, toggle icons): render both, hide the
+ * inactive one. Unlayered so it beats `block`/`flex` utilities.
+ */
+:root:has(> head > meta[name='color-scheme'][content='dark']) .light-only,
+:root:has(> head > meta[name='color-scheme'][content='light']) .dark-only {
+  display: none !important;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) .light-only {
+    display: none !important;
+  }
+}
+@media (prefers-color-scheme: light) {
+  :root:not(:has(> head > meta[name='color-scheme'][content='dark'])) .dark-only {
+    display: none !important;
+  }
+}
+@supports not (color: light-dark(#fff, #000)) {
+  .light-only {
+    display: none !important;
+  }
 }
 
 @theme inline {
@@ -55,8 +120,12 @@
     line-height: 1.55;
   }
   ::selection {
-    background: color-mix(in oklab, var(--blue) 45%, transparent);
-    color: #fff;
+    background: color-mix(in oklab, var(--blue) 35%, transparent);
+    color: var(--fg);
+  }
+  html {
+    scrollbar-color: var(--line-strong) var(--bg);
+    accent-color: var(--blue);
   }
   :focus-visible {
     outline: 2px solid var(--blue);
@@ -166,7 +235,7 @@
     color: var(--bg);
   }
   .btn-primary:hover {
-    background: #ffffff;
+    background: color-mix(in oklab, var(--fg) 84%, var(--bg));
   }
   .btn-ghost {
     border: 1px solid var(--line-strong);
@@ -185,6 +254,38 @@
     border-radius: 14px;
     background: var(--surface);
     overflow: hidden;
+    box-shadow: var(--elevate);
+  }
+  .elevate {
+    box-shadow: var(--elevate);
+  }
+  .glow-bg {
+    background:
+      radial-gradient(closest-side at 30% 50%, var(--glow-blue), transparent),
+      radial-gradient(closest-side at 72% 55%, var(--glow-pink), transparent);
+    filter: blur(60px);
+    opacity: 0.55;
+  }
+  /* Sections ease in as they scroll into view, where supported. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .reveal {
+        animation: reveal linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 40%;
+      }
+    }
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+  }
+  /* Theme switch: a quick cross-fade instead of every color snapping. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.25s;
   }
   .window-bar {
     display: flex;

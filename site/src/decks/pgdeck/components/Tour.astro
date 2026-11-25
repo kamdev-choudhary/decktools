@@ -1,6 +1,6 @@
 ---
 import Corners from '../../../components/Corners.astro';
-import Shot from './Shot.astro';
+import Shot from '../../../components/Shot.astro';
 
 const stops = [
   { id: 'browse', shot: 'table', label: 'Browse', body: 'Sort, page and filter millions of rows. Headers show each type and where its foreign key points.', alt: 'The orders table: order ids, customer UUIDs linking to customers, statuses, totals and timestamps, with filters and pagination.' },
@@ -40,9 +40,9 @@ const stops = [
       </div>
     </div>
 
-    <div class="relative mt-10">
+    <div class="reveal relative mt-10">
       <div class="tour-glow pointer-events-none absolute -inset-x-6 -inset-y-6 -z-10" aria-hidden="true"></div>
-      <div class="brand-border rounded-[16px] bg-surface">
+      <div class="brand-border elevate rounded-[16px] bg-surface">
         <div class="overflow-hidden rounded-[16px]">
           <div class="window-bar" aria-hidden="true">
             <div class="dots"><i></i><i></i><i></i></div>
@@ -72,8 +72,8 @@ const stops = [
 <style>
   .tour-glow {
     background:
-      radial-gradient(closest-side at 20% 40%, color-mix(in oklab, var(--blue) 40%, transparent), transparent),
-      radial-gradient(closest-side at 85% 70%, color-mix(in oklab, var(--pink) 32%, transparent), transparent);
+      radial-gradient(closest-side at 20% 40%, var(--glow-blue), transparent),
+      radial-gradient(closest-side at 85% 70%, var(--glow-pink), transparent);
     filter: blur(50px);
     opacity: 0.45;
   }

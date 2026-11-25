@@ -22,11 +22,19 @@ const ogUrl = new URL(og.src, Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- "light dark" follows the system; ThemeToggle swaps in a stored override. -->
+    <meta name="color-scheme" content="light dark" />
+    <script is:inline>
+      try {
+        document.querySelector('meta[name="color-scheme"]').content = localStorage.getItem('color-scheme') ?? 'light dark';
+      } catch {}
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -35,6 +43,7 @@ const ogUrl = new URL(og.src, Astro.site);
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body class="bg-bg text-fg">
+    <a href="#main" class="btn btn-primary fixed top-3 left-3 z-[60] -translate-y-20 focus-visible:translate-y-0">Skip to content</a>
     <slot />
   </body>
 </html>

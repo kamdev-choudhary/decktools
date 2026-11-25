@@ -38,8 +38,8 @@ import Logo from '../../../components/Logo.astro';
 <style>
   .cta-glow {
     background:
-      radial-gradient(closest-side at 35% 50%, color-mix(in oklab, var(--blue) 60%, transparent), transparent),
-      radial-gradient(closest-side at 65% 50%, color-mix(in oklab, var(--pink) 50%, transparent), transparent);
+      radial-gradient(closest-side at 35% 50%, var(--glow-blue), transparent),
+      radial-gradient(closest-side at 65% 50%, var(--glow-pink), transparent);
     filter: blur(60px);
     opacity: 0.6;
   }

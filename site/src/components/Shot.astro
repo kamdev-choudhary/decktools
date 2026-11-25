@@ -1,0 +1,49 @@
+---
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+
+/**
+ * A product screenshot in the page's theme. Each deck keeps a dark and a light
+ * capture (2880×1800) at src/decks/<deck>/assets/shots/<name>-{dark,light}.png;
+ * both are rendered as responsive WebP and CSS hides the inactive one. Both are
+ * lazy, so the hidden one (display: none) is never fetched.
+ */
+interface Props {
+  name: string;
+  alt: string;
+  deck?: string;
+  /** Above the fold: fetch at high priority. */
+  eager?: boolean;
+  sizes?: string;
+  class?: string;
+}
+
+const { name, alt, deck = 'pgdeck', eager = false, sizes = '(min-width: 1200px) 1100px, 100vw', class: className } = Astro.props;
+const files = import.meta.glob<{ default: ImageMetadata }>('../decks/*/assets/shots/*.png', { eager: true });
+
+const variants = await Promise.all(
+  (['dark', 'light'] as const).map(async (theme) => {
+    const file = files[`../decks/${deck}/assets/shots/${name}-${theme}.png`];
+    if (!file) throw new Error(`Missing screenshot ${deck}/${name}-${theme}.png`);
+    const img = await getImage({ src: file.default, widths: [720, 1100, 1600, 2200], format: 'webp', quality: 82 });
+    return { theme, img };
+  }),
+);
+---
+
+{
+  variants.map(({ theme, img }) => (
+    <img
+      src={img.src}
+      srcset={img.srcSet.attribute}
+      sizes={sizes}
+      alt={alt}
+      width="1440"
+      height="900"
+      loading="lazy"
+      fetchpriority={eager ? 'high' : 'auto'}
+      decoding="async"
+      class:list={['block h-auto w-full', `${theme}-only`, className]}
+    />
+  ))
+}

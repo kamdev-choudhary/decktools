@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import Corners from '../components/Corners.astro';
+import Logo from '../components/Logo.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Base title="Page not found · Deck tools" description="This page doesn't exist. Head back to the list of decks.">
+  <header class="sticky top-0 z-50 border-b border-line bg-bg/80 backdrop-blur-xl">
+    <nav class="mx-auto flex h-16 max-w-[75rem] items-center gap-8 px-5 md:px-6" aria-label="Main">
+      <a href={`${base}/`} class="flex items-center gap-2.5 text-[1.05rem] font-semibold tracking-tight">
+        <Logo class="size-7" />
+        Deck tools
+      </a>
+      <div class="ml-auto"><ThemeToggle /></div>
+    </nav>
+  </header>
+  <main id="main" class="rails relative isolate min-h-[calc(100dvh-4rem)] overflow-hidden">
+    <div class="grid-bg pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
+    <section class="pad py-28 text-center md:py-40">
+      <p class="font-mono text-sm text-faint">404 · relation does not exist</p>
+      <h1 class="display mx-auto mt-6 max-w-[14ch] text-[clamp(2.6rem,1.2rem+5vw,5rem)]">Nothing at this address.</h1>
+      <p class="lede mx-auto mt-6">The page may have moved, or the link was mistyped.</p>
+      <div class="mt-10 flex flex-wrap justify-center gap-3">
+        <a href={`${base}/`} class="btn btn-primary">All decks</a>
+        <a href={`${base}/pgdeck/`} class="btn btn-ghost">pgdeck</a>
+      </div>
+    </section>
+    <div class="section"><Corners /></div>
+  </main>
+</Base>

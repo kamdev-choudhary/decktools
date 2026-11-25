@@ -4,7 +4,7 @@ import { DOCS_URL, getPgdeckVersion } from '../meta';
 import Corners from '../../../components/Corners.astro';
 import CopyCommand from '../../../components/CopyCommand.astro';
 import Cross from '../../../components/Cross.astro';
-import Shot from './Shot.astro';
+import Shot from '../../../components/Shot.astro';
 
 const version = await getPgdeckVersion();
 const command = 'npx pgdeck postgres://localhost:5432/shop';
@@ -43,9 +43,9 @@ const stats = [
 
   <!-- The one orchestrated moment: the command runs, pgdeck answers, the app opens. -->
   <div class="pad relative mt-16 pb-20 md:mt-20 md:pb-28">
-    <div class="glow pointer-events-none absolute inset-x-[8%] top-[12%] -z-10 h-[70%]" aria-hidden="true"></div>
+    <div class="glow-bg pointer-events-none absolute inset-x-[8%] top-[12%] -z-10 h-[70%]" aria-hidden="true"></div>
     <div class="relative">
-      <div class="app-in brand-border rounded-[16px] bg-surface">
+      <div class="app-in brand-border elevate rounded-[16px] bg-surface">
         <div class="overflow-hidden rounded-[16px]">
           <div class="window-bar" aria-hidden="true">
             <div class="dots"><i></i><i></i><i></i></div>
@@ -64,7 +64,7 @@ const stats = [
         </div>
       </div>
 
-      <div class="term relative z-20 mt-4 w-full rounded-2xl border border-line-strong bg-surface/90 p-5 text-left backdrop-blur-md md:absolute md:-bottom-12 md:-left-8 md:mt-0 md:w-[27rem]">
+      <div class="term elevate relative z-20 mt-4 w-full rounded-2xl border border-line-strong bg-surface/90 p-5 text-left backdrop-blur-md md:absolute md:-bottom-12 md:-left-8 md:mt-0 md:w-[27rem]">
         <div class="mb-4 flex items-center" aria-hidden="true">
           <div class="dots"><i></i><i></i><i></i></div>
           <span class="ml-auto font-mono text-[0.68rem] text-faint">~/shop</span>
@@ -96,13 +96,6 @@ const stats = [
 </section>
 
 <style>
-  .glow {
-    background:
-      radial-gradient(closest-side at 30% 50%, color-mix(in oklab, var(--blue) 55%, transparent), transparent),
-      radial-gradient(closest-side at 72% 55%, color-mix(in oklab, var(--pink) 45%, transparent), transparent);
-    filter: blur(60px);
-    opacity: 0.55;
-  }
   .intro {
     animation: intro 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     animation-delay: calc(var(--d) * 0.07s);
