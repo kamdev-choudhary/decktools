@@ -19,8 +19,14 @@ export const hero = (version: string): HeroContent => ({
   terminalCommand: 'npx pgdeck postgres://localhost:5432/shop',
   terminalCwd: '~/shop',
   terminal: [
-    { gap: true, html: `  <span class="font-semibold text-blue">pgdeck</span> <span class="text-faint">v${version}</span>` },
-    { gap: true, html: `  <span class="text-green">✓ Connected</span>   shop as postgres <span class="text-faint">(PostgreSQL 18)</span>` },
+    {
+      gap: true,
+      html: `  <span class="font-semibold text-blue">pgdeck</span> <span class="text-faint">v${version}</span>`,
+    },
+    {
+      gap: true,
+      html: `  <span class="text-green">✓ Connected</span>   shop as postgres <span class="text-faint">(PostgreSQL 18)</span>`,
+    },
     { html: `    <span class="text-faint">Databases</span>   35 available` },
     { html: `  <span class="text-blue">➜ Web UI      http://127.0.0.1:47615/</span>` },
     { html: `    <span class="text-faint">Login</span>       admin / <span class="text-amber">7Qm2xLpR9vKe</span>` },
@@ -39,13 +45,55 @@ export const hero = (version: string): HeroContent => ({
 });
 
 export const tour: TourStop[] = [
-  { id: 'browse', shot: 'table', label: 'Browse', body: 'Sort, page and filter millions of rows. Headers show each type and where its foreign key points.', alt: 'The orders table: order ids, customer UUIDs linking to customers, statuses, totals and timestamps, with filters and pagination.' },
-  { id: 'edit', shot: 'editor', label: 'Edit', body: 'Double-click a row for a form with the right control for each column, including a picker for foreign keys.', alt: 'The Edit row dialog for an order, with a foreign key Browse button, a status menu and date pickers.' },
-  { id: 'sql', shot: 'sql', label: 'SQL', body: 'Highlighting and table autocomplete. Run the selection or the whole script, keep history, export results.', alt: 'The SQL editor with a revenue-by-country query and its result rows.' },
-  { id: 'structure', shot: 'structure', label: 'Structure', body: 'Columns, indexes, constraints and references, each with actions to change or drop it.', alt: 'The Structure tab for orders with columns, indexes and constraints.' },
-  { id: 'create', shot: 'create-table', label: 'Create', body: 'Build a table column by column, with constraints and foreign keys, and read the SQL as you go.', alt: 'The New table dialog with columns, constraint toggles and a references picker.' },
-  { id: 'import', shot: 'import', label: 'Import', body: 'Drop data files or a pg_dump backup. Files are matched to tables by name and streamed in.', alt: 'The Import page with drop zones for data files and backups.' },
-  { id: 'export', shot: 'export', label: 'Export', body: 'Pick tables and a format, or download the whole database as a restorable backup.', alt: 'The Export page with a table list and format options.' },
+  {
+    id: 'browse',
+    shot: 'table',
+    label: 'Browse',
+    body: 'Sort, page and filter millions of rows. Headers show each type and where its foreign key points.',
+    alt: 'The orders table: order ids, customer UUIDs linking to customers, statuses, totals and timestamps, with filters and pagination.',
+  },
+  {
+    id: 'edit',
+    shot: 'editor',
+    label: 'Edit',
+    body: 'Double-click a row for a form with the right control for each column, including a picker for foreign keys.',
+    alt: 'The Edit row dialog for an order, with a foreign key Browse button, a status menu and date pickers.',
+  },
+  {
+    id: 'sql',
+    shot: 'sql',
+    label: 'SQL',
+    body: 'Highlighting and table autocomplete. Run the selection or the whole script, keep history, export results.',
+    alt: 'The SQL editor with a revenue-by-country query and its result rows.',
+  },
+  {
+    id: 'structure',
+    shot: 'structure',
+    label: 'Structure',
+    body: 'Columns, indexes, constraints and references, each with actions to change or drop it.',
+    alt: 'The Structure tab for orders with columns, indexes and constraints.',
+  },
+  {
+    id: 'create',
+    shot: 'create-table',
+    label: 'Create',
+    body: 'Build a table column by column, with constraints and foreign keys, and read the SQL as you go.',
+    alt: 'The New table dialog with columns, constraint toggles and a references picker.',
+  },
+  {
+    id: 'import',
+    shot: 'import',
+    label: 'Import',
+    body: 'Drop data files or a pg_dump backup. Files are matched to tables by name and streamed in.',
+    alt: 'The Import page with drop zones for data files and backups.',
+  },
+  {
+    id: 'export',
+    shot: 'export',
+    label: 'Export',
+    body: 'Pick tables and a format, or download the whole database as a restorable backup.',
+    alt: 'The Export page with a table list and format options.',
+  },
 ];
 
 export const deploy: DeployContent = {
@@ -119,7 +167,10 @@ export const deploy: DeployContent = {
     },
   ],
   safety: [
-    ['Login by default', 'A random password at every start, HTTP-only SameSite=Strict cookies, and rate-limited sign-in.'],
+    [
+      'Login by default',
+      'A random password at every start, HTTP-only SameSite=Strict cookies, and rate-limited sign-in.',
+    ],
     ['Private unless you say so', 'Binds to 127.0.0.1. It warns if you expose it without a login.'],
     ['Cross-site safe', 'API calls need a custom header and WebSockets check their Origin.'],
     ['Least privilege', 'pgdeck can only do what its role can. Use a read-only role for anything sensitive.'],

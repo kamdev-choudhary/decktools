@@ -52,7 +52,8 @@ export const DECKS: Deck[] = [
     slug: 'redisdeck',
     name: 'redisdeck',
     target: 'Redis',
-    tagline: 'Browse and edit keys of every type, run commands in a console, and watch memory, clients and operations live.',
+    tagline:
+      'Browse and edit keys of every type, run commands in a console, and watch memory, clients and operations live.',
     command: 'npx redisdeck redis://localhost:6379',
     status: 'available',
     hasPage: true,
