@@ -16,6 +16,8 @@ export interface Deck {
   /** Example command shown on the home page card. */
   command: string;
   status: 'available' | 'planned';
+  /** True once src/pages/<slug>/ exists; until then the card links to the deck's README. */
+  hasPage?: boolean;
   /** Shown while no version can be fetched from npm. */
   fallbackVersion?: string;
 }
@@ -28,15 +30,17 @@ export const DECKS: Deck[] = [
     tagline: 'Browse and edit rows, run SQL, change tables and watch live activity on every database on your server.',
     command: 'npx pgdeck postgres://localhost:5432',
     status: 'available',
+    hasPage: true,
     fallbackVersion: '0.1.5',
   },
   {
     slug: 's3deck',
     name: 's3deck',
     target: 'S3 storage',
-    tagline: 'Browse buckets, preview and move objects, and manage access on S3 and S3-compatible storage.',
-    command: 'npx s3deck',
-    status: 'planned',
+    tagline: 'Browse buckets, preview files, move gigabytes, share links and manage bucket settings on AWS S3, Cloudflare R2, MinIO, Backblaze B2 and more.',
+    command: 'npx s3deck --profile prod --open',
+    status: 'available',
+    fallbackVersion: '0.1.1',
   },
   {
     slug: 'redisdeck',

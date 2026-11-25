@@ -4,13 +4,14 @@ import Corners from '../components/Corners.astro';
 import CopyCommand from '../components/CopyCommand.astro';
 import Logo from '../components/Logo.astro';
 import { DECKS } from '../decks';
-import { getVersion, REPO_URL } from '../lib/meta';
+import { docsUrl, getVersion, REPO_URL } from '../lib/meta';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const decks = await Promise.all(
   DECKS.map(async (d) => ({
     ...d,
-    href: `${base}/${d.slug}/`,
+    href: d.hasPage ? `${base}/${d.slug}/` : docsUrl(d.slug),
+    cta: d.hasPage ? `Explore ${d.name}` : 'Read the docs',
     version: d.status === 'available' ? await getVersion(d.slug, d.fallbackVersion ?? '') : null,
   })),
 );
@@ -20,7 +21,7 @@ const planned = decks.filter((d) => d.status === 'planned');
 
 <Base
   title="Deck tools: web UIs for your infrastructure, one command away"
-  description="Zero-install web UIs for PostgreSQL and more. Run a deck with npx, open the link, and manage your infrastructure from the browser."
+  description="Zero-install web UIs for PostgreSQL, S3 and more. Run a deck with npx, open the link, and manage your infrastructure from the browser."
 >
   <header class="sticky top-0 z-50 border-b border-line bg-bg/80 backdrop-blur-xl">
     <nav class="mx-auto flex h-16 max-w-[75rem] items-center gap-8 px-5 md:px-6" aria-label="Main">
@@ -65,7 +66,7 @@ const planned = decks.filter((d) => d.status === 'planned');
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
                   <CopyCommand command={d.command} class="flex-1 text-left" />
                   <a href={d.href} class="btn btn-primary h-[3.1rem] shrink-0">
-                    Explore {d.name}
+                    {d.cta}
                   </a>
                 </div>
               </article>
