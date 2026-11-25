@@ -1,4 +1,4 @@
-import { HardDrive, Lock, Rows3, Table2 } from 'lucide-react';
+import { HardDrive, ListTree, Lock, Rows3, Sheet, Table2 } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@deck/ui/components/badge';
 import { REL_KIND_LABEL } from '@shared/types';
@@ -25,6 +25,9 @@ interface TableViewProps {
  * nearly all of the vertical space. The table name itself is in the header
  * breadcrumb, so it isn't repeated here.
  */
+const TAB =
+  'h-full flex-none gap-1.5 rounded-md px-2.5 text-[13px] text-muted-foreground data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:text-foreground [&_svg:not([class*=size-])]:size-3.5';
+
 export function TableView({ db, schema, table, eq, readonly }: TableViewProps) {
   const meta = useMeta(db, schema, table);
   const [tab, setTab] = useState('data');
@@ -38,12 +41,13 @@ export function TableView({ db, schema, table, eq, readonly }: TableViewProps) {
   return (
     <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col gap-0">
       <div className="flex h-12 shrink-0 items-center gap-3 border-b px-3 md:px-4">
-        <TabsList variant="line" className="h-full shrink-0 p-0">
-          <TabsTrigger value="data" className="px-2.5">
-            Data
+        {/* Segmented control, styled like the rest of the app: bordered, no shadow. */}
+        <TabsList className="h-8 shrink-0 gap-0.5 rounded-lg border bg-muted/60 p-0.5">
+          <TabsTrigger value="data" className={TAB}>
+            <Sheet /> Data
           </TabsTrigger>
-          <TabsTrigger value="structure" className="px-2.5">
-            Structure
+          <TabsTrigger value="structure" className={TAB}>
+            <ListTree /> Structure
           </TabsTrigger>
         </TabsList>
         <Tooltip>

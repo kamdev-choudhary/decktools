@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowUpRight, Link2, Search } from 'lucide-react';
+import { ArrowUpRight, KeyRound, Link2, Search, Table2 } from 'lucide-react';
 import { useDeferredValue, useState } from 'react';
 import type { Column, Filter, TableMeta } from '@shared/types';
 import { api } from '@/api/client';
@@ -70,20 +70,29 @@ function PeekBody({ db, fk, value }: { db: string; fk: FkTarget; value: string }
     queryKey: ['db', db, 'fk-peek', fk.schema, fk.table, fk.column, value],
     queryFn: () => api.rows(db, { schema: fk.schema, table: fk.table, limit: 1, offset: 0, filters }),
   });
+  const meta = useMeta(db, fk.schema, fk.table);
+  const types = new Map(meta.data?.columns.map((c) => [c.name, c.type]));
   const href = tableHref(db, fk.schema, fk.table, { [fk.column]: value });
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b px-3 py-2">
-        <div className="min-w-0">
-          <div className="truncate font-mono text-xs font-medium">
-            {fk.schema}.{fk.table}
+      {/* Header band, styled like the grid's column headers. */}
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b bg-grid-header px-4 py-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
+            <Table2 className="size-4" />
           </div>
-          <div className="truncate font-mono text-[11px] text-muted-foreground">
-            {fk.column} = {value}
+          <div className="min-w-0">
+            <div className="truncate text-sm font-medium">
+              {fk.schema === 'public' ? '' : `${fk.schema}.`}
+              {fk.table}
+            </div>
+            <div className="truncate font-mono text-[11px] text-muted-foreground">
+              where {fk.column} = {value}
+            </div>
           </div>
         </div>
-        <Button variant="outline" size="xs" asChild>
+        <Button variant="outline" size="sm" asChild>
           <a href={href}>
             Open <ArrowUpRight />
           </a>
@@ -91,22 +100,33 @@ function PeekBody({ db, fk, value }: { db: string; fk: FkTarget; value: string }
       </div>
       <div className="min-h-0 overflow-y-auto">
         {row.isPending && (
-          <div className="flex justify-center p-6">
+          <div className="flex justify-center p-8">
             <Spinner />
           </div>
         )}
-        {row.isError && <ErrorAlert error={row.error} className="m-3 w-auto" />}
-        {row.isSuccess && !row.data.rows.length && <p className="p-4 text-center text-xs text-muted-foreground">No matching row. The reference may be broken.</p>}
+        {row.isError && <ErrorAlert error={row.error} className="m-4 w-auto" />}
+        {row.isSuccess && !row.data.rows.length && <p className="px-4 py-8 text-center text-sm text-muted-foreground">No matching row. The reference may be broken.</p>}
         {row.isSuccess && row.data.rows[0] && (
-          <dl className="divide-y text-xs">
+          <dl>
             {row.data.fields.map((f, i) => {
               const v = row.data.rows[0]![i] ?? null;
+              const isKey = f === fk.column;
               return (
-                <div key={f} className="grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] gap-3 px-3 py-1 hover:bg-muted/40">
-                  <dt className="truncate font-mono text-muted-foreground" title={f}>
-                    {f}
+                <div
+                  key={f}
+                  className={cn(
+                    'grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] items-start gap-4 border-b px-4 py-2 last:border-b-0 hover:bg-row-hover',
+                    isKey && 'bg-row-selected hover:bg-row-selected',
+                  )}
+                >
+                  <dt className="min-w-0">
+                    <div className="flex items-center gap-1.5 text-[13px] font-medium" title={f}>
+                      {isKey && <KeyRound className="size-3 shrink-0 text-warning" aria-label="Referenced key" />}
+                      <span className="truncate">{f}</span>
+                    </div>
+                    {types.get(f) && <div className="truncate font-mono text-[10.5px] text-muted-foreground">{types.get(f)}</div>}
                   </dt>
-                  <dd className={cn('min-w-0 font-mono', v === null && 'text-null italic')}>
+                  <dd className={cn('min-w-0 pt-px font-mono text-[12.5px]', v === null && 'text-null italic')}>
                     <TruncatedText text={v ?? 'NULL'} side="left" />
                   </dd>
                 </div>
@@ -119,25 +139,26 @@ function PeekBody({ db, fk, value }: { db: string; fk: FkTarget; value: string }
   );
 }
 
-/** Small ↗ button in an FK cell that previews the referenced row. */
+/** An FK cell's value, drawn as a link; clicking it previews the referenced row. */
 export function FkPeek({ db, fk, value }: { db: string; fk: FkTarget; value: string }) {
   const [open, setOpen] = useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
+        {/* The value itself is the link to the referenced row. */}
         <button
           type="button"
           onClick={(e) => e.stopPropagation()}
           onDoubleClick={(e) => e.stopPropagation()}
-          aria-label={`Show the referenced ${fk.table} row`}
-          className="shrink-0 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-accent hover:text-foreground focus-visible:opacity-100 data-[state=open]:opacity-100"
+          title={`Show the referenced ${fk.table} row`}
+          className="inline-block max-w-full cursor-pointer truncate rounded-sm align-top text-link underline decoration-link/40 underline-offset-[3px] transition-colors hover:decoration-link focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none data-[state=open]:decoration-link"
         >
-          <ArrowUpRight className="size-3.5" />
+          {value}
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="flex max-h-[min(26rem,var(--radix-popover-content-available-height))] w-[min(26rem,calc(100vw-2rem))] flex-col overflow-hidden p-0"
+        className="flex max-h-[min(32rem,var(--radix-popover-content-available-height))] w-[min(34rem,calc(100vw-2rem))] flex-col overflow-hidden p-0"
       >
         {open && <PeekBody db={db} fk={fk} value={value} />}
       </PopoverContent>

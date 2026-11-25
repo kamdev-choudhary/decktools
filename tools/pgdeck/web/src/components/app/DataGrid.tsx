@@ -164,10 +164,7 @@ export function DataGrid({
                     {v === null ? (
                       'NULL'
                     ) : db && foreignKeys?.[fields[j]!] ? (
-                      <span className="flex min-w-0 items-center gap-1">
-                        <span className="truncate">{v}</span>
-                        <FkPeek db={db} fk={foreignKeys[fields[j]!]!} value={v} />
-                      </span>
+                      <FkPeek db={db} fk={foreignKeys[fields[j]!]!} value={v} />
                     ) : wrap || v.length <= MAX_CELL_CHARS ? (
                       v
                     ) : (
