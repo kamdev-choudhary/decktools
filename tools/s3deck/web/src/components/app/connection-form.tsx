@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { connectionInputSchema, pathStyleSchema, type ConnectionInput } from '@shared/schemas';
 import { ChevronRight, CircleAlert, KeyRound, Lock } from 'lucide-react';
 import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { errorText } from '@/api/client';
@@ -142,7 +142,8 @@ export function ConnectionForm({ onConnected, onCancel }: { onConnected?: () => 
     },
   });
   const { errors } = form.formState;
-  const provider = PROVIDERS[form.watch('provider')]!;
+  const provider = PROVIDERS[useWatch({ control: form.control, name: 'provider' })]!;
+  const remember = useWatch({ control: form.control, name: 'remember' });
 
   const onSubmit = form.handleSubmit((values) => {
     const parsed = connectionInputSchema.safeParse(toInput(values));
@@ -310,7 +311,7 @@ export function ConnectionForm({ onConnected, onCancel }: { onConnected?: () => 
 
         <FieldDescription className="flex items-start gap-2">
           <Lock className="mt-0.5 size-3.5 shrink-0" />
-          {form.watch('remember')
+          {remember
             ? 'Keys are sent once to the s3deck server and stored there encrypted (AES-256-GCM). They are never sent back to the browser.'
             : 'Keys are sent once to the s3deck server and kept in its memory for this session. They are never sent back to the browser or written to disk, and are forgotten when you log out or s3deck restarts.'}
         </FieldDescription>

@@ -10,7 +10,7 @@
 import { PREVIEW_TEXT_BYTES } from '@shared/constants';
 import DOMPurify from 'dompurify';
 import { Code, Eye } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { readError } from '@/api/client';
 import { EmptyState } from '@/components/app/empty-state';
@@ -229,7 +229,7 @@ const PANGRAM = 'The quick brown fox jumps over the lazy dog';
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789 !@#$%^&*()[]{}<>?/\\|;:\'",.-_=+~`';
 
 function FontPreview({ url, size }: RichPreviewProps) {
-  const family = useMemo(() => `s3deck-preview-${Math.random().toString(36).slice(2)}`, []);
+  const family = `s3deck-preview-${useId().replace(/[^\w-]/g, '')}`;
   const q = useFile('font', url, async (s) => {
     if (size > MAX_PARSE_BYTES) throw new Error('Font file is too large to preview.');
     const bytes = await fetchBytes(url, s);

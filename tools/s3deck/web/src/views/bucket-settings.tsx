@@ -19,7 +19,7 @@ import {
   Upload,
   Workflow,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import type { ZodType } from 'zod';
 import { errorText } from '@/api/client';
@@ -155,7 +155,12 @@ function JsonEditor<T>({
 }) {
   const initial = value === null || (Array.isArray(value) && value.length === 0) ? '' : JSON.stringify(value, null, 2);
   const [text, setText] = useState(initial);
-  useEffect(() => setText(initial), [initial]);
+  // A saved or refreshed value replaces the draft.
+  const [textFor, setTextFor] = useState(initial);
+  if (textFor !== initial) {
+    setTextFor(initial);
+    setText(initial);
+  }
 
   const result = useMemo(() => validateJson(text, schema), [text, schema]);
   const dirty = text !== initial;
@@ -511,7 +516,12 @@ type Pab = NonNullable<BucketSettings['publicAccessBlock']['value']>;
 function PublicAccess({ value, locked, saving, onSave }: { value: Pab | null; locked: boolean; saving: boolean; onSave: (v: Pab) => void }) {
   const initial: Pab = value ?? { BlockPublicAcls: false, IgnorePublicAcls: false, BlockPublicPolicy: false, RestrictPublicBuckets: false };
   const [draft, setDraft] = useState(initial);
-  useEffect(() => setDraft(initial), [value]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A saved or refreshed value replaces the draft.
+  const [draftFor, setDraftFor] = useState(value);
+  if (draftFor !== value) {
+    setDraftFor(value);
+    setDraft(initial);
+  }
   const changed = PAB_FIELDS.some(([k]) => draft[k] !== initial[k]);
 
   return (

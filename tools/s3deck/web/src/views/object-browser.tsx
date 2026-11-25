@@ -210,11 +210,14 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
   const lastClicked = useRef<number>(-1);
 
   // Reset per-folder state on navigation.
-  useEffect(() => {
+  const folderKey = `${bucket}\u0000${listPrefix}`;
+  const [folderFor, setFolderFor] = useState(folderKey);
+  if (folderFor !== folderKey) {
+    setFolderFor(folderKey);
     setSelected(new Set());
     setFilter('');
     setFocus(-1);
-  }, [listPrefix, bucket]);
+  }
 
   const rows: Entry[] = useMemo(() => {
     const pages = objects.data?.pages ?? [];

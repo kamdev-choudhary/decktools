@@ -387,7 +387,12 @@ export function ShareDialog({ bucket, objectKey, versionId, onClose }: DialogPro
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => setLink(null), [tab, expiresIn]);
+  // A link is for one mode and lifetime; changing either discards it.
+  const [linkFor, setLinkFor] = useState({ tab, expiresIn });
+  if (linkFor.tab !== tab || linkFor.expiresIn !== expiresIn) {
+    setLinkFor({ tab, expiresIn });
+    setLink(null);
+  }
 
   const create = async () => {
     setBusy(true);

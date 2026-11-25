@@ -35,12 +35,14 @@ export function CreateBucketDialog({ open, onOpenChange }: { open: boolean; onOp
   });
   const { errors } = form.formState;
 
+  // Start fresh each time the dialog closes. form and create.reset are stable.
+  const resetMutation = create.reset;
   useEffect(() => {
     if (!open) {
       form.reset({ name: '', region: connection.region });
-      create.reset();
+      resetMutation();
     }
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, form, connection.region, resetMutation]);
 
   const submit = form.handleSubmit((v) =>
     create.mutate(v, {

@@ -33,7 +33,7 @@ export class ActivityLog {
         // skip a corrupt line
       }
     }
-    this.recent = entries.reverse();
+    this.recent = entries.toReversed();
   }
 
   record(entry: Omit<ActivityEntry, 'id' | 'at'>) {

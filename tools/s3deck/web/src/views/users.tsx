@@ -3,7 +3,7 @@ import { createUserSchema, passwordSchema, roleSchema } from '@shared/schemas';
 import type { Role, UserInfo } from '@shared/types';
 import { CircleAlert, Ellipsis, KeyRound, Plus, ShieldCheck, Trash2, UserRound, UserX } from 'lucide-react';
 import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { errorText } from '@/api/client';
@@ -70,7 +70,8 @@ function AddUserDialog({ open, onOpenChange, ssoEnabled }: { open: boolean; onOp
     defaultValues: { username: '', password: '', role: 'viewer', sso: false },
   });
   const { errors } = form.formState;
-  const sso = form.watch('sso');
+  const sso = useWatch({ control: form.control, name: 'sso' });
+  const role = useWatch({ control: form.control, name: 'role' });
 
   const submit = form.handleSubmit((v) =>
     create.mutate(
@@ -121,7 +122,7 @@ function AddUserDialog({ open, onOpenChange, ssoEnabled }: { open: boolean; onOp
                 <Input id="new-password" type="password" autoComplete="new-password" aria-invalid={!!errors.password} {...form.register('password')} />
               </FormField>
             )}
-            <FormField label="Role" htmlFor="new-role" description={ROLES.find((r) => r.value === form.watch('role'))?.hint}>
+            <FormField label="Role" htmlFor="new-role" description={ROLES.find((r) => r.value === role)?.hint}>
               <Controller
                 control={form.control}
                 name="role"

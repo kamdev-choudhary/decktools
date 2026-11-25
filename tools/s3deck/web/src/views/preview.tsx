@@ -51,17 +51,19 @@ async function fetchHead(url: string, signal: AbortSignal): Promise<{ text: stri
 }
 
 function CodeView({ text, language }: { text: string; language?: string }) {
-  const [html, setHtml] = useState<string | null>(null);
+  // Highlighted HTML, tagged with the source it was made from so a new file never shows stale markup.
+  const [highlighted, setHighlighted] = useState<{ text: string; language: string; html: string | null } | null>(null);
+  const html = highlighted && highlighted.text === text && highlighted.language === language ? highlighted.html : null;
   useEffect(() => {
     let cancelled = false;
-    if (!language || text.length > 300_000) return setHtml(null);
+    if (!language || text.length > 300_000) return;
     void import('highlight.js/lib/common').then(({ default: hljs }) => {
       if (cancelled) return;
       try {
         const lang = hljs.getLanguage(language) ? language : undefined;
-        setHtml(lang ? hljs.highlight(text, { language: lang }).value : null);
+        setHighlighted({ text, language, html: lang ? hljs.highlight(text, { language: lang }).value : null });
       } catch {
-        setHtml(null);
+        setHighlighted({ text, language, html: null });
       }
     });
     return () => {
@@ -213,6 +215,8 @@ function Preview({ bucket, details, versionId }: { bucket: string; details: Obje
         </Center>
       );
     case 'pdf':
+      // No sandbox: browsers refuse to run their built-in PDF viewer in a sandboxed frame.
+      // oxlint-disable-next-line react/iframe-missing-sandbox
       return <iframe src={url} title={name} className="h-full w-full border-0" />;
     case 'none':
       return (
@@ -440,10 +444,13 @@ export function PreviewPanel({ bucket, objectKey, onClose }: { bucket: string; o
   const details = useObjectDetails(bucket, objectKey, versionId);
   const name = objectKey.split('/').pop() || objectKey;
 
-  useEffect(() => {
+  // Opening another object starts on its latest version and the preview tab.
+  const [panelFor, setPanelFor] = useState(objectKey);
+  if (panelFor !== objectKey) {
+    setPanelFor(objectKey);
     setVersionId(null);
     setTab('preview');
-  }, [objectKey]);
+  }
 
   return (
     <aside className="flex h-full min-h-0 w-full flex-col border-l bg-background" aria-label="Preview">

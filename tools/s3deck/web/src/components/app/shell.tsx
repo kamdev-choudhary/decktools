@@ -34,7 +34,13 @@ export function Shell({ me, connections }: { me: MeResponse; connections: Connec
   // Refresh listings as uploads finish.
   useEffect(() => uploadQueue.onComplete((bucket) => void invalidateBucket(qc, bucket)), [qc]);
   useEffect(() => onAction((a) => a === 'add-connection' && setAddOpen(true)), []);
-  useEffect(() => setNavOpen(false), [route.bucket, route.view]);
+  // Close the mobile nav on navigation.
+  const navKey = `${route.bucket}\u0000${route.view}`;
+  const [navFor, setNavFor] = useState(navKey);
+  if (navFor !== navKey) {
+    setNavFor(navKey);
+    setNavOpen(false);
+  }
 
   return (
     <AppContext.Provider value={state}>
