@@ -1,8 +1,12 @@
 {
-  "name": "deck-tools",
+  "name": "decktools",
   "private": true,
   "description": "Monorepo for the Deck tools: zero-install web UIs for infrastructure, run with npx.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamdev-choudhary/decktools.git"
+  },
   "type": "module",
   "packageManager": "pnpm@12.18.0",
   "engines": {
