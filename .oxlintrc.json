@@ -14,15 +14,15 @@
     "react/react-in-jsx-scope": "off",
     "react-hooks/rules-of-hooks": "error",
 
-    // React Compiler-style checks. They point at real patterns in existing,
-    // working UI code; keep them visible as warnings and fix case by case.
-    "react/set-state-in-effect": "warn",
-    "react/refs": "warn",
-    "react/purity": "warn",
-    "react/exhaustive-effect-dependencies": "warn",
-    "react/memo-dependencies": "warn",
-    "react/no-unstable-nested-components": "warn",
-    "react/incompatible-library": "warn", // react-hook-form watch()
+    // React Compiler-style checks. Intentional exceptions carry an inline
+    // oxlint-disable comment that says why.
+    "react/set-state-in-effect": "error",
+    "react/refs": "error",
+    "react/purity": "error",
+    "react/exhaustive-effect-dependencies": "error",
+    "react/memo-dependencies": "error",
+    "react/no-unstable-nested-components": "error",
+    "react/incompatible-library": "error", // e.g. use useWatch(), not form.watch()
 
     // Deliberate patterns in this codebase.
     "import/no-named-as-default-member": "off", // pg is CommonJS: pg.Pool / pg.DatabaseError is the supported form
