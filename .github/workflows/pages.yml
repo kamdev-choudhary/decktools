@@ -1,4 +1,5 @@
-# Builds the landing page in site/ and publishes it to GitHub Pages.
+# Builds the website in site/ (the hub plus one page per deck) and publishes it
+# to GitHub Pages at https://kamdev-choudhary.github.io/decktools/.
 # One-time setup: repo Settings → Pages → Source: "GitHub Actions".
 name: Deploy site
 
@@ -29,8 +30,8 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile --filter pgdeck-site...
-      - run: pnpm --filter pgdeck-site build
+      - run: pnpm install --frozen-lockfile --filter deck-site...
+      - run: pnpm --filter deck-site build
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site/dist

@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, typecheck, test, build (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+
+    # An S3-compatible server for s3deck's integration tests.
+    services:
+      s3:
+        image: rustfs/rustfs:latest
+        env:
+          RUSTFS_ACCESS_KEY: minioadmin
+          RUSTFS_SECRET_KEY: minioadmin
+        ports:
+          - 9000:9000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      - run: pnpm typecheck
+
+      - name: Wait for S3
+        run: |
+          for i in $(seq 1 30); do
+            curl -s -o /dev/null http://localhost:9000/ && exit 0
+            sleep 2
+          done
+          echo "S3 service did not start" && exit 1
+
+      - name: Test
+        run: pnpm test
+        env:
+          S3DECK_TEST_ENDPOINT: http://localhost:9000
+          S3DECK_TEST_ACCESS_KEY: minioadmin
+          S3DECK_TEST_SECRET_KEY: minioadmin
+
+      - run: pnpm build
+
+      - name: Smoke-test the built CLIs
+        run: |
+          node tools/pgdeck/dist/cli.js --version
+          node tools/pgdeck/dist/cli.js --help > /dev/null
+          node tools/s3deck/dist/cli.mjs --version
+          node tools/s3deck/dist/cli.mjs --help > /dev/null
+
+      - name: Check the published package contents
+        run: |
+          (cd tools/pgdeck && pnpm pack --dry-run)
+          (cd tools/s3deck && pnpm pack --dry-run)

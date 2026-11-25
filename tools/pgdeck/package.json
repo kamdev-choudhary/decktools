@@ -50,7 +50,7 @@
     "dev:web": "vite --config web/vite.config.ts",
     "lint": "oxlint -c ../../.oxlintrc.json src web test",
     "typecheck": "tsc -p tsconfig.json && tsc -p web/tsconfig.json",
-    "test": "tsx --test \"test/**/*.test.ts\"",
+    "test": "tsx --test test/*.test.ts",
     "start": "node dist/cli.js",
     "prepublishOnly": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "pack:check": "pnpm build && pnpm pack --dry-run"
