@@ -17,5 +17,9 @@
     "pgdeck": "pnpm --filter pgdeck",
     "site:dev": "pnpm --filter pgdeck-site dev",
     "site:build": "pnpm --filter pgdeck-site build"
+  },
+  "devDependencies": {
+    "oxlint": "^1.95.0",
+    "pgdeck": "workspace:*"
   }
 }
