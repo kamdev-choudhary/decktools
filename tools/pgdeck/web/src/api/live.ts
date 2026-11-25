@@ -15,15 +15,21 @@ export function useLive(db: string) {
   const [status, setStatus] = useState<LiveStatus>('connecting');
   const [error, setError] = useState<string | null>(null);
 
+  // Switching databases starts a fresh series.
+  const [seriesFor, setSeriesFor] = useState(db);
+  if (seriesFor !== db) {
+    setSeriesFor(db);
+    setSamples([]);
+    setStatus('connecting');
+  }
+
   useEffect(() => {
     let ws: WebSocket | null = null;
     let retry = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let stopped = false;
-    setSamples([]);
 
     const connect = () => {
-      setStatus('connecting');
       const url = new URL(`${BASE}api/db/${encodeURIComponent(db)}/live`, location.href);
       url.protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
       ws = new WebSocket(url);
@@ -43,7 +49,13 @@ export function useLive(db: string) {
       ws.onclose = () => {
         if (stopped) return;
         setStatus('offline');
-        timer = setTimeout(connect, Math.min(1000 * 2 ** retry++, 15_000));
+        timer = setTimeout(
+          () => {
+            setStatus('connecting');
+            connect();
+          },
+          Math.min(1000 * 2 ** retry++, 15_000),
+        );
       };
     };
 

@@ -355,16 +355,16 @@ function PrivilegeGrid({
   const missingUsage = useMemo(() => {
     if (tab !== 'table' && tab !== 'sequence' && tab !== 'function') return [];
     const schemas = new Map(detail.objects.filter((o) => o.kind === 'schema').map((o) => [o.name, o]));
+    const granted = (o: GrantObject, p: string) => pending.get(cellKey(o, p)) ?? o.privileges.includes(p);
     const out = new Set<string>();
     for (const o of detail.objects) {
       if (o.kind !== tab || !o.schema || o.owner === role) continue;
-      const anyGrant = privilegesFor(o.kind, detail.serverVersion).some((p) => has(o, p));
+      const anyGrant = privilegesFor(o.kind, detail.serverVersion).some((p) => granted(o, p));
       const s = schemas.get(o.schema);
-      if (anyGrant && s && s.owner !== role && !has(s, 'USAGE') && !s.public.includes('USAGE')) out.add(o.schema);
+      if (anyGrant && s && s.owner !== role && !granted(s, 'USAGE') && !s.public.includes('USAGE')) out.add(o.schema);
     }
     return [...out].map((n) => schemas.get(n)!);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, detail.objects, pending, role]);
+  }, [tab, detail.objects, detail.serverVersion, pending, role]);
 
   const kinds = TABS.find((t) => t.value === tab)!.kinds;
   const needle = filter.trim().toLowerCase();

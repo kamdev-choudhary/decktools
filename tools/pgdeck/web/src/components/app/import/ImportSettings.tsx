@@ -52,11 +52,15 @@ export function ImportSettings({ file, meta, disabled, onPlan }: ImportSettingsP
 
   const insertable = meta.columns.filter((c) => !c.generated);
 
-  // Read the first few KB whenever compression changes.
-  useEffect(() => {
-    let cancelled = false;
+  // Read the first few KB whenever the file or its compression changes.
+  const [readFor, setReadFor] = useState({ file, gzip });
+  if (readFor.file !== file || readFor.gzip !== gzip) {
+    setReadFor({ file, gzip });
     setHead(null);
     setReadError(null);
+  }
+  useEffect(() => {
+    let cancelled = false;
     readHead(file, gzip)
       .then((text) => {
         if (cancelled) return;
@@ -70,8 +74,14 @@ export function ImportSettings({ file, meta, disabled, onPlan }: ImportSettingsP
   }, [file, gzip]);
 
   // Re-parse the preview and re-derive the mapping when parsing options change.
-  useEffect(() => {
-    if (head === null) return;
+  // The mapping stays editable afterwards, so this adjusts state rather than memoizing.
+  const parseKey = { head, format, delimiter, header, meta };
+  const [parsedFor, setParsedFor] = useState<typeof parseKey | null>(null);
+  if (
+    head !== null &&
+    (parsedFor?.head !== head || parsedFor.format !== format || parsedFor.delimiter !== delimiter || parsedFor.header !== header || parsedFor.meta !== meta)
+  ) {
+    setParsedFor(parseKey);
     const p = buildPreview(head, format, delimiter, header);
     setPreview(p);
     setMapping(
@@ -81,8 +91,7 @@ export function ImportSettings({ file, meta, disabled, onPlan }: ImportSettingsP
         format !== 'ndjson',
       ).map((m) => (m === '' && format === 'ndjson' ? SKIP : m)),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [head, format, delimiter, header, meta]);
+  }
 
   const mapped = mapping.map((m, i) => ({ fileColumn: preview?.columns[i] ?? '', target: m })).filter((m) => m.target && m.target !== SKIP);
   const duplicate = mapped.find((m, i) => mapped.findIndex((x) => x.target === m.target) !== i);
@@ -103,6 +112,8 @@ export function ImportSettings({ file, meta, disabled, onPlan }: ImportSettingsP
 
   // Report the plan upward whenever it changes.
   const planKey = JSON.stringify({ format, gzip, delimiter, header, truncate, mapped, problem });
+  // Keyed on the serialized plan so the parent hears about real changes only, not every render.
+  /* oxlint-disable react-hooks/exhaustive-deps, react/exhaustive-effect-dependencies */
   useEffect(() => {
     if (problem) return onPlan(null, problem);
     const params = new URLSearchParams({
@@ -117,8 +128,8 @@ export function ImportSettings({ file, meta, disabled, onPlan }: ImportSettingsP
     });
     if (format === 'ndjson') params.set('keys', JSON.stringify(mapped.map((m) => m.fileColumn)));
     onPlan({ params, truncate, columns: mapped.length }, null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planKey, meta.schema, meta.table]);
+  /* oxlint-enable react-hooks/exhaustive-deps, react/exhaustive-effect-dependencies */
 
   return (
     <div className="space-y-5">

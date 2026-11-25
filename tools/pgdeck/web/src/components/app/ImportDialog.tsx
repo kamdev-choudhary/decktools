@@ -42,9 +42,9 @@ export function ImportDialog({ db, meta, onClose }: ImportDialogProps) {
   const start = async () => {
     if (!file || !plan) return;
     const startedAt = performance.now();
-    setProgress({ loaded: 0, total: file.size, startedAt });
+    setProgress({ loaded: 0, total: file.size, startedAt, at: startedAt });
     setError(null);
-    const job = uploadImport(db, file, plan.params, (loaded, total) => setProgress({ loaded, total, startedAt }));
+    const job = uploadImport(db, file, plan.params, (loaded, total) => setProgress({ loaded, total, startedAt, at: performance.now() }));
     abortRef.current = job.abort;
     try {
       const r = await job.promise;

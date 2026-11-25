@@ -122,7 +122,12 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
   const [showHubs, setShowHubs] = useState(false);
   const [hoverEdge, setHoverEdge] = useState<string | null>(null);
 
-  useEffect(() => setSelected(focus), [focus]);
+  // Following a link to another focus table selects it.
+  const [selectedFor, setSelectedFor] = useState(focus);
+  if (selectedFor !== focus) {
+    setSelectedFor(focus);
+    setSelected(focus);
+  }
 
   const g = graph.data;
   const schemas = useMemo(() => [...new Set(g?.tables.map((t) => t.schema) ?? [])], [g]);
@@ -146,8 +151,12 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
 
   // Cards the user dragged, remembered per database and view so a refresh keeps the arrangement.
   const posKey = `pgdeck.diagram.${db}.${focus ? `focus:${focus}:${depth}` : `schema:${schema}`}.${columnMode}.${showHubs ? 'hubs' : 'nohubs'}`;
-  const [moved, setMoved] = useState<Record<string, XYPosition>>({});
-  useEffect(() => setMoved(storage.getJson<Record<string, XYPosition>>(posKey, {})), [posKey]);
+  const [moved, setMoved] = useState(() => storage.getJson<Record<string, XYPosition>>(posKey, {}));
+  const [movedFor, setMovedFor] = useState(posKey);
+  if (movedFor !== posKey) {
+    setMovedFor(posKey);
+    setMoved(storage.getJson<Record<string, XYPosition>>(posKey, {}));
+  }
   const saveMoved = useCallback(
     (next: Record<string, XYPosition>) => {
       setMoved(next);
@@ -268,14 +277,16 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
   );
 
   // Re-fit when the set of tables changes; centre on the focused table when there is one.
+  // Deliberately keyed on the layout only: re-fitting on every node change would fight the user's panning.
+  /* oxlint-disable react-hooks/exhaustive-deps, react/exhaustive-effect-dependencies */
   useEffect(() => {
     if (!nodes.length) return;
     const t = setTimeout(() => {
       void flow.fitView({ padding: 0.08, maxZoom: 1, duration: 300 });
     }, 30);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [laid]);
+  /* oxlint-enable react-hooks/exhaustive-deps, react/exhaustive-effect-dependencies */
 
   const exportImage = useCallback(
     async (kind: 'png' | 'svg') => {

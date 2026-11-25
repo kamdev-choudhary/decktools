@@ -4,7 +4,7 @@ import { EditorView, keymap } from '@codemirror/view';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CodeMirror from '@uiw/react-codemirror';
 import { ArrowUpCircle, Blocks, Copy, Hash, Power, PowerOff, RotateCcw, Save, SquareFunction, SquareTerminal, Trash2, Zap, type LucideIcon } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { ObjectAction, ObjectKind } from '@shared/types';
 import { api } from '@/api/client';
@@ -194,14 +194,19 @@ function DefinitionEditor({
   const { resolved } = useTheme();
   const [text, setText] = useState(initial);
   const dirty = text !== initial;
+  // The keymap is created once; route it through a ref so it sees fresh state.
   const saveRef = useRef(() => {});
-  saveRef.current = () => {
-    if (editable && dirty && !saving) onSave(text);
-  };
+  useLayoutEffect(() => {
+    saveRef.current = () => {
+      if (editable && dirty && !saving) onSave(text);
+    };
+  });
   const extensions = useMemo(
     () => [
       sqlLanguage({ dialect: PostgreSQL }),
       EditorView.lineWrapping,
+      // Key handlers run on key presses, after render, so reading the ref here is safe.
+      // oxlint-disable-next-line react/refs
       Prec.highest(keymap.of([{ key: 'Mod-s', run: () => (saveRef.current(), true) }, { key: 'Mod-Enter', run: () => (saveRef.current(), true) }])),
     ],
     [],

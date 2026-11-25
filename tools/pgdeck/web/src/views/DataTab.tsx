@@ -1,5 +1,5 @@
 import { Plus, RefreshCw, Trash2, Upload } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import type { Cell, RowKey, SortDir, TableMeta } from '@shared/types';
@@ -69,7 +69,12 @@ export function DataTab({ db, meta, initialEq, actionsSlot, readonly }: DataTabP
   const { insert, update, remove } = useRowMutations(db, meta.schema, meta.table);
   const data = rows.data;
 
-  useEffect(() => setSelected(new Set()), [data]);
+  // Clear the selection whenever a new set of rows arrives.
+  const [selectionFor, setSelectionFor] = useState(data);
+  if (selectionFor !== data) {
+    setSelectionFor(data);
+    setSelected(new Set());
+  }
 
   const types = useMemo(() => Object.fromEntries(meta.columns.map((c) => [c.name, c.type])), [meta.columns]);
   const fks = useMemo(() => singleColumnFks(meta), [meta]);

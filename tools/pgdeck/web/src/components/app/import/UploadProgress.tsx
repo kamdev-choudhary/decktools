@@ -4,12 +4,14 @@ export interface Progress {
   loaded: number;
   total: number;
   startedAt: number;
+  /** performance.now() when this progress was reported. */
+  at: number;
 }
 
 /** Progress bar with bytes, speed and time left for an upload. */
 export function UploadProgress({ progress }: { progress: Progress }) {
   const pct = Math.min(progress.loaded / Math.max(progress.total, 1), 1);
-  const elapsed = (performance.now() - progress.startedAt) / 1000;
+  const elapsed = (progress.at - progress.startedAt) / 1000;
   const speed = elapsed > 0.5 ? progress.loaded / elapsed : 0;
   const eta = speed > 0 ? (progress.total - progress.loaded) / speed : null;
 

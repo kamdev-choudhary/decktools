@@ -75,7 +75,12 @@ function Shell({ db, session }: { db: string; session: SessionInfo }) {
     }
   };
 
-  useEffect(() => setSidebarOpen(false), [route]);
+  // Close the mobile drawer on navigation (adjusting state while rendering, not in an effect).
+  const [drawerRoute, setDrawerRoute] = useState(route);
+  if (drawerRoute !== route) {
+    setDrawerRoute(route);
+    setSidebarOpen(false);
+  }
 
   useEffect(() => {
     const where = route.view === 'table' ? route.table : route.view === 'sql' ? 'SQL' : route.view === 'import' ? 'Import' : route.view === 'export' ? 'Export' : route.view === 'diagram' ? 'ER diagram' : route.view === 'object' ? route.kind : route.view === 'roles' ? 'Roles' : route.view === 'role' ? route.name : db;

@@ -141,7 +141,7 @@ export function ImportView({ db }: { db: string }) {
       if (stopRef.current) break;
       if (it.status === 'done') continue;
       const startedAt = performance.now();
-      const onProgress = (loaded: number, total: number) => update(it.id, { progress: { loaded, total, startedAt } });
+      const onProgress = (loaded: number, total: number) => update(it.id, { progress: { loaded, total, startedAt, at: performance.now() } });
       let job: { promise: Promise<ImportResponse | RestoreResponse>; abort: () => void };
       if (isDump(it)) {
         const params = new URLSearchParams({
@@ -155,7 +155,7 @@ export function ImportView({ db }: { db: string }) {
         job = uploadFile<ImportResponse>(db, 'import', it.file, it.plan.params, onProgress);
       } else continue;
 
-      update(it.id, { status: 'uploading', progress: { loaded: 0, total: it.file.size, startedAt }, error: undefined });
+      update(it.id, { status: 'uploading', progress: { loaded: 0, total: it.file.size, startedAt, at: startedAt }, error: undefined });
       abortRef.current = job.abort;
       try {
         const r = await job.promise;

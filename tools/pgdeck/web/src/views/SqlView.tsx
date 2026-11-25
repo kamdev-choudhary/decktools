@@ -4,7 +4,7 @@ import { EditorView, keymap } from '@codemirror/view';
 import CodeMirror from '@uiw/react-codemirror';
 import { ChevronDown, History, Play, Route } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { QueryResult } from '@shared/types';
 import { api, ApiError } from '@/api/client';
 import { PlanView } from '@/components/app/plan/PlanView';
@@ -81,9 +81,11 @@ export function SqlView({ db }: { db: string }) {
 
   // The keymap is created once; route it through a ref so it sees fresh state.
   const executeRef = useRef(execute);
-  executeRef.current = execute;
   const explainRef = useRef(runExplain);
-  explainRef.current = runExplain;
+  useLayoutEffect(() => {
+    executeRef.current = execute;
+    explainRef.current = runExplain;
+  });
 
   // Arrived from "Explain" elsewhere (e.g. the slow queries list): explain once on open.
   useEffect(() => {
@@ -102,12 +104,15 @@ export function SqlView({ db }: { db: string }) {
   const extensions = useMemo(
     () => [
       sqlLanguage({ dialect: PostgreSQL, schema, defaultSchema: 'public' }),
+      // Key handlers run on key presses, after render, so reading the refs here is safe.
+      /* oxlint-disable react/refs */
       Prec.highest(
         keymap.of([
           { key: 'Mod-Enter', run: () => (executeRef.current(), true) },
           { key: 'Mod-Shift-Enter', run: () => (explainRef.current(false), true) },
         ]),
       ),
+      /* oxlint-enable react/refs */
       EditorView.lineWrapping,
     ],
     [schema],
