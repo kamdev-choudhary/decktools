@@ -30,7 +30,8 @@ export function formatDuration(seconds: number): string {
 }
 
 /** A PTTL in ms → "No expiry" / "Expires in 2h 9m". */
-export const formatTtl = (ms: number) => (ms < 0 ? 'No expiry' : `Expires in ${formatDuration(Math.max(ms / 1000, 0))}`);
+export const formatTtl = (ms: number) =>
+  ms < 0 ? 'No expiry' : `Expires in ${formatDuration(Math.max(ms / 1000, 0))}`;
 
 const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
 export function formatRelative(ms: number): string {

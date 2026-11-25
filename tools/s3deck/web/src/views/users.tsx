@@ -25,7 +25,14 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,20 +57,32 @@ const ROLES: { value: Role; label: string; hint: string }[] = [
   { value: 'admin', label: 'Admin', hint: 'Also buckets, bucket settings, users and the activity log' },
 ];
 
-const formSchema = createUserSchema.extend({
-  sso: z.boolean(),
-  password: z.string(),
-}).superRefine((v, ctx) => {
-  if (v.sso) {
-    if (!v.username.includes('@')) ctx.addIssue({ code: 'custom', path: ['username'], message: 'Use the email address people sign in with' });
-  } else {
-    const r = passwordSchema.safeParse(v.password);
-    if (!r.success) ctx.addIssue({ code: 'custom', path: ['password'], message: r.error.issues[0]?.message ?? 'Invalid password' });
-  }
-});
+const formSchema = createUserSchema
+  .extend({
+    sso: z.boolean(),
+    password: z.string(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.sso) {
+      if (!v.username.includes('@'))
+        ctx.addIssue({ code: 'custom', path: ['username'], message: 'Use the email address people sign in with' });
+    } else {
+      const r = passwordSchema.safeParse(v.password);
+      if (!r.success)
+        ctx.addIssue({ code: 'custom', path: ['password'], message: r.error.issues[0]?.message ?? 'Invalid password' });
+    }
+  });
 type FormValues = z.infer<typeof formSchema>;
 
-function AddUserDialog({ open, onOpenChange, ssoEnabled }: { open: boolean; onOpenChange: (o: boolean) => void; ssoEnabled: boolean }) {
+function AddUserDialog({
+  open,
+  onOpenChange,
+  ssoEnabled,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  ssoEnabled: boolean;
+}) {
   const { create } = useUserMutations();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -115,11 +134,28 @@ function AddUserDialog({ open, onOpenChange, ssoEnabled }: { open: boolean; onOp
               </FormField>
             )}
             <FormField label={sso ? 'Email' : 'Username'} htmlFor="new-username" error={errors.username?.message}>
-              <Input id="new-username" autoComplete="off" autoFocus aria-invalid={!!errors.username} {...form.register('username')} />
+              <Input
+                id="new-username"
+                autoComplete="off"
+                autoFocus
+                aria-invalid={!!errors.username}
+                {...form.register('username')}
+              />
             </FormField>
             {!sso && (
-              <FormField label="Password" htmlFor="new-password" description="At least 10 characters" error={errors.password?.message}>
-                <Input id="new-password" type="password" autoComplete="new-password" aria-invalid={!!errors.password} {...form.register('password')} />
+              <FormField
+                label="Password"
+                htmlFor="new-password"
+                description="At least 10 characters"
+                error={errors.password?.message}
+              >
+                <Input
+                  id="new-password"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={!!errors.password}
+                  {...form.register('password')}
+                />
               </FormField>
             )}
             <FormField label="Role" htmlFor="new-role" description={ROLES.find((r) => r.value === role)?.hint}>
@@ -168,11 +204,24 @@ function ResetPasswordDialog({ user, onClose }: { user: UserInfo; onClose: () =>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Set password for {user.username}</DialogTitle>
-          <DialogDescription>They’ll use it the next time they sign in. Existing sessions stay signed in.</DialogDescription>
+          <DialogDescription>
+            They’ll use it the next time they sign in. Existing sessions stay signed in.
+          </DialogDescription>
         </DialogHeader>
         <FieldGroup className="gap-4">
-          <FormField label="New password" htmlFor="reset-pw" error={password && !check.success ? check.error.issues[0]?.message : undefined}>
-            <Input id="reset-pw" type="password" autoComplete="new-password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} />
+          <FormField
+            label="New password"
+            htmlFor="reset-pw"
+            error={password && !check.success ? check.error.issues[0]?.message : undefined}
+          >
+            <Input
+              id="reset-pw"
+              type="password"
+              autoComplete="new-password"
+              autoFocus
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </FormField>
           {update.isError && <ErrorAlert error={update.error} />}
         </FieldGroup>
@@ -208,7 +257,10 @@ export function UsersView() {
   const persistence = !!me.data?.persistence;
 
   const patch = (u: UserInfo, p: Parameters<typeof update.mutate>[0]['patch'], message: string) =>
-    update.mutate({ username: u.username, patch: p }, { onSuccess: () => toast.success(message), onError: (e) => toast.error(errorText(e)) });
+    update.mutate(
+      { username: u.username, patch: p },
+      { onSuccess: () => toast.success(message), onError: (e) => toast.error(errorText(e)) },
+    );
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
@@ -228,7 +280,9 @@ export function UsersView() {
         {!persistence && (
           <Alert>
             <CircleAlert />
-            <AlertDescription>s3deck is running without a data directory (--no-persist), so extra users can’t be stored.</AlertDescription>
+            <AlertDescription>
+              s3deck is running without a data directory (--no-persist), so extra users can’t be stored.
+            </AlertDescription>
           </Alert>
         )}
         <div className="overflow-hidden rounded-lg border">
@@ -282,7 +336,9 @@ export function UsersView() {
                         {u.role}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{u.hasPassword ? 'Password' : 'Single sign-on'}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {u.hasPassword ? 'Password' : 'Single sign-on'}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{formatDate(u.createdAt)}</TableCell>
                     <TableCell className="pr-4 text-right">
                       <DropdownMenu>
@@ -298,7 +354,11 @@ export function UsersView() {
                             onValueChange={(v) => patch(u, { role: roleSchema.parse(v) }, `${u.username} is now ${v}`)}
                           >
                             {ROLES.map((r) => (
-                              <DropdownMenuRadioItem key={r.value} value={r.value} disabled={self && r.value !== 'admin'}>
+                              <DropdownMenuRadioItem
+                                key={r.value}
+                                value={r.value}
+                                disabled={self && r.value !== 'admin'}
+                              >
                                 {r.label}
                               </DropdownMenuRadioItem>
                             ))}
@@ -311,7 +371,13 @@ export function UsersView() {
                           )}
                           <DropdownMenuItem
                             disabled={self}
-                            onSelect={() => patch(u, { disabled: !u.disabled }, u.disabled ? `${u.username} enabled` : `${u.username} disabled`)}
+                            onSelect={() =>
+                              patch(
+                                u,
+                                { disabled: !u.disabled },
+                                u.disabled ? `${u.username} enabled` : `${u.username} disabled`,
+                              )
+                            }
                           >
                             <UserX /> {u.disabled ? 'Enable' : 'Disable'}
                           </DropdownMenuItem>
@@ -345,7 +411,9 @@ export function UsersView() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleting?.username}?</AlertDialogTitle>
-            <AlertDialogDescription>They’re signed out right away and can’t sign in again. Their remembered connections are kept on disk.</AlertDialogDescription>
+            <AlertDialogDescription>
+              They’re signed out right away and can’t sign in again. Their remembered connections are kept on disk.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>

@@ -22,7 +22,11 @@ export function FormField({
     <Field data-invalid={!!error || undefined} className={cn('gap-1.5', className)}>
       <FieldLabel htmlFor={htmlFor}>{label}</FieldLabel>
       {children}
-      {error ? <FieldError>{error}</FieldError> : description ? <FieldDescription>{description}</FieldDescription> : null}
+      {error ? (
+        <FieldError>{error}</FieldError>
+      ) : description ? (
+        <FieldDescription>{description}</FieldDescription>
+      ) : null}
     </Field>
   );
 }

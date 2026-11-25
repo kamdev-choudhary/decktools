@@ -95,7 +95,10 @@ export async function openConnection(spec: ConnectionSpec): Promise<ProbeResult>
 }
 
 function defaultLabel(spec: ConnectionSpec, providerName: string) {
-  return spec.label?.trim() || (spec.endpoint ? `${providerName} · ${new URL(spec.endpoint).host}` : `${providerName} · ${spec.region}`);
+  return (
+    spec.label?.trim() ||
+    (spec.endpoint ? `${providerName} · ${new URL(spec.endpoint).host}` : `${providerName} · ${spec.region}`)
+  );
 }
 
 function buildConnection(spec: ConnectionSpec, handle: S3Handle): Connection {
@@ -127,7 +130,11 @@ export function connectionFromSaved(item: SavedConnection): Connection {
     region: item.region,
     pathStyle: item.pathStyle,
     accessKeyId: item.accessKeyId,
-    credentials: { accessKeyId: item.accessKeyId, secretAccessKey: item.secretAccessKey, sessionToken: item.sessionToken },
+    credentials: {
+      accessKeyId: item.accessKeyId,
+      secretAccessKey: item.secretAccessKey,
+      sessionToken: item.sessionToken,
+    },
     pinnedBuckets: item.buckets,
     publicUrlBase: item.publicUrlBase,
   };
@@ -156,11 +163,16 @@ export class ConnectionRegistry {
 
   addForSession(c: Connection) {
     const owned = [...this.connections.values()].filter(
-      (x) => (c.ownerSessionId && x.ownerSessionId === c.ownerSessionId) || (c.ownerUser && x.ownerUser === c.ownerUser),
+      (x) =>
+        (c.ownerSessionId && x.ownerSessionId === c.ownerSessionId) || (c.ownerUser && x.ownerUser === c.ownerUser),
     );
     if (owned.length >= MAX_BROWSER_CONNECTIONS_PER_SESSION) {
       c.handle.client.destroy();
-      throw new HttpError(400, 'TOO_MANY_CONNECTIONS', `At most ${MAX_BROWSER_CONNECTIONS_PER_SESSION} connections per session`);
+      throw new HttpError(
+        400,
+        'TOO_MANY_CONNECTIONS',
+        `At most ${MAX_BROWSER_CONNECTIONS_PER_SESSION} connections per session`,
+      );
     }
     this.connections.set(c.id, c);
   }
@@ -180,7 +192,9 @@ export class ConnectionRegistry {
 
   listForSession(session: Pick<Session, 'id' | 'user'>): Connection[] {
     const order = { cli: 0, saved: 1, browser: 2 };
-    return [...this.connections.values()].filter((c) => this.visible(c, session)).sort((a, b) => order[a.source] - order[b.source]);
+    return [...this.connections.values()]
+      .filter((c) => this.visible(c, session))
+      .sort((a, b) => order[a.source] - order[b.source]);
   }
 
   remove(id: string) {

@@ -49,7 +49,12 @@ export function findHubs(graph: SchemaGraph, visible: Set<string>): Map<string, 
 }
 
 /** Tables within `depth` foreign-key hops of `focus`, in either direction. Hubs are reached but not expanded. */
-export function neighbourhood(graph: SchemaGraph, focus: string, depth: number, hubs: Set<string> = new Set()): Set<string> {
+export function neighbourhood(
+  graph: SchemaGraph,
+  focus: string,
+  depth: number,
+  hubs: Set<string> = new Set(),
+): Set<string> {
   const adj = new Map<string, Set<string>>();
   const link = (a: string, b: string) => (adj.get(a) ?? adj.set(a, new Set()).get(a)!).add(b);
   for (const f of graph.foreignKeys) {
@@ -101,7 +106,14 @@ export function layoutDiagram(
       hiddenLinks++;
       continue;
     }
-    links.push({ id: `${child}:${f.name}`, fk: f, source: parent, sourceColumn: f.refColumns[0]!, target: child, targetColumn: f.columns[0]! });
+    links.push({
+      id: `${child}:${f.name}`,
+      fk: f,
+      source: parent,
+      sourceColumn: f.refColumns[0]!,
+      target: child,
+      targetColumn: f.columns[0]!,
+    });
   }
 
   const boxes: TableBox[] = graph.tables

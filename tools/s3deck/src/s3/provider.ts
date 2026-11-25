@@ -96,7 +96,13 @@ export function detectProvider(endpoint?: string | null): ProviderInfo {
     };
   }
   if (host === 'storage.googleapis.com') {
-    return { id: 'gcs', name: 'Google Cloud Storage', defaultRegion: 'auto', pathStyle: true, capabilities: NO_AWS_EXTRAS };
+    return {
+      id: 'gcs',
+      name: 'Google Cloud Storage',
+      defaultRegion: 'auto',
+      pathStyle: true,
+      capabilities: NO_AWS_EXTRAS,
+    };
   }
   return {
     id: 'other',

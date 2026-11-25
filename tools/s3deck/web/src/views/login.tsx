@@ -28,7 +28,10 @@ export function LoginView() {
   const login = useLogin();
   const me = useMe();
   const sso = me.data?.sso;
-  const form = useForm<LoginInput>({ resolver: zodResolver(loginSchema), defaultValues: { username: '', password: '' } });
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { username: '', password: '' },
+  });
   const { errors } = form.formState;
 
   return (
@@ -47,10 +50,22 @@ export function LoginView() {
           <form onSubmit={form.handleSubmit((v) => login.mutate(v))} noValidate>
             <FieldGroup className="gap-4">
               <FormField label="Username" htmlFor="username" error={errors.username?.message}>
-                <Input id="username" autoComplete="username" autoFocus aria-invalid={!!errors.username} {...form.register('username')} />
+                <Input
+                  id="username"
+                  autoComplete="username"
+                  autoFocus
+                  aria-invalid={!!errors.username}
+                  {...form.register('username')}
+                />
               </FormField>
               <FormField label="Password" htmlFor="password" error={errors.password?.message}>
-                <Input id="password" type="password" autoComplete="current-password" aria-invalid={!!errors.password} {...form.register('password')} />
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  aria-invalid={!!errors.password}
+                  {...form.register('password')}
+                />
               </FormField>
               {ssoError && !login.isError && (
                 <Alert variant="destructive">

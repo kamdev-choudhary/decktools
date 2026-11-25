@@ -12,7 +12,11 @@ const OPTIONS: { value: ThemePreference; label: string; Icon: typeof Sun }[] = [
 export function ThemeSwitcher({ className }: { className?: string }) {
   const { preference, setPreference } = useTheme();
   return (
-    <div role="radiogroup" aria-label="Theme" className={cn('inline-flex items-center rounded-full border p-0.5', className)}>
+    <div
+      role="radiogroup"
+      aria-label="Theme"
+      className={cn('inline-flex items-center rounded-full border p-0.5', className)}
+    >
       {OPTIONS.map(({ value, label, Icon }) => (
         <button
           key={value}

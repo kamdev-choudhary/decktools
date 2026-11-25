@@ -45,7 +45,8 @@ export async function readZipListing(size: number, read: ReadRange): Promise<Zip
     cdSize = Number(zv.getBigUint64(40, true));
     cdOffset = Number(zv.getBigUint64(48, true));
   }
-  if (cdSize > MAX_CENTRAL_DIR) throw new Error(`This archive lists too many files to preview (${count.toLocaleString()}).`);
+  if (cdSize > MAX_CENTRAL_DIR)
+    throw new Error(`This archive lists too many files to preview (${count.toLocaleString()}).`);
   if (cdSize === 0) return [];
 
   const cd = await read(cdOffset, cdOffset + cdSize - 1);
@@ -83,7 +84,14 @@ export async function readZipListing(size: number, read: ReadRange): Promise<Zip
     const modified =
       date === 0
         ? null
-        : new Date((date >> 9) + 1980, ((date >> 5) & 0xf) - 1, date & 0x1f, time >> 11, (time >> 5) & 0x3f, (time & 0x1f) * 2);
+        : new Date(
+            (date >> 9) + 1980,
+            ((date >> 5) & 0xf) - 1,
+            date & 0x1f,
+            time >> 11,
+            (time >> 5) & 0x3f,
+            (time & 0x1f) * 2,
+          );
     entries.push({ name, size: uncompressed, compressed, modified, dir: name.endsWith('/') });
     p = extraEnd + commentLen;
   }

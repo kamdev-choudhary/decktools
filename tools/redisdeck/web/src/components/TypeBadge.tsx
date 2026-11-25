@@ -13,7 +13,11 @@ export function TypeBadge({ type, full, className }: { type: KeyType; full?: boo
         !full && 'w-12',
         className,
       )}
-      style={{ color, borderColor: `color-mix(in oklab, ${color} 35%, transparent)`, background: `color-mix(in oklab, ${color} 8%, transparent)` }}
+      style={{
+        color,
+        borderColor: `color-mix(in oklab, ${color} 35%, transparent)`,
+        background: `color-mix(in oklab, ${color} 8%, transparent)`,
+      }}
     >
       {full ? typeLabel(type) : typeShort(type)}
     </span>

@@ -41,7 +41,10 @@ const jsonParam = <T extends z.ZodType>(inner: T, fallback: string) =>
     })
     .pipe(inner);
 
-const flag = z.enum(['0', '1']).default('0').transform((v) => v === '1');
+const flag = z
+  .enum(['0', '1'])
+  .default('0')
+  .transform((v) => v === '1');
 
 /** GET /export: everything is in the query string so a plain download link works. */
 export const exportQuery = tableRef.extend({
@@ -67,7 +70,11 @@ export const tableActionBody = z.object({
   schema: ident,
   table: ident,
   action: z.discriminatedUnion('action', [
-    z.object({ action: z.literal('truncate'), cascade: z.boolean().default(false), restartIdentity: z.boolean().default(false) }),
+    z.object({
+      action: z.literal('truncate'),
+      cascade: z.boolean().default(false),
+      restartIdentity: z.boolean().default(false),
+    }),
     z.object({ action: z.literal('drop'), cascade: z.boolean().default(false) }),
     z.object({ action: z.literal('rename'), newName: ident }),
     z.object({ action: z.literal('duplicate'), newName: ident, withData: z.boolean().default(false) }),
@@ -96,7 +103,12 @@ export const objectQuery = z.object({
 const oid = z.number().int().positive();
 export const objectActionBody = z.union([
   z.object({ kind: z.literal('function'), oid, action: z.literal('replace'), sql: z.string().min(1).max(1_000_000) }),
-  z.object({ kind: z.enum(['function', 'trigger', 'sequence', 'extension']), oid, action: z.literal('drop'), cascade: z.boolean().default(false) }),
+  z.object({
+    kind: z.enum(['function', 'trigger', 'sequence', 'extension']),
+    oid,
+    action: z.literal('drop'),
+    cascade: z.boolean().default(false),
+  }),
   z.object({ kind: z.literal('trigger'), oid, action: z.enum(['enable', 'disable']) }),
   z.object({ kind: z.literal('sequence'), oid, action: z.literal('restart'), value: z.string().min(1).max(40) }),
   z.object({ kind: z.literal('extension'), oid, action: z.literal('update') }),
@@ -125,7 +137,13 @@ export const createTableBody = z.object({
         identity: z.boolean().default(false),
         default: z.string().max(10_000).default(''),
         references: z
-          .object({ schema: ident, table: ident, column: ident, onDelete: fkAction.default('NO ACTION'), onUpdate: fkAction.default('NO ACTION') })
+          .object({
+            schema: ident,
+            table: ident,
+            column: ident,
+            onDelete: fkAction.default('NO ACTION'),
+            onUpdate: fkAction.default('NO ACTION'),
+          })
           .nullable()
           .default(null),
         comment: z.string().max(10_000).default(''),
@@ -153,13 +171,21 @@ export const alterBody = tableRef.extend({
     z.object({
       action: z.literal('createIndex'),
       name: z.string().max(63).default(''),
-      columns: z.array(z.object({ name: ident, desc: z.boolean().default(false) })).min(1).max(32),
+      columns: z
+        .array(z.object({ name: ident, desc: z.boolean().default(false) }))
+        .min(1)
+        .max(32),
       unique: z.boolean().default(false),
       method: z.enum(INDEX_METHODS).default('btree'),
       concurrently: z.boolean().default(false),
       where: z.string().max(10_000).default(''),
     }),
-    z.object({ action: z.literal('dropIndex'), name: ident, concurrently: z.boolean().default(false), cascade: z.boolean().default(false) }),
+    z.object({
+      action: z.literal('dropIndex'),
+      name: ident,
+      concurrently: z.boolean().default(false),
+      cascade: z.boolean().default(false),
+    }),
     z.object({ action: z.literal('dropConstraint'), name: ident, cascade: z.boolean().default(false) }),
   ]),
 });
@@ -179,8 +205,14 @@ export const databaseActionBody = z.discriminatedUnion('action', [
 export const restoreQuery = z.object({
   gzip: flag,
   custom: flag,
-  single: z.enum(['0', '1']).default('1').transform((v) => v === '1'),
-  skipOwnership: z.enum(['0', '1']).default('1').transform((v) => v === '1'),
+  single: z
+    .enum(['0', '1'])
+    .default('1')
+    .transform((v) => v === '1'),
+  skipOwnership: z
+    .enum(['0', '1'])
+    .default('1')
+    .transform((v) => v === '1'),
 });
 
 /** POST /import: options in the query string, the raw file is the body. */
@@ -237,9 +269,26 @@ export const roleActionBody: z.ZodType<RoleAction> = z.discriminatedUnion('actio
     password: z.string().max(1024).nullable().optional(),
     comment: z.string().max(10_000).optional(),
   }),
-  z.object({ action: z.literal('membership'), role: roleName, group: roleName, grant: z.boolean(), admin: z.boolean().optional() }),
-  z.object({ action: z.literal('drop'), name: roleName, reassignTo: roleName.optional(), dropOwned: z.boolean().default(false) }),
-  z.object({ action: z.literal('revokeDefault'), role: roleName, forRole: roleName, schema: ident.nullable(), type: z.enum(['r', 'S', 'f', 'T', 'n']) }),
+  z.object({
+    action: z.literal('membership'),
+    role: roleName,
+    group: roleName,
+    grant: z.boolean(),
+    admin: z.boolean().optional(),
+  }),
+  z.object({
+    action: z.literal('drop'),
+    name: roleName,
+    reassignTo: roleName.optional(),
+    dropOwned: z.boolean().default(false),
+  }),
+  z.object({
+    action: z.literal('revokeDefault'),
+    role: roleName,
+    forRole: roleName,
+    schema: ident.nullable(),
+    type: z.enum(['r', 'S', 'f', 'T', 'n']),
+  }),
 ]) as z.ZodType<RoleAction>;
 
 /** POST /grants */
@@ -259,7 +308,12 @@ export const grantsBody = z.object({
 });
 
 /** POST /grant-preset */
-export const grantPresetBody = z.object({ role: roleName, schema: ident, preset: z.enum(['read', 'write', 'none']), future: z.boolean().default(false) });
+export const grantPresetBody = z.object({
+  role: roleName,
+  schema: ident,
+  preset: z.enum(['read', 'write', 'none']),
+  future: z.boolean().default(false),
+});
 
 /** Validate input, turning schema failures into a 400 the UI can display. */
 export function parse<T extends z.ZodType>(schema: T, input: unknown): z.infer<T> {

@@ -8,7 +8,14 @@ import { invalidateBucket, moreObjectApi, objectApi, useBucketMutation, useFolde
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -79,7 +86,15 @@ export function FolderSizeCell({ bucket, prefix }: { bucket: string; prefix: str
 /* Deleted objects (versioned buckets)                                 */
 /* ------------------------------------------------------------------ */
 
-export function DeletedRows({ bucket, entries, readonly }: { bucket: string; entries: DeletedEntry[]; readonly: boolean }) {
+export function DeletedRows({
+  bucket,
+  entries,
+  readonly,
+}: {
+  bucket: string;
+  entries: DeletedEntry[];
+  readonly: boolean;
+}) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -189,7 +204,12 @@ export function GridView({
                   className="size-full object-cover"
                 />
               ) : (
-                <Icon className={cn('size-10', entry.type === 'folder' ? 'fill-primary/15 text-primary' : 'text-muted-foreground')} />
+                <Icon
+                  className={cn(
+                    'size-10',
+                    entry.type === 'folder' ? 'fill-primary/15 text-primary' : 'text-muted-foreground',
+                  )}
+                />
               )}
             </div>
             <div className="flex items-center gap-1 px-2.5 py-2">
@@ -198,7 +218,9 @@ export function GridView({
                   {entry.name}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {entry.type === 'object' ? `${formatBytes(entry.size)} · ${formatRelative(entry.lastModified)}` : 'Folder'}
+                  {entry.type === 'object'
+                    ? `${formatBytes(entry.size)} · ${formatRelative(entry.lastModified)}`
+                    : 'Folder'}
                 </p>
               </div>
               <div onClick={(e) => e.stopPropagation()}>{menu(entry)}</div>
@@ -223,7 +245,17 @@ export function GridView({
 /* Storage class & archive restore dialogs                             */
 /* ------------------------------------------------------------------ */
 
-export function StorageClassDialog({ bucket, keys, classes, onClose }: { bucket: string; keys: string[]; classes: string[]; onClose: () => void }) {
+export function StorageClassDialog({
+  bucket,
+  keys,
+  classes,
+  onClose,
+}: {
+  bucket: string;
+  keys: string[];
+  classes: string[];
+  onClose: () => void;
+}) {
   const [value, setValue] = useState(classes[1] ?? classes[0] ?? 'STANDARD');
   const run = useBucketMutation(bucket, () => moreObjectApi.storageClass(bucket, keys, value));
   return (
@@ -232,15 +264,23 @@ export function StorageClassDialog({ bucket, keys, classes, onClose }: { bucket:
         <DialogHeader>
           <DialogTitle>Change storage class</DialogTitle>
           <DialogDescription>
-            {keys.length === 1 ? <span className="font-mono text-xs break-all">{keys[0]}</span> : `${keys.length} objects`} are rewritten in place with
-            the new class. Headers and metadata are kept.
+            {keys.length === 1 ? (
+              <span className="font-mono text-xs break-all">{keys[0]}</span>
+            ) : (
+              `${keys.length} objects`
+            )}{' '}
+            are rewritten in place with the new class. Headers and metadata are kept.
           </DialogDescription>
         </DialogHeader>
         <FieldGroup className="gap-4">
           <FormField
             label="Storage class"
             htmlFor="storage-class"
-            description={ARCHIVE_CLASSES.has(value) ? 'Archived objects must be restored before they can be downloaded.' : undefined}
+            description={
+              ARCHIVE_CLASSES.has(value)
+                ? 'Archived objects must be restored before they can be downloaded.'
+                : undefined
+            }
           >
             <Select value={value} onValueChange={setValue}>
               <SelectTrigger id="storage-class" className="w-full">
@@ -266,7 +306,9 @@ export function StorageClassDialog({ bucket, keys, classes, onClose }: { bucket:
             onClick={() =>
               run.mutate(undefined, {
                 onSuccess: () => {
-                  toast.success(`Moved ${keys.length} object${keys.length === 1 ? '' : 's'} to ${CLASS_LABELS[value] ?? value}`);
+                  toast.success(
+                    `Moved ${keys.length} object${keys.length === 1 ? '' : 's'} to ${CLASS_LABELS[value] ?? value}`,
+                  );
                   onClose();
                 },
               })
@@ -287,7 +329,15 @@ const TIERS = [
   { value: 'Bulk', label: 'Bulk', hint: '5–12 hours (48 hours for Deep Archive), lowest cost' },
 ] as const;
 
-export function RestoreArchiveDialog({ bucket, keys, onClose }: { bucket: string; keys: string[]; onClose: () => void }) {
+export function RestoreArchiveDialog({
+  bucket,
+  keys,
+  onClose,
+}: {
+  bucket: string;
+  keys: string[];
+  onClose: () => void;
+}) {
   const [tier, setTier] = useState<'Expedited' | 'Standard' | 'Bulk'>('Standard');
   const [days, setDays] = useState('7');
   const daysNum = Number(days);
@@ -300,8 +350,8 @@ export function RestoreArchiveDialog({ bucket, keys, onClose }: { bucket: string
         <DialogHeader>
           <DialogTitle>Restore from archive</DialogTitle>
           <DialogDescription>
-            Makes a temporary, downloadable copy of {keys.length === 1 ? 'this object' : `${keys.length} objects`}. The archived original stays
-            where it is.
+            Makes a temporary, downloadable copy of {keys.length === 1 ? 'this object' : `${keys.length} objects`}. The
+            archived original stays where it is.
           </DialogDescription>
         </DialogHeader>
         <FieldGroup className="gap-4">
@@ -319,8 +369,20 @@ export function RestoreArchiveDialog({ bucket, keys, onClose }: { bucket: string
               </SelectContent>
             </Select>
           </FormField>
-          <FormField label="Keep the copy for (days)" htmlFor="days" error={daysValid ? undefined : 'Between 1 and 365 days'}>
-            <Input id="days" type="number" min={1} max={365} value={days} onChange={(e) => setDays(e.target.value)} aria-invalid={!daysValid} />
+          <FormField
+            label="Keep the copy for (days)"
+            htmlFor="days"
+            error={daysValid ? undefined : 'Between 1 and 365 days'}
+          >
+            <Input
+              id="days"
+              type="number"
+              min={1}
+              max={365}
+              value={days}
+              onChange={(e) => setDays(e.target.value)}
+              aria-invalid={!daysValid}
+            />
           </FormField>
           {run.isError && <ErrorAlert error={run.error} />}
         </FieldGroup>
@@ -333,7 +395,9 @@ export function RestoreArchiveDialog({ bucket, keys, onClose }: { bucket: string
             onClick={() =>
               run.mutate(undefined, {
                 onSuccess: () => {
-                  toast.success('Restore requested', { description: 'The object can be downloaded once the restore finishes.' });
+                  toast.success('Restore requested', {
+                    description: 'The object can be downloaded once the restore finishes.',
+                  });
                   onClose();
                 },
               })

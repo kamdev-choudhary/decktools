@@ -46,7 +46,10 @@ function describe(n: PlanNode): { label: string; detail: string | null } {
   const parts: string[] = [];
   const rel = n['Relation Name'] as string | undefined;
   const alias = n.Alias as string | undefined;
-  if (rel) parts.push(`on ${n.Schema && n.Schema !== 'public' ? `${n.Schema}.` : ''}${rel}${alias && alias !== rel ? ` ${alias}` : ''}`);
+  if (rel)
+    parts.push(
+      `on ${n.Schema && n.Schema !== 'public' ? `${n.Schema}.` : ''}${rel}${alias && alias !== rel ? ` ${alias}` : ''}`,
+    );
   else if (n['CTE Name']) parts.push(`on ${n['CTE Name']}`);
   else if (n['Function Name']) parts.push(`on ${n['Function Name']}()`);
   if (n['Index Name']) parts.push(`using ${n['Index Name']}`);
@@ -87,7 +90,8 @@ export function analyzePlan(plan: PlanNode, analyzed: boolean, executionMs: numb
       rows: analyzed ? actual : est,
       estRows: est,
       loops,
-      misestimate: analyzed && (actual > 0 || est > 0) ? Math.max(actual, est) / Math.max(Math.min(actual, est), 1) : null,
+      misestimate:
+        analyzed && (actual > 0 || est > 0) ? Math.max(actual, est) / Math.max(Math.min(actual, est), 1) : null,
       warnings: [],
       children: [],
     };
@@ -106,10 +110,14 @@ export function analyzePlan(plan: PlanNode, analyzed: boolean, executionMs: numb
     const removed = num(n['Rows Removed by Filter']) * a.loops;
     const kept = a.rows * a.loops;
     if (analyzed && removed > 1000 && removed > kept * 2) {
-      a.warnings.push(`The filter threw away ${fmtInt(removed)} rows to keep ${fmtInt(kept)}. An index on the filtered column could avoid reading them.`);
+      a.warnings.push(
+        `The filter threw away ${fmtInt(removed)} rows to keep ${fmtInt(kept)}. An index on the filtered column could avoid reading them.`,
+      );
     }
     if (n['Sort Space Type'] === 'Disk') {
-      a.warnings.push(`The sort spilled ${fmtInt(num(n['Sort Space Used']))} kB to disk. A higher work_mem would keep it in memory.`);
+      a.warnings.push(
+        `The sort spilled ${fmtInt(num(n['Sort Space Used']))} kB to disk. A higher work_mem would keep it in memory.`,
+      );
     }
     if (num(n['Hash Batches']) > 1) {
       a.warnings.push(`The hash table needed ${n['Hash Batches']} batches. A higher work_mem would fit it in one.`);

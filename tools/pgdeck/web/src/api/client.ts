@@ -75,9 +75,11 @@ export const api = {
   logout: () => request<SessionInfo>('auth/logout', {}),
 
   databases: () => request<DatabaseList>('databases'),
-  createDatabase: (body: { name: string; template?: string }) => request<{ ok: true; message: string }>('databases', body),
-  databaseAction: (body: { action: 'rename'; name: string; newName: string } | { action: 'drop'; name: string; force: boolean }) =>
-    request<{ ok: true; message: string }>('databases/action', body),
+  createDatabase: (body: { name: string; template?: string }) =>
+    request<{ ok: true; message: string }>('databases', body),
+  databaseAction: (
+    body: { action: 'rename'; name: string; newName: string } | { action: 'drop'; name: string; force: boolean },
+  ) => request<{ ok: true; message: string }>('databases/action', body),
 
   info: (database: string) => request<DbInfo>(db(database, 'info')),
   tables: (database: string) => request<TableRef[]>(db(database, 'tables')),
@@ -94,30 +96,40 @@ export const api = {
   stats: (database: string) => request<DbStats>(db(database, 'stats')),
   tableAction: (database: string, schema: string, table: string, action: TableAction) =>
     request<{ ok: true; message: string }>(db(database, 'table-action'), { schema, table, action }),
-  createTable: (database: string, spec: NewTable) => request<{ ok: true; message: string }>(db(database, 'create-table'), spec),
+  createTable: (database: string, spec: NewTable) =>
+    request<{ ok: true; message: string }>(db(database, 'create-table'), spec),
   maintenance: (database: string, action: 'analyze' | 'vacuum', tables: { schema: string; table: string }[]) =>
-    request<{ ok: true; message: string; done: number; failed: { table: string; error: string }[] }>(db(database, 'maintenance'), { action, tables }),
+    request<{ ok: true; message: string; done: number; failed: { table: string; error: string }[] }>(
+      db(database, 'maintenance'),
+      { action, tables },
+    ),
   alter: (database: string, schema: string, table: string, change: AlterAction) =>
     request<{ ok: true; message: string }>(db(database, 'alter'), { schema, table, change }),
-  explain: (database: string, sql: string, analyze: boolean) => request<ExplainResponse>(db(database, 'explain'), { sql, analyze }),
-  statements: (database: string, sort: StatementSort) => request<StatementsResponse>(db(database, `statements?${new URLSearchParams({ sort })}`)),
+  explain: (database: string, sql: string, analyze: boolean) =>
+    request<ExplainResponse>(db(database, 'explain'), { sql, analyze }),
+  statements: (database: string, sort: StatementSort) =>
+    request<StatementsResponse>(db(database, `statements?${new URLSearchParams({ sort })}`)),
   enableStatements: (database: string) => request<{ ok: true; message: string }>(db(database, 'statements/enable'), {}),
   resetStatements: (database: string) => request<{ ok: true; message: string }>(db(database, 'statements/reset'), {}),
   signalSession: (database: string, pid: number, terminate: boolean) =>
     request<{ ok: true; message: string }>(db(database, 'sessions/signal'), { pid, terminate }),
   objects: (database: string) => request<DbObjects>(db(database, 'objects')),
-  object: (database: string, kind: ObjectKind, oid: number) => request<ObjectDetail>(db(database, `object?${new URLSearchParams({ kind, oid: String(oid) })}`)),
+  object: (database: string, kind: ObjectKind, oid: number) =>
+    request<ObjectDetail>(db(database, `object?${new URLSearchParams({ kind, oid: String(oid) })}`)),
   availableExtensions: (database: string) => request<AvailableExtension[]>(db(database, 'extensions/available')),
-  objectAction: (database: string, action: ObjectAction) => request<{ ok: true; message: string; oid?: number }>(db(database, 'object-action'), action),
+  objectAction: (database: string, action: ObjectAction) =>
+    request<{ ok: true; message: string; oid?: number }>(db(database, 'object-action'), action),
   roles: (database: string) => request<RolesResponse>(db(database, 'roles')),
   role: (database: string, name: string) => request<RoleDetail>(db(database, `role?${new URLSearchParams({ name })}`)),
-  roleAction: (database: string, action: RoleAction) => request<{ ok: true; message: string; name?: string }>(db(database, 'role-action'), action),
+  roleAction: (database: string, action: RoleAction) =>
+    request<{ ok: true; message: string; name?: string }>(db(database, 'role-action'), action),
   grants: (database: string, role: string, changes: GrantChange[]) =>
     request<{ ok: true; message: string; statements: string[] }>(db(database, 'grants'), { role, changes }),
   grantPreset: (database: string, role: string, schema: string, preset: SchemaPreset, future: boolean) =>
     request<{ ok: true; message: string }>(db(database, 'grant-preset'), { role, schema, preset, future }),
   graph: (database: string) => request<SchemaGraph>(db(database, 'graph')),
-  catalog: (database: string) => request<{ schemas: string[]; types: { name: string; kind: string }[] }>(db(database, 'catalog')),
+  catalog: (database: string) =>
+    request<{ schemas: string[]; types: { name: string; kind: string }[] }>(db(database, 'catalog')),
   ddl: (database: string, schema: string, table: string) =>
     request<{ sql: string }>(db(database, `ddl?${new URLSearchParams({ schema, table })}`)),
 };

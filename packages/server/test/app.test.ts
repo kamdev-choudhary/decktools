@@ -38,7 +38,11 @@ function make(overrides: Partial<DeckAppOptions> = {}) {
 
 const H = { 'x-testdeck': '1' };
 const login = (app: ReturnType<typeof make>, password = 'pw') =>
-  app.request('/api/auth/login', { method: 'POST', headers: { ...H, 'content-type': 'application/json' }, body: JSON.stringify({ username: 'admin', password }) });
+  app.request('/api/auth/login', {
+    method: 'POST',
+    headers: { ...H, 'content-type': 'application/json' },
+    body: JSON.stringify({ username: 'admin', password }),
+  });
 
 describe('createDeckApp', () => {
   it('serves health and the UI publicly, with security headers', async () => {
@@ -64,7 +68,11 @@ describe('createDeckApp', () => {
   it('gates the API behind a login session', async () => {
     const app = make();
     assert.equal((await app.request('/api/ping', { headers: H })).status, 401);
-    assert.deepEqual(await (await app.request('/api/auth/session', { headers: H })).json(), { authRequired: true, authenticated: false, username: null });
+    assert.deepEqual(await (await app.request('/api/auth/session', { headers: H })).json(), {
+      authRequired: true,
+      authenticated: false,
+      username: null,
+    });
 
     assert.equal((await login(app, 'wrong')).status, 401);
     const bad = await app.request('/api/auth/login', { method: 'POST', headers: H, body: '{}' });

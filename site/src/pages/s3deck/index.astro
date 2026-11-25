@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import Closing from '../../components/deck/Closing.astro';
+import Deploy from '../../components/deck/Deploy.astro';
+import Features from '../../components/deck/Features.astro';
+import Hero from '../../components/deck/Hero.astro';
+import Nav from '../../components/deck/Nav.astro';
+import Tour from '../../components/deck/Tour.astro';
+import Providers from '../../decks/s3deck/components/Providers.astro';
+import { deploy, features, hero, SECTIONS, tour } from '../../decks/s3deck/content';
+import { DOCS_URL, getS3deckVersion, NPM_URL } from '../../decks/s3deck/meta';
+import ogImage from '../../decks/s3deck/assets/shots/grid-dark.png';
+
+const version = await getS3deckVersion();
+---
+
+<Base
+  title="s3deck: the S3 browser that starts with one command"
+  description="Browse buckets, preview files, move gigabytes, share links and manage bucket settings on AWS S3, Cloudflare R2, MinIO and more. Run npx s3deck and open the link."
+  ogImage={ogImage}
+>
+  <Nav name="s3deck" docsUrl={DOCS_URL} sections={SECTIONS} />
+  <main id="main" class="rails">
+    <Hero deck="s3deck" version={version} docsUrl={DOCS_URL} content={hero(version)} />
+    <Features
+      title="One UI for every bucket, on every provider."
+      lede="It talks the S3 API, so it works wherever your files live. Uploads and downloads stream through, so no bucket needs CORS rules."
+      features={features}
+    >
+      <Providers />
+    </Features>
+    <Tour deck="s3deck" name="s3deck" lede="Real screens from s3deck, browsing a demo assets bucket." stops={tour} />
+    <Deploy content={deploy} />
+    <Closing
+      name="s3deck"
+      title="Point it at a bucket and press Enter."
+      lede="It uses the AWS credentials you already have, prints a link and a password. Open the link. That’s the setup."
+      command="npx s3deck --profile prod --open"
+      docsUrl={DOCS_URL}
+      npmUrl={NPM_URL}
+    />
+  </main>
+</Base>

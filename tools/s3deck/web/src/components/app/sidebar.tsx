@@ -182,7 +182,12 @@ export function Sidebar({ className }: { className?: string }) {
             <InputGroupAddon>
               <Search />
             </InputGroupAddon>
-            <InputGroupInput value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter buckets" aria-label="Filter buckets" />
+            <InputGroupInput
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="Filter buckets"
+              aria-label="Filter buckets"
+            />
           </InputGroup>
         </div>
       )}
@@ -207,7 +212,9 @@ export function Sidebar({ className }: { className?: string }) {
               }}
               className={cn(
                 'group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm',
-                active ? 'bg-primary/10 font-medium text-primary dark:bg-primary/15' : 'text-foreground/80 hover:bg-muted',
+                active
+                  ? 'bg-primary/10 font-medium text-primary dark:bg-primary/15'
+                  : 'text-foreground/80 hover:bg-muted',
               )}
               aria-current={active ? 'page' : undefined}
             >
@@ -261,7 +268,12 @@ export function Sidebar({ className }: { className?: string }) {
           {me.readonly ? (
             <Badge variant="secondary">read-only</Badge>
           ) : (
-            me.role && me.role !== 'admin' && <Badge variant="outline" className="capitalize">{me.role}</Badge>
+            me.role &&
+            me.role !== 'admin' && (
+              <Badge variant="outline" className="capitalize">
+                {me.role}
+              </Badge>
+            )
           )}
           <ThemeMenu />
           {me.authRequired && (

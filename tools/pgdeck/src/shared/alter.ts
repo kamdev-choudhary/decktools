@@ -2,7 +2,15 @@
  * ALTER TABLE / CREATE INDEX statements for the Structure tab. Shared so the UI
  * previews exactly what the server runs.
  */
-import { columnDefinition, foreignKeyClause, isValidType, quoteIdent, quoteLiteral, validateColumn, type NewColumn } from './create-table.js';
+import {
+  columnDefinition,
+  foreignKeyClause,
+  isValidType,
+  quoteIdent,
+  quoteLiteral,
+  validateColumn,
+  type NewColumn,
+} from './create-table.js';
 
 export const INDEX_METHODS = ['btree', 'hash', 'gin', 'gist', 'brin', 'spgist'] as const;
 export type IndexMethod = (typeof INDEX_METHODS)[number];
@@ -74,7 +82,8 @@ export function alterSql(schema: string, table: string, a: AlterAction): string[
       const c = a.column;
       const out = [alter(`ADD COLUMN ${columnDefinition(c, c.primaryKey)}`)];
       if (c.references) out.push(alter(`ADD ${foreignKeyClause(c.name, c.references)}`));
-      if (c.comment.trim()) out.push(`COMMENT ON COLUMN ${rel}.${quoteIdent(c.name)} IS ${quoteLiteral(c.comment.trim())};`);
+      if (c.comment.trim())
+        out.push(`COMMENT ON COLUMN ${rel}.${quoteIdent(c.name)} IS ${quoteLiteral(c.comment.trim())};`);
       return out;
     }
     case 'alterColumn': {
@@ -85,16 +94,24 @@ export function alterSql(schema: string, table: string, a: AlterAction): string[
         // An old default that can't be cast would block the type change: drop it first,
         // change the type, then set the (new) default. Callers pass `default` along with `type`.
         out.push(alter(`ALTER COLUMN ${col} DROP DEFAULT`));
-        out.push(alter(`ALTER COLUMN ${col} TYPE ${a.type.trim()}${a.using?.trim() ? ` USING ${a.using.trim()}` : ''}`));
+        out.push(
+          alter(`ALTER COLUMN ${col} TYPE ${a.type.trim()}${a.using?.trim() ? ` USING ${a.using.trim()}` : ''}`),
+        );
         if (a.default?.trim()) clauses.push(`ALTER COLUMN ${col} SET DEFAULT ${a.default.trim()}`);
       } else if (a.default !== undefined) {
-        clauses.push(a.default === null || !a.default.trim() ? `ALTER COLUMN ${col} DROP DEFAULT` : `ALTER COLUMN ${col} SET DEFAULT ${a.default.trim()}`);
+        clauses.push(
+          a.default === null || !a.default.trim()
+            ? `ALTER COLUMN ${col} DROP DEFAULT`
+            : `ALTER COLUMN ${col} SET DEFAULT ${a.default.trim()}`,
+        );
       }
       if (a.nullable !== undefined) clauses.push(`ALTER COLUMN ${col} ${a.nullable ? 'DROP' : 'SET'} NOT NULL`);
       if (clauses.length) out.push(`ALTER TABLE ${rel}\n  ${clauses.join(',\n  ')};`);
-      if (a.comment !== undefined) out.push(`COMMENT ON COLUMN ${rel}.${col} IS ${a.comment?.trim() ? quoteLiteral(a.comment.trim()) : 'NULL'};`);
+      if (a.comment !== undefined)
+        out.push(`COMMENT ON COLUMN ${rel}.${col} IS ${a.comment?.trim() ? quoteLiteral(a.comment.trim()) : 'NULL'};`);
       // RENAME can't be combined with other subcommands; do it last.
-      if (a.newName !== undefined && a.newName !== a.column) out.push(alter(`RENAME COLUMN ${col} TO ${quoteIdent(a.newName)}`));
+      if (a.newName !== undefined && a.newName !== a.column)
+        out.push(alter(`RENAME COLUMN ${col} TO ${quoteIdent(a.newName)}`));
       return out;
     }
     case 'dropColumn':
@@ -107,7 +124,9 @@ export function alterSql(schema: string, table: string, a: AlterAction): string[
       ];
     }
     case 'dropIndex':
-      return [`DROP INDEX ${a.concurrently ? 'CONCURRENTLY ' : ''}${quoteIdent(schema)}.${quoteIdent(a.name)}${a.cascade && !a.concurrently ? ' CASCADE' : ''};`];
+      return [
+        `DROP INDEX ${a.concurrently ? 'CONCURRENTLY ' : ''}${quoteIdent(schema)}.${quoteIdent(a.name)}${a.cascade && !a.concurrently ? ' CASCADE' : ''};`,
+      ];
     case 'dropConstraint':
       return [alter(`DROP CONSTRAINT ${quoteIdent(a.name)}${a.cascade ? ' CASCADE' : ''}`)];
   }

@@ -41,7 +41,9 @@ export function csrf(): MiddlewareHandler {
 }
 
 function isHttps(c: Context): boolean {
-  return c.req.header('x-forwarded-proto')?.split(',')[0]?.trim() === 'https' || new URL(c.req.url).protocol === 'https:';
+  return (
+    c.req.header('x-forwarded-proto')?.split(',')[0]?.trim() === 'https' || new URL(c.req.url).protocol === 'https:'
+  );
 }
 
 export function setSessionCookie(c: Context, ctx: ServerContext, session: Session) {

@@ -52,7 +52,12 @@ export function serverUrl(host: string, port: number, basePath: string): string 
  * neither a random password is generated (and printed at startup).
  * Returns null when auth is disabled (--no-auth).
  */
-export function resolveAuth(opts: { enabled: boolean; username: string; password?: string; passwordEnv?: string }): ResolvedAuth | null {
+export function resolveAuth(opts: {
+  enabled: boolean;
+  username: string;
+  password?: string;
+  passwordEnv?: string;
+}): ResolvedAuth | null {
   if (!opts.enabled) return null;
   const password = opts.password ?? (opts.passwordEnv ? process.env[opts.passwordEnv] : undefined);
   return {

@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import Closing from '../../components/deck/Closing.astro';
+import Deploy from '../../components/deck/Deploy.astro';
+import Features from '../../components/deck/Features.astro';
+import Hero from '../../components/deck/Hero.astro';
+import Nav from '../../components/deck/Nav.astro';
+import Tour from '../../components/deck/Tour.astro';
+import Types from '../../decks/redisdeck/components/Types.astro';
+import { deploy, features, hero, SECTIONS, tour } from '../../decks/redisdeck/content';
+import { DOCS_URL, getRedisdeckVersion, NPM_URL } from '../../decks/redisdeck/meta';
+import ogImage from '../../decks/redisdeck/assets/shots/keys-dark.png';
+
+const version = await getRedisdeckVersion();
+---
+
+<Base
+  title="redisdeck: the Redis browser that starts with one command"
+  description="Browse and edit Redis keys of every type, run commands in a console, and watch live server stats. Run npx redisdeck and open the link."
+  ogImage={ogImage}
+>
+  <Nav name="redisdeck" docsUrl={DOCS_URL} sections={SECTIONS} />
+  <main id="main" class="rails">
+    <Hero deck="redisdeck" version={version} docsUrl={DOCS_URL} content={hero(version)} />
+    <Features
+      title="Every type, edited the way it’s shaped."
+      lede="Not a raw string dump. Each data type gets an editor that fits it, and big collections load page by page."
+      features={features}
+    >
+      <Types />
+    </Features>
+    <Tour deck="redisdeck" name="redisdeck" lede="Real screens from redisdeck, running against a demo shop cache." stops={tour} />
+    <Deploy content={deploy} />
+    <Closing
+      name="redisdeck"
+      title="Point it at Redis and press Enter."
+      lede="It prints a link and a password. Open the link. That’s the setup."
+      command="npx redisdeck redis://localhost:6379"
+      docsUrl={DOCS_URL}
+      npmUrl={NPM_URL}
+    />
+  </main>
+</Base>

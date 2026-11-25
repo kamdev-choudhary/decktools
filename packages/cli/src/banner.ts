@@ -19,7 +19,16 @@ export interface BannerOptions {
 }
 
 /** The startup summary every deck prints: URL, who can reach it, how to log in. */
-export function formatBanner({ name, version, server, url, port, before = [], after = [], resource = 'data' }: BannerOptions): string {
+export function formatBanner({
+  name,
+  version,
+  server,
+  url,
+  port,
+  before = [],
+  after = [],
+  resource = 'data',
+}: BannerOptions): string {
   const lines = [
     '',
     `  ${pc.bold(pc.blue(name))} ${pc.dim(`v${version}`)}`,

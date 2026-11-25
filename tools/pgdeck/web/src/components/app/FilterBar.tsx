@@ -1,11 +1,26 @@
 import { ListFilter, Plus, X } from 'lucide-react';
 import { useState } from 'react';
-import { FILTER_OPS, LIST_OPS, UNARY_OPS, type Column, type Filter, type FilterMatch, type FilterOp } from '@shared/types';
+import {
+  FILTER_OPS,
+  LIST_OPS,
+  UNARY_OPS,
+  type Column,
+  type Filter,
+  type FilterMatch,
+  type FilterOp,
+} from '@shared/types';
 import { Badge } from '@deck/ui/components/badge';
 import { Button } from '@deck/ui/components/button';
 import { Input } from '@deck/ui/components/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@deck/ui/components/popover';
-import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@deck/ui/components/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '@deck/ui/components/select';
 import { cn } from '@deck/ui/lib/utils';
 import { Combobox } from '@deck/ui/components/combobox';
 import { fieldKind } from './FieldInput';
@@ -32,7 +47,17 @@ export interface FilterState {
 }
 
 /** Value editor that fits the column type and operator. */
-function ValueInput({ column, filter, onChange, autoFocus }: { column?: Column; filter: Filter; onChange: (val: string) => void; autoFocus: boolean }) {
+function ValueInput({
+  column,
+  filter,
+  onChange,
+  autoFocus,
+}: {
+  column?: Column;
+  filter: Filter;
+  onChange: (val: string) => void;
+  autoFocus: boolean;
+}) {
   const kind = column ? fieldKind(column) : 'text';
   const value = filter.val ?? '';
   const cls = 'h-8 min-w-0 flex-1 font-mono text-xs';
@@ -73,7 +98,9 @@ function ValueInput({ column, filter, onChange, autoFocus }: { column?: Column; 
     );
   }
   if (!isList(filter.op) && kind === 'date' && ['=', '!=', '<', '<=', '>', '>='].includes(filter.op)) {
-    return <Input type="date" value={value} onChange={(e) => onChange(e.target.value)} className={cls} aria-label="Value" />;
+    return (
+      <Input type="date" value={value} onChange={(e) => onChange(e.target.value)} className={cls} aria-label="Value" />
+    );
   }
 
   const placeholder = isList(filter.op)
@@ -99,13 +126,22 @@ function ValueInput({ column, filter, onChange, autoFocus }: { column?: Column; 
 }
 
 /** The condition builder shown inside the filter popover. */
-function FilterEditor({ columns, value, onApply }: { columns: Column[]; value: FilterState; onApply: (next: FilterState) => void }) {
+function FilterEditor({
+  columns,
+  value,
+  onApply,
+}: {
+  columns: Column[];
+  value: FilterState;
+  onApply: (next: FilterState) => void;
+}) {
   const blank = (): Filter => ({ col: columns[0]?.name ?? '', op: '=', val: '' });
   const [draft, setDraft] = useState<Filter[]>(value.filters.length ? value.filters : [blank()]);
   const [match, setMatch] = useState<FilterMatch>(value.match);
   const byName = new Map(columns.map((c) => [c.name, c]));
 
-  const update = (i: number, patch: Partial<Filter>) => setDraft((d) => d.map((f, k) => (k === i ? { ...f, ...patch } : f)));
+  const update = (i: number, patch: Partial<Filter>) =>
+    setDraft((d) => d.map((f, k) => (k === i ? { ...f, ...patch } : f)));
 
   return (
     <form
@@ -166,7 +202,12 @@ function FilterEditor({ columns, value, onApply }: { columns: Column[]; value: F
               </SelectContent>
             </Select>
             {needsValue(f) ? (
-              <ValueInput column={byName.get(f.col)} filter={f} onChange={(val) => update(i, { val })} autoFocus={i === draft.length - 1} />
+              <ValueInput
+                column={byName.get(f.col)}
+                filter={f}
+                onChange={(val) => update(i, { val })}
+                autoFocus={i === draft.length - 1}
+              />
             ) : (
               <span className="flex-1" />
             )}
@@ -182,7 +223,9 @@ function FilterEditor({ columns, value, onApply }: { columns: Column[]; value: F
             </Button>
           </div>
         ))}
-        {!draft.length && <p className="py-4 text-center text-xs text-muted-foreground">No conditions. Add one below.</p>}
+        {!draft.length && (
+          <p className="py-4 text-center text-xs text-muted-foreground">No conditions. Add one below.</p>
+        )}
       </div>
 
       <div className="flex shrink-0 items-center justify-between gap-2 border-t p-3">
@@ -224,7 +267,9 @@ export function FilterControl({ columns, value, onChange }: FilterControlProps) 
       <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
         <ListFilter className="size-3.5" />
         <span className="hidden sm:inline">Filters</span>
-        {filters.length > 0 && <Badge className="h-4 min-w-4 rounded-full px-1 text-[10px] tabular-nums">{filters.length}</Badge>}
+        {filters.length > 0 && (
+          <Badge className="h-4 min-w-4 rounded-full px-1 text-[10px] tabular-nums">{filters.length}</Badge>
+        )}
       </span>
 
       <Popover open={open} onOpenChange={setOpen}>
@@ -277,7 +322,12 @@ export function FilterControl({ columns, value, onChange }: FilterControlProps) 
       </Popover>
 
       {filters.length > 0 && (
-        <Button variant="ghost" size="sm" className="shrink-0 text-muted-foreground" onClick={() => onChange({ filters: [], match: 'and' })}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="shrink-0 text-muted-foreground"
+          onClick={() => onChange({ filters: [], match: 'and' })}
+        >
           Clear all
         </Button>
       )}

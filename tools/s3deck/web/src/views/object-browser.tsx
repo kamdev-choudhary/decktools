@@ -131,7 +131,10 @@ function Breadcrumbs({
   dropTarget: string | null;
 }) {
   const parts = prefix.split('/').filter(Boolean);
-  const crumbs = [{ label: bucket, prefix: '' }, ...parts.map((p, i) => ({ label: p, prefix: `${parts.slice(0, i + 1).join('/')}/` }))];
+  const crumbs = [
+    { label: bucket, prefix: '' },
+    ...parts.map((p, i) => ({ label: p, prefix: `${parts.slice(0, i + 1).join('/')}/` })),
+  ];
   return (
     <Breadcrumb>
       <BreadcrumbList className="flex-nowrap sm:gap-1.5">
@@ -148,7 +151,10 @@ function Breadcrumbs({
                     <a
                       href={hrefFor({ bucket, prefix: c.prefix })}
                       {...dropProps(c.prefix)}
-                      className={cn('block max-w-40 truncate rounded px-1', dropTarget === c.prefix && 'bg-primary/15 text-primary')}
+                      className={cn(
+                        'block max-w-40 truncate rounded px-1',
+                        dropTarget === c.prefix && 'bg-primary/15 text-primary',
+                      )}
                       onClick={(e) => {
                         if (e.metaKey || e.ctrlKey) return;
                         e.preventDefault();
@@ -234,9 +240,12 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
   useEffect(() => {
     const el = sentinel.current;
     if (!el) return;
-    const io = new IntersectionObserver((es) => {
-      if (es[0]?.isIntersecting && objects.hasNextPage && !objects.isFetchingNextPage) void objects.fetchNextPage();
-    }, { rootMargin: '400px' });
+    const io = new IntersectionObserver(
+      (es) => {
+        if (es[0]?.isIntersecting && objects.hasNextPage && !objects.isFetchingNextPage) void objects.fetchNextPage();
+      },
+      { rootMargin: '400px' },
+    );
     io.observe(el);
     return () => io.disconnect();
   }, [objects]);
@@ -248,7 +257,8 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
       if (readonly) return toast.error('s3deck is in read-only mode');
       if (!files.length) return;
       const rejected = uploadQueue.add(connection.id, bucket, route.prefix, files);
-      if (rejected.length) toast.error(`${rejected.length} file${rejected.length === 1 ? '' : 's'} skipped: key too long or invalid`);
+      if (rejected.length)
+        toast.error(`${rejected.length} file${rejected.length === 1 ? '' : 's'} skipped: key too long or invalid`);
     },
     [bucket, route.prefix, readonly, connection.id],
   );
@@ -257,7 +267,8 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
       const target = e.target as HTMLElement | null;
-      if (target?.closest('input, textarea, [contenteditable="true"]') || document.querySelector('[role="dialog"]')) return;
+      if (target?.closest('input, textarea, [contenteditable="true"]') || document.querySelector('[role="dialog"]'))
+        return;
       const files = filesFromClipboard(e.clipboardData);
       if (!files.length || readonly || searching) return;
       e.preventDefault();
@@ -345,7 +356,9 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
         prefixes: entries.filter((e) => e.type === 'folder').map((e) => e.key),
       });
       triggerDownload(apiUrl(`zip/${token}`));
-      toast.info('Preparing ZIP download…', { description: 'The file is built on the fly and streams as it’s created.' });
+      toast.info('Preparing ZIP download…', {
+        description: 'The file is built on the fly and streams as it’s created.',
+      });
     } catch (e) {
       toast.error(errorText(e));
     }
@@ -407,7 +420,8 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
       } else if (e.key === ' ' && rows[focus]) {
         e.preventDefault();
         const entry = rows[focus];
-        if (entry.type === 'object') patchRoute({ object: route.object === entry.key ? null : entry.key }, { replace: true });
+        if (entry.type === 'object')
+          patchRoute({ object: route.object === entry.key ? null : entry.key }, { replace: true });
       } else if (e.key === 'Backspace') {
         e.preventDefault();
         if (searching) patchRoute({ search: '' });
@@ -448,7 +462,13 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
   const rowMenu = (entry: Entry) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-sm" className="opacity-60 group-hover/row:opacity-100 data-[state=open]:opacity-100" aria-label="Actions" onClick={(e) => e.stopPropagation()}>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="opacity-60 group-hover/row:opacity-100 data-[state=open]:opacity-100"
+          aria-label="Actions"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Ellipsis />
         </Button>
       </DropdownMenuTrigger>
@@ -547,7 +567,9 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
           <IconButton
             label={searching ? 'Back to folder' : 'Up one folder (⌫)'}
             disabled={!searching && !route.prefix}
-            onClick={() => (searching ? patchRoute({ search: '' }) : navigate({ bucket, prefix: parentPrefix(route.prefix) }))}
+            onClick={() =>
+              searching ? patchRoute({ search: '' }) : navigate({ bucket, prefix: parentPrefix(route.prefix) })
+            }
             {...(route.prefix && !searching ? dropProps(parentPrefix(route.prefix)) : {})}
             className={cn(route.prefix && dropTarget === parentPrefix(route.prefix) && 'bg-primary/15 text-primary')}
           >
@@ -671,99 +693,122 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
               dropTarget={dropTarget}
             />
           ) : (
-          <Table className="table-fixed border-separate border-spacing-0 [&_td]:border-b [&_th]:border-b [&_tr]:border-0">
-            <TableHeader className="sticky top-0 z-10 bg-background">
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="w-10 pl-4">
-                  <Checkbox
-                    checked={allSelected ? true : someSelected ? 'indeterminate' : false}
-                    onCheckedChange={(v) => setSelected(v === true ? new Set(rows.map((r) => r.key)) : new Set())}
-                    aria-label="Select all"
-                  />
-                </TableHead>
-                <TableHead>{sortHeader('name', 'Name')}</TableHead>
-                <TableHead className="w-24 text-right">{sortHeader('size', 'Size', 'ml-0 -mr-2')}</TableHead>
-                <TableHead className="w-40">{sortHeader('lastModified', 'Last modified')}</TableHead>
-                <TableHead className="hidden w-32 md:table-cell">{sortHeader('storageClass', 'Storage class')}</TableHead>
-                <TableHead className="w-12 pr-4" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {objects.isPending &&
-                Array.from({ length: 8 }, (_, i) => (
-                  <TableRow key={i}>
-                    <TableCell className="pl-4">
-                      <Skeleton className="size-4" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-48" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="ml-auto h-4 w-12" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <Skeleton className="h-4 w-16" />
-                    </TableCell>
-                    <TableCell />
-                  </TableRow>
-                ))}
-              {rows.map((entry, index) => {
-                const Icon = entry.type === 'folder' ? Folder : iconFor(entry.name);
-                const isSelected = selected.has(entry.key);
-                const isOpen = route.object === entry.key;
-                return (
-                  <TableRow
-                    key={entry.key}
-                    data-index={index}
-                    data-state={isSelected || isOpen ? 'selected' : undefined}
-                    {...dragProps(entry)}
-                    {...(entry.type === 'folder' ? dropProps(entry.key) : {})}
-                    onClick={(e) => {
-                      setFocus(index);
-                      if (e.metaKey || e.ctrlKey || e.shiftKey) toggle(index, e);
-                      else open(entry);
-                    }}
-                    className={cn(
-                      'group/row cursor-default data-[state=selected]:bg-primary/8 dark:data-[state=selected]:bg-primary/15',
-                      focus === index && 'outline-2 -outline-offset-2 outline-ring/60',
-                      dropTarget === entry.key && 'bg-primary/15 outline-2 -outline-offset-2 outline-primary',
-                    )}
-                  >
-                    <TableCell className="pl-4">
-                      <Checkbox checked={isSelected} onClick={(e) => (e.stopPropagation(), toggle(index, e))} aria-label={`Select ${entry.name}`} />
-                    </TableCell>
-                    <TableCell>
-                      <span className="flex min-w-0 items-center gap-2">
-                        <Icon className={cn('size-4 shrink-0', entry.type === 'folder' ? 'fill-primary/15 text-primary' : 'text-muted-foreground')} />
-                        <span className="truncate" title={entry.key}>
-                          {searching ? entry.key : entry.name}
-                          {entry.type === 'folder' && <span className="text-muted-foreground">/</span>}
+            <Table className="table-fixed border-separate border-spacing-0 [&_td]:border-b [&_th]:border-b [&_tr]:border-0">
+              <TableHeader className="sticky top-0 z-10 bg-background">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-10 pl-4">
+                    <Checkbox
+                      checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+                      onCheckedChange={(v) => setSelected(v === true ? new Set(rows.map((r) => r.key)) : new Set())}
+                      aria-label="Select all"
+                    />
+                  </TableHead>
+                  <TableHead>{sortHeader('name', 'Name')}</TableHead>
+                  <TableHead className="w-24 text-right">{sortHeader('size', 'Size', 'ml-0 -mr-2')}</TableHead>
+                  <TableHead className="w-40">{sortHeader('lastModified', 'Last modified')}</TableHead>
+                  <TableHead className="hidden w-32 md:table-cell">
+                    {sortHeader('storageClass', 'Storage class')}
+                  </TableHead>
+                  <TableHead className="w-12 pr-4" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {objects.isPending &&
+                  Array.from({ length: 8 }, (_, i) => (
+                    <TableRow key={i}>
+                      <TableCell className="pl-4">
+                        <Skeleton className="size-4" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-48" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="ml-auto h-4 w-12" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-24" />
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <Skeleton className="h-4 w-16" />
+                      </TableCell>
+                      <TableCell />
+                    </TableRow>
+                  ))}
+                {rows.map((entry, index) => {
+                  const Icon = entry.type === 'folder' ? Folder : iconFor(entry.name);
+                  const isSelected = selected.has(entry.key);
+                  const isOpen = route.object === entry.key;
+                  return (
+                    <TableRow
+                      key={entry.key}
+                      data-index={index}
+                      data-state={isSelected || isOpen ? 'selected' : undefined}
+                      {...dragProps(entry)}
+                      {...(entry.type === 'folder' ? dropProps(entry.key) : {})}
+                      onClick={(e) => {
+                        setFocus(index);
+                        if (e.metaKey || e.ctrlKey || e.shiftKey) toggle(index, e);
+                        else open(entry);
+                      }}
+                      className={cn(
+                        'group/row cursor-default data-[state=selected]:bg-primary/8 dark:data-[state=selected]:bg-primary/15',
+                        focus === index && 'outline-2 -outline-offset-2 outline-ring/60',
+                        dropTarget === entry.key && 'bg-primary/15 outline-2 -outline-offset-2 outline-primary',
+                      )}
+                    >
+                      <TableCell className="pl-4">
+                        <Checkbox
+                          checked={isSelected}
+                          onClick={(e) => (e.stopPropagation(), toggle(index, e))}
+                          aria-label={`Select ${entry.name}`}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <span className="flex min-w-0 items-center gap-2">
+                          <Icon
+                            className={cn(
+                              'size-4 shrink-0',
+                              entry.type === 'folder' ? 'fill-primary/15 text-primary' : 'text-muted-foreground',
+                            )}
+                          />
+                          <span className="truncate" title={entry.key}>
+                            {searching ? entry.key : entry.name}
+                            {entry.type === 'folder' && <span className="text-muted-foreground">/</span>}
+                          </span>
                         </span>
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground tabular-nums">
-                      {entry.type === 'object' ? formatBytes(entry.size) : <FolderSizeCell bucket={bucket} prefix={entry.key} />}
-                    </TableCell>
-                    <TableCell className="truncate text-muted-foreground" title={entry.type === 'object' ? formatDate(entry.lastModified) : undefined}>
-                      {entry.type === 'object' ? formatRelative(entry.lastModified) : ''}
-                    </TableCell>
-                    <TableCell className="hidden truncate text-xs text-muted-foreground md:table-cell">
-                      {entry.type === 'object' ? <StorageClassBadge value={entry.storageClass} /> : ''}
-                    </TableCell>
-                    <TableCell className="pr-4 text-right">{rowMenu(entry)}</TableCell>
-                  </TableRow>
-                );
-              })}
-              {showDeleted && <DeletedRows bucket={bucket} entries={deletedEntries} readonly={readonly} />}
-            </TableBody>
-          </Table>
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground tabular-nums">
+                        {entry.type === 'object' ? (
+                          formatBytes(entry.size)
+                        ) : (
+                          <FolderSizeCell bucket={bucket} prefix={entry.key} />
+                        )}
+                      </TableCell>
+                      <TableCell
+                        className="truncate text-muted-foreground"
+                        title={entry.type === 'object' ? formatDate(entry.lastModified) : undefined}
+                      >
+                        {entry.type === 'object' ? formatRelative(entry.lastModified) : ''}
+                      </TableCell>
+                      <TableCell className="hidden truncate text-xs text-muted-foreground md:table-cell">
+                        {entry.type === 'object' ? <StorageClassBadge value={entry.storageClass} /> : ''}
+                      </TableCell>
+                      <TableCell className="pr-4 text-right">{rowMenu(entry)}</TableCell>
+                    </TableRow>
+                  );
+                })}
+                {showDeleted && <DeletedRows bucket={bucket} entries={deletedEntries} readonly={readonly} />}
+              </TableBody>
+            </Table>
           )}
           {showDeleted && deleted.hasNextPage && (
             <div className="flex justify-center py-2">
-              <Button variant="ghost" size="sm" onClick={() => void deleted.fetchNextPage()} disabled={deleted.isFetchingNextPage}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void deleted.fetchNextPage()}
+                disabled={deleted.isFetchingNextPage}
+              >
                 {deleted.isFetchingNextPage && <Spinner />} More deleted files
               </Button>
             </div>
@@ -819,7 +864,8 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
           >
             <span className="px-2 font-medium whitespace-nowrap">{selected.size} selected</span>
             <Button variant="ghost" size="sm" onClick={() => void download(selectedEntries)}>
-              <Download /> {selectedEntries.length === 1 && selectedEntries[0]!.type === 'object' ? 'Download' : 'Download ZIP'}
+              <Download />{' '}
+              {selectedEntries.length === 1 && selectedEntries[0]!.type === 'object' ? 'Download' : 'Download ZIP'}
             </Button>
             {!readonly && (
               <>
@@ -828,36 +874,56 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
                 </Button>
                 {selectedObjects.length > 0 && selectedObjects.length === selectedEntries.length && (
                   <>
-                    <Button variant="ghost" size="sm" onClick={() => setDialog({ type: 'metadata', keys: selectedObjects.map((o) => o.key) })}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDialog({ type: 'metadata', keys: selectedObjects.map((o) => o.key) })}
+                    >
                       <FileText /> Metadata
                     </Button>
                     {connection.capabilities.tagging && (
-                      <Button variant="ghost" size="sm" onClick={() => setDialog({ type: 'tags', keys: selectedObjects.map((o) => o.key) })}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDialog({ type: 'tags', keys: selectedObjects.map((o) => o.key) })}
+                      >
                         <TagIcon /> Tags
                       </Button>
                     )}
                     {classes.length > 1 && (
-                      <Button variant="ghost" size="sm" onClick={() => setDialog({ type: 'storage-class', keys: selectedObjects.map((o) => o.key) })}>
-                        <Layers /> Class
-                      </Button>
-                    )}
-                    {connection.capabilities.archiveRestore && selectedObjects.some((o) => ARCHIVE_CLASSES.has(o.storageClass ?? '')) && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() =>
-                          setDialog({
-                            type: 'restore-archive',
-                            keys: selectedObjects.filter((o) => ARCHIVE_CLASSES.has(o.storageClass ?? '')).map((o) => o.key),
-                          })
-                        }
+                        onClick={() => setDialog({ type: 'storage-class', keys: selectedObjects.map((o) => o.key) })}
                       >
-                        <Archive /> Restore
+                        <Layers /> Class
                       </Button>
                     )}
+                    {connection.capabilities.archiveRestore &&
+                      selectedObjects.some((o) => ARCHIVE_CLASSES.has(o.storageClass ?? '')) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setDialog({
+                              type: 'restore-archive',
+                              keys: selectedObjects
+                                .filter((o) => ARCHIVE_CLASSES.has(o.storageClass ?? ''))
+                                .map((o) => o.key),
+                            })
+                          }
+                        >
+                          <Archive /> Restore
+                        </Button>
+                      )}
                   </>
                 )}
-                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setDialog({ type: 'delete', entries: selectedEntries })}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => setDialog({ type: 'delete', entries: selectedEntries })}
+                >
                   <Trash2 /> Delete
                 </Button>
               </>
@@ -872,7 +938,9 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
           <div className="pointer-events-none absolute inset-2 z-20 grid place-items-center rounded-xl border-2 border-dashed border-primary bg-primary/5">
             <div className="flex flex-col items-center gap-2 text-primary">
               <Upload className="size-8" />
-              <p className="font-medium">Drop to upload to {bucket}/{route.prefix}</p>
+              <p className="font-medium">
+                Drop to upload to {bucket}/{route.prefix}
+              </p>
             </div>
           </div>
         )}
@@ -887,12 +955,22 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
         >
           <SheetTitle className="sr-only">Preview {route.object?.split('/').pop()}</SheetTitle>
           {route.object && (
-            <PreviewPanel bucket={bucket} objectKey={route.object} onClose={() => patchRoute({ object: null }, { replace: true })} />
+            <PreviewPanel
+              bucket={bucket}
+              objectKey={route.object}
+              onClose={() => patchRoute({ object: null }, { replace: true })}
+            />
           )}
         </SheetContent>
       </Sheet>
 
-      <input ref={fileInput} type="file" multiple hidden onChange={(e) => (upload(filesFromInput(e.target.files)), (e.target.value = ''))} />
+      <input
+        ref={fileInput}
+        type="file"
+        multiple
+        hidden
+        onChange={(e) => (upload(filesFromInput(e.target.files)), (e.target.value = ''))}
+      />
       <input
         ref={folderInput}
         type="file"
@@ -903,7 +981,12 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
       />
 
       {dialog?.type === 'new-folder' && (
-        <NewFolderDialog bucket={bucket} prefix={route.prefix} onClose={() => setDialog(null)} onCreated={(p) => navigate({ bucket, prefix: p })} />
+        <NewFolderDialog
+          bucket={bucket}
+          prefix={route.prefix}
+          onClose={() => setDialog(null)}
+          onCreated={(p) => navigate({ bucket, prefix: p })}
+        />
       )}
       {dialog?.type === 'delete' && (
         <DeleteDialog
@@ -912,19 +995,35 @@ export function ObjectBrowser({ bucket }: { bucket: string }) {
           onClose={() => setDialog(null)}
           onDeleted={() => {
             setSelected(new Set());
-            if (route.object && dialog.entries.some((e) => e.key === route.object)) patchRoute({ object: null }, { replace: true });
+            if (route.object && dialog.entries.some((e) => e.key === route.object))
+              patchRoute({ object: null }, { replace: true });
           }}
         />
       )}
-      {dialog?.type === 'rename' && <RenameDialog bucket={bucket} entry={dialog.entry} onClose={() => setDialog(null)} />}
-      {dialog?.type === 'copy' && <CopyMoveDialog bucket={bucket} prefix={route.prefix} entries={dialog.entries} onClose={() => setDialog(null)} />}
-      {dialog?.type === 'share' && <ShareDialog bucket={bucket} objectKey={dialog.key} onClose={() => setDialog(null)} />}
-      {dialog?.type === 'metadata' && <MetadataDialog bucket={bucket} keys={dialog.keys} onClose={() => setDialog(null)} />}
+      {dialog?.type === 'rename' && (
+        <RenameDialog bucket={bucket} entry={dialog.entry} onClose={() => setDialog(null)} />
+      )}
+      {dialog?.type === 'copy' && (
+        <CopyMoveDialog
+          bucket={bucket}
+          prefix={route.prefix}
+          entries={dialog.entries}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog?.type === 'share' && (
+        <ShareDialog bucket={bucket} objectKey={dialog.key} onClose={() => setDialog(null)} />
+      )}
+      {dialog?.type === 'metadata' && (
+        <MetadataDialog bucket={bucket} keys={dialog.keys} onClose={() => setDialog(null)} />
+      )}
       {dialog?.type === 'tags' && <TagsDialog bucket={bucket} keys={dialog.keys} onClose={() => setDialog(null)} />}
       {dialog?.type === 'storage-class' && (
         <StorageClassDialog bucket={bucket} keys={dialog.keys} classes={classes} onClose={() => setDialog(null)} />
       )}
-      {dialog?.type === 'restore-archive' && <RestoreArchiveDialog bucket={bucket} keys={dialog.keys} onClose={() => setDialog(null)} />}
+      {dialog?.type === 'restore-archive' && (
+        <RestoreArchiveDialog bucket={bucket} keys={dialog.keys} onClose={() => setDialog(null)} />
+      )}
     </div>
   );
 }

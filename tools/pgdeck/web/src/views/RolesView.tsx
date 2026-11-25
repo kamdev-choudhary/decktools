@@ -28,7 +28,10 @@ export function expiry(validUntil: string | null): { text: string; expired: bool
   if (!validUntil) return null;
   const d = new Date(validUntil.replace(' ', 'T'));
   if (Number.isNaN(d.getTime())) return { text: validUntil, expired: false };
-  return { text: d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }), expired: d.getTime() < Date.now() };
+  return {
+    text: d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
+    expired: d.getTime() < Date.now(),
+  };
 }
 
 export function RolesView({ db, readonly }: { db: string; readonly: boolean }) {
@@ -39,7 +42,11 @@ export function RolesView({ db, readonly }: { db: string; readonly: boolean }) {
 
   const roles = useMemo(() => {
     const needle = filter.trim().toLowerCase();
-    return (q.data?.roles ?? []).filter((r) => (showSystem || !r.system) && (!needle || r.name.toLowerCase().includes(needle) || r.comment?.toLowerCase().includes(needle)));
+    return (q.data?.roles ?? []).filter(
+      (r) =>
+        (showSystem || !r.system) &&
+        (!needle || r.name.toLowerCase().includes(needle) || r.comment?.toLowerCase().includes(needle)),
+    );
   }, [q.data, filter, showSystem]);
 
   if (q.isPending) return <CenteredSpinner />;
@@ -56,7 +63,8 @@ export function RolesView({ db, readonly }: { db: string; readonly: boolean }) {
           <div className="space-y-1">
             <h1 className="text-xl font-semibold tracking-tight">Roles</h1>
             <p className="text-sm text-muted-foreground">
-              {users} user{users === 1 ? '' : 's'} and {groups} group{groups === 1 ? '' : 's'} on this server. Roles are shared by every database; privileges are set per database.
+              {users} user{users === 1 ? '' : 's'} and {groups} group{groups === 1 ? '' : 's'} on this server. Roles are
+              shared by every database; privileges are set per database.
             </p>
           </div>
           {!readonly && (
@@ -68,7 +76,9 @@ export function RolesView({ db, readonly }: { db: string; readonly: boolean }) {
                   </Button>
                 </span>
               </TooltipTrigger>
-              {!canCreate && <TooltipContent>{me.name} needs the CREATEROLE attribute or superuser to create roles.</TooltipContent>}
+              {!canCreate && (
+                <TooltipContent>{me.name} needs the CREATEROLE attribute or superuser to create roles.</TooltipContent>
+              )}
             </Tooltip>
           )}
         </header>
@@ -76,7 +86,14 @@ export function RolesView({ db, readonly }: { db: string; readonly: boolean }) {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative w-full max-w-xs">
             <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input type="search" value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Search roles…" className="h-8 pl-8 text-[13px]" spellCheck={false} />
+            <Input
+              type="search"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="Search roles…"
+              className="h-8 pl-8 text-[13px]"
+              spellCheck={false}
+            />
           </div>
           <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
             <Checkbox checked={showSystem} onCheckedChange={(v) => setShowSystem(v === true)} />
@@ -118,11 +135,19 @@ export function RolesView({ db, readonly }: { db: string; readonly: boolean }) {
                       )}
                       {r.comment && <p className="truncate text-xs text-muted-foreground">{r.comment}</p>}
                     </td>
-                    <td className="px-3 py-2.5 text-xs text-muted-foreground">{r.system ? 'built-in' : r.login ? 'user' : 'group'}</td>
+                    <td className="px-3 py-2.5 text-xs text-muted-foreground">
+                      {r.system ? 'built-in' : r.login ? 'user' : 'group'}
+                    </td>
                     <td className="px-3 py-2.5">
                       <div className="flex flex-wrap gap-1">
                         {roleBadges(r).map((b) => (
-                          <Badge key={b.label} variant="outline" className={b.tone === 'warning' ? 'border-warning/40 text-warning' : 'text-muted-foreground'}>
+                          <Badge
+                            key={b.label}
+                            variant="outline"
+                            className={
+                              b.tone === 'warning' ? 'border-warning/40 text-warning' : 'text-muted-foreground'
+                            }
+                          >
                             {b.label}
                           </Badge>
                         ))}
@@ -131,8 +156,12 @@ export function RolesView({ db, readonly }: { db: string; readonly: boolean }) {
                     <td className="max-w-56 px-3 py-2.5 font-mono text-xs text-muted-foreground">
                       <span className="line-clamp-2 break-all">{r.memberOf.map((m) => m.role).join(', ') || '—'}</span>
                     </td>
-                    <td className="px-3 py-2.5 text-right text-xs text-muted-foreground tabular-nums">{r.login ? (r.connLimit === -1 ? 'unlimited' : r.connLimit) : '—'}</td>
-                    <td className={`px-4 py-2.5 text-right text-xs tabular-nums ${exp?.expired ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    <td className="px-3 py-2.5 text-right text-xs text-muted-foreground tabular-nums">
+                      {r.login ? (r.connLimit === -1 ? 'unlimited' : r.connLimit) : '—'}
+                    </td>
+                    <td
+                      className={`px-4 py-2.5 text-right text-xs tabular-nums ${exp?.expired ? 'text-destructive' : 'text-muted-foreground'}`}
+                    >
                       {exp ? `${exp.expired ? 'expired ' : ''}${exp.text}` : r.login ? 'never' : '—'}
                     </td>
                   </tr>
@@ -149,7 +178,14 @@ export function RolesView({ db, readonly }: { db: string; readonly: boolean }) {
         </div>
       </div>
 
-      {creating && <CreateRoleDialog db={db} data={q.data} onClose={() => setCreating(false)} onCreated={(name) => navigate(roleHref(db, name))} />}
+      {creating && (
+        <CreateRoleDialog
+          db={db}
+          data={q.data}
+          onClose={() => setCreating(false)}
+          onCreated={(name) => navigate(roleHref(db, name))}
+        />
+      )}
     </div>
   );
 }

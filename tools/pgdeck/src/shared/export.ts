@@ -74,9 +74,14 @@ const mdCell = (v: Cell) => (v === null ? '_NULL_' : v.replace(/\|/g, '\\|').rep
 /**
  * @param target Qualified table for SQL INSERT output, e.g. { schema: 'public', table: 'users' }.
  */
-export function createSerializer(format: ExportFormat, columns: ExportColumn[], target?: { schema: string; table: string }): Serializer {
+export function createSerializer(
+  format: ExportFormat,
+  columns: ExportColumn[],
+  target?: { schema: string; table: string },
+): Serializer {
   const names = columns.map((c) => c.name);
-  const obj = (cells: Cell[]) => Object.fromEntries(columns.map((c, i) => [c.name, typed(cells[i] ?? null, c.typeName)]));
+  const obj = (cells: Cell[]) =>
+    Object.fromEntries(columns.map((c, i) => [c.name, typed(cells[i] ?? null, c.typeName)]));
 
   switch (format) {
     case 'csv':
@@ -109,7 +114,8 @@ export function createSerializer(format: ExportFormat, columns: ExportColumn[], 
       const cols = names.map(quoteIdent).join(', ');
       return {
         header: () => '',
-        row: (cells) => `INSERT INTO ${rel} (${cols}) VALUES (${cells.map((v, i) => sqlLiteral(v, columns[i]?.typeName)).join(', ')});\n`,
+        row: (cells) =>
+          `INSERT INTO ${rel} (${cols}) VALUES (${cells.map((v, i) => sqlLiteral(v, columns[i]?.typeName)).join(', ')});\n`,
         footer: () => '',
       };
     }
@@ -123,7 +129,12 @@ export function createSerializer(format: ExportFormat, columns: ExportColumn[], 
 }
 
 /** Serialize rows already in memory. */
-export function serializeAll(format: ExportFormat, columns: ExportColumn[], rows: Cell[][], target?: { schema: string; table: string }): string {
+export function serializeAll(
+  format: ExportFormat,
+  columns: ExportColumn[],
+  rows: Cell[][],
+  target?: { schema: string; table: string },
+): string {
   const s = createSerializer(format, columns, target);
   return s.header() + rows.map((r, i) => s.row(r, i)).join('') + s.footer();
 }

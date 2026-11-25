@@ -78,9 +78,16 @@ export function Combobox({
       </PopoverTrigger>
       <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-60 p-0">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} className="h-9 text-xs" value={search} onValueChange={setSearch} />
+          <CommandInput
+            placeholder={searchPlaceholder}
+            className="h-9 text-xs"
+            value={search}
+            onValueChange={setSearch}
+          />
           <CommandList className="max-h-64">
-            {!showCreate && <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">{emptyText}</CommandEmpty>}
+            {!showCreate && (
+              <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">{emptyText}</CommandEmpty>
+            )}
             {showCreate && (
               <CommandGroup forceMount>
                 <CommandItem
@@ -113,7 +120,9 @@ export function Combobox({
                 >
                   <Check className={cn('size-3.5 shrink-0', o.value === value ? 'opacity-100' : 'opacity-0')} />
                   <span className={cn('min-w-0 truncate', mono && 'font-mono')}>{o.label ?? o.value}</span>
-                  {o.hint && <span className="ml-auto shrink-0 pl-2 font-mono text-[11px] text-muted-foreground">{o.hint}</span>}
+                  {o.hint && (
+                    <span className="ml-auto shrink-0 pl-2 font-mono text-[11px] text-muted-foreground">{o.hint}</span>
+                  )}
                 </CommandItem>
               ))}
             </CommandGroup>

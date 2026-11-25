@@ -1,0 +1,8 @@
+dist/
+coverage/
+.astro/
+pnpm-lock.yaml
+CHANGELOG.md
+.changeset/*.md
+# Astro components need prettier-plugin-astro; left to the editor for now.
+*.astro

@@ -83,7 +83,24 @@ function Shell({ db, session }: { db: string; session: SessionInfo }) {
   }
 
   useEffect(() => {
-    const where = route.view === 'table' ? route.table : route.view === 'sql' ? 'SQL' : route.view === 'import' ? 'Import' : route.view === 'export' ? 'Export' : route.view === 'diagram' ? 'ER diagram' : route.view === 'object' ? route.kind : route.view === 'roles' ? 'Roles' : route.view === 'role' ? route.name : db;
+    const where =
+      route.view === 'table'
+        ? route.table
+        : route.view === 'sql'
+          ? 'SQL'
+          : route.view === 'import'
+            ? 'Import'
+            : route.view === 'export'
+              ? 'Export'
+              : route.view === 'diagram'
+                ? 'ER diagram'
+                : route.view === 'object'
+                  ? route.kind
+                  : route.view === 'roles'
+                    ? 'Roles'
+                    : route.view === 'role'
+                      ? route.name
+                      : db;
     document.title = `${where} · pgdeck`;
   }, [route, db]);
 
@@ -92,8 +109,18 @@ function Shell({ db, session }: { db: string; session: SessionInfo }) {
   else if (route.view === 'import') content = <ImportView db={db} />;
   else if (route.view === 'export') content = <ExportView db={db} />;
   else if (route.view === 'roles') content = <RolesView db={db} readonly={info.data?.readonly ?? false} />;
-  else if (route.view === 'role') content = <RoleView key={route.name} db={db} name={route.name} readonly={info.data?.readonly ?? false} />;
-  else if (route.view === 'object') content = <ObjectView key={`${route.kind}:${route.oid}`} db={db} kind={route.kind} oid={route.oid} readonly={info.data?.readonly ?? false} />;
+  else if (route.view === 'role')
+    content = <RoleView key={route.name} db={db} name={route.name} readonly={info.data?.readonly ?? false} />;
+  else if (route.view === 'object')
+    content = (
+      <ObjectView
+        key={`${route.kind}:${route.oid}`}
+        db={db}
+        kind={route.kind}
+        oid={route.oid}
+        readonly={info.data?.readonly ?? false}
+      />
+    );
   else if (route.view === 'diagram')
     content = (
       <Suspense fallback={<CenteredSpinner label="Loading diagram…" />}>
@@ -132,7 +159,11 @@ function Shell({ db, session }: { db: string; session: SessionInfo }) {
           </SheetContent>
         </Sheet>
         <main className="flex min-w-0 flex-1 flex-col">
-          {info.isError ? <ErrorAlert error={info.error} title={`Cannot open ${db}`} className="m-6 w-auto" /> : content}
+          {info.isError ? (
+            <ErrorAlert error={info.error} title={`Cannot open ${db}`} className="m-6 w-auto" />
+          ) : (
+            content
+          )}
         </main>
       </div>
     </div>

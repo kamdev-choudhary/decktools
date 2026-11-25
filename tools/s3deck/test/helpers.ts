@@ -53,17 +53,33 @@ export async function testApp(overrides: { readonly?: boolean; auth?: boolean } 
 /** A tiny cookie-keeping client for app.request(). */
 export function client(app: { request: (url: string, init?: RequestInit) => Response | Promise<Response> }) {
   let cookie = '';
-  const call = async (method: string, url: string, body?: unknown, headers: Record<string, string> = {}, raw?: string | Uint8Array) => {
+  const call = async (
+    method: string,
+    url: string,
+    body?: unknown,
+    headers: Record<string, string> = {},
+    raw?: string | Uint8Array,
+  ) => {
     const res = await app.request(`http://localhost${url}`, {
       method,
       headers: {
         ...(cookie ? { cookie } : {}),
         ...(body !== undefined ? { 'content-type': 'application/json' } : {}),
-        ...(raw !== undefined ? { 'content-type': 'application/octet-stream', 'content-length': String(typeof raw === 'string' ? Buffer.byteLength(raw) : raw.byteLength) } : {}),
+        ...(raw !== undefined
+          ? {
+              'content-type': 'application/octet-stream',
+              'content-length': String(typeof raw === 'string' ? Buffer.byteLength(raw) : raw.byteLength),
+            }
+          : {}),
         ...(method !== 'GET' ? { 'x-s3deck-csrf': '1' } : {}),
         ...headers,
       },
-      body: raw !== undefined ? (raw as unknown as RequestInit['body']) : body !== undefined ? JSON.stringify(body) : undefined,
+      body:
+        raw !== undefined
+          ? (raw as unknown as RequestInit['body'])
+          : body !== undefined
+            ? JSON.stringify(body)
+            : undefined,
     });
     const set = res.headers.get('set-cookie');
     if (set) cookie = set.split(';')[0] ?? '';

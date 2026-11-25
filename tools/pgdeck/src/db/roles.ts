@@ -52,7 +52,9 @@ async function serverVersion(ctx: DbContext): Promise<number> {
 export async function listRoles(ctx: DbContext): Promise<RolesResponse> {
   const [roles, me, version] = await Promise.all([
     ctx.pool.query<RoleRow>(`select ${ROLE_COLUMNS} from pg_roles r order by r.rolname like 'pg\\_%', r.rolname`),
-    ctx.pool.query<RolesResponse['me']>(`select rolname as name, rolsuper as superuser, rolcreaterole as createrole from pg_roles where rolname = current_user`),
+    ctx.pool.query<RolesResponse['me']>(
+      `select rolname as name, rolsuper as superuser, rolcreaterole as createrole from pg_roles where rolname = current_user`,
+    ),
     serverVersion(ctx),
   ]);
   return { roles: roles.rows.map(toSummary), me: me.rows[0]!, serverVersion: version };
@@ -112,7 +114,9 @@ export async function getRole(ctx: DbContext, name: string): Promise<RoleDetail>
        group by db.datname order by db.datname = current_database() desc, db.datname`,
       [role.oid],
     ),
-    ctx.pool.query<{ name: string }>(`select datname as name from pg_database where datdba = $1 order by 1`, [role.oid]),
+    ctx.pool.query<{ name: string }>(`select datname as name from pg_database where datdba = $1 order by 1`, [
+      role.oid,
+    ]),
     ctx.pool.query<{ name: string }>(`select current_database() as name`),
     serverVersion(ctx),
   ]);
@@ -145,13 +149,17 @@ export function scramVerifier(password: string, iterations = 4096): string {
 }
 
 async function passwordLiteral(client: pg.PoolClient | pg.Pool, password: string): Promise<string> {
-  if (!password) throw new UserError('The password is empty. Leave the field out to keep the current one, or choose “Remove password”.');
+  if (!password)
+    throw new UserError(
+      'The password is empty. Leave the field out to keep the current one, or choose “Remove password”.',
+    );
   const { rows } = await client.query<{ enc: string; iter: string | null }>(
     `select current_setting('password_encryption') as enc, current_setting('scram_iterations', true) as iter`,
   );
   // eslint-disable-next-line no-control-regex
   const ascii = /^[\x00-\x7f]*$/.test(password);
-  const value = rows[0]?.enc === 'scram-sha-256' && ascii ? scramVerifier(password, Number(rows[0].iter) || 4096) : password;
+  const value =
+    rows[0]?.enc === 'scram-sha-256' && ascii ? scramVerifier(password, Number(rows[0].iter) || 4096) : password;
   return `'${value.replace(/'/g, "''")}'`;
 }
 
@@ -161,7 +169,10 @@ async function runStatements(ctx: DbContext, statements: string[]): Promise<void
   });
 }
 
-export async function runRoleAction(ctx: DbContext, a: RoleAction): Promise<{ ok: true; message: string; name?: string }> {
+export async function runRoleAction(
+  ctx: DbContext,
+  a: RoleAction,
+): Promise<{ ok: true; message: string; name?: string }> {
   if (ctx.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
 
   switch (a.action) {
@@ -181,7 +192,8 @@ export async function runRoleAction(ctx: DbContext, a: RoleAction): Promise<{ ok
         if (problem) throw new UserError(problem);
       }
       await withTransaction(ctx.pool, async (client) => {
-        const pw = a.password === undefined ? undefined : a.password === null ? null : await passwordLiteral(client, a.password);
+        const pw =
+          a.password === undefined ? undefined : a.password === null ? null : await passwordLiteral(client, a.password);
         const statements = alterRoleSql(a, pw);
         if (!statements.length) throw new UserError('Nothing to change.');
         for (const s of statements) await client.query(s);
@@ -189,7 +201,8 @@ export async function runRoleAction(ctx: DbContext, a: RoleAction): Promise<{ ok
       const name = a.newName || a.name;
       return {
         ok: true,
-        message: a.password !== undefined && !a.attributes && !a.newName ? `Changed the password of ${name}` : `Saved ${name}`,
+        message:
+          a.password !== undefined && !a.attributes && !a.newName ? `Changed the password of ${name}` : `Saved ${name}`,
         name,
       };
     }
@@ -199,7 +212,10 @@ export async function runRoleAction(ctx: DbContext, a: RoleAction): Promise<{ ok
         ? [`GRANT ${quoteIdent(a.group)} TO ${quoteIdent(a.role)}${a.admin ? ' WITH ADMIN OPTION' : ''}`]
         : await revokeMembershipSql(ctx, a.group, a.role);
       await runStatements(ctx, sql);
-      return { ok: true, message: a.grant ? `${a.role} is now a member of ${a.group}` : `${a.role} is no longer a member of ${a.group}` };
+      return {
+        ok: true,
+        message: a.grant ? `${a.role} is now a member of ${a.group}` : `${a.role} is no longer a member of ${a.group}`,
+      };
     }
     case 'drop': {
       if (isSystemRole(a.name)) throw new UserError('Built-in roles can’t be dropped.');
@@ -248,13 +264,19 @@ async function grantTarget(client: pg.PoolClient, kind: GrantKind, oid: number):
   };
   switch (kind) {
     case 'database':
-      return one(`select format('DATABASE %I', datname) as t from pg_database where oid = $1 and datname = current_database()`);
+      return one(
+        `select format('DATABASE %I', datname) as t from pg_database where oid = $1 and datname = current_database()`,
+      );
     case 'schema':
       return one(`select format('SCHEMA %I', nspname) as t from pg_namespace where oid = $1`);
     case 'table':
-      return one(`select format('TABLE %I.%I', n.nspname, c.relname) as t from pg_class c join pg_namespace n on n.oid = c.relnamespace where c.oid = $1 and c.relkind in ('r', 'p', 'v', 'm', 'f')`);
+      return one(
+        `select format('TABLE %I.%I', n.nspname, c.relname) as t from pg_class c join pg_namespace n on n.oid = c.relnamespace where c.oid = $1 and c.relkind in ('r', 'p', 'v', 'm', 'f')`,
+      );
     case 'sequence':
-      return one(`select format('SEQUENCE %I.%I', n.nspname, c.relname) as t from pg_class c join pg_namespace n on n.oid = c.relnamespace where c.oid = $1 and c.relkind = 'S'`);
+      return one(
+        `select format('SEQUENCE %I.%I', n.nspname, c.relname) as t from pg_class c join pg_namespace n on n.oid = c.relnamespace where c.oid = $1 and c.relkind = 'S'`,
+      );
     case 'function':
       return one(
         `select format('%s %I.%I(%s)', case p.prokind when 'p' then 'PROCEDURE' else 'FUNCTION' end, n.nspname, p.proname, pg_get_function_identity_arguments(p.oid)) as t
@@ -264,15 +286,21 @@ async function grantTarget(client: pg.PoolClient, kind: GrantKind, oid: number):
 }
 
 /** Apply ticked/unticked privileges in one transaction, one GRANT or REVOKE per object. */
-export async function applyGrants(ctx: DbContext, role: string, changes: GrantChange[]): Promise<{ ok: true; message: string; statements: string[] }> {
+export async function applyGrants(
+  ctx: DbContext,
+  role: string,
+  changes: GrantChange[],
+): Promise<{ ok: true; message: string; statements: string[] }> {
   if (ctx.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
   if (!changes.length) throw new UserError('Nothing to change.');
   const version = await serverVersion(ctx);
   const groups = new Map<string, { kind: GrantKind; oid: number; grant: boolean; privileges: Set<string> }>();
   for (const c of changes) {
-    if (!privilegesFor(c.kind, version).includes(c.privilege)) throw new UserError(`${c.privilege} can’t be granted on a ${c.kind}.`);
+    if (!privilegesFor(c.kind, version).includes(c.privilege))
+      throw new UserError(`${c.privilege} can’t be granted on a ${c.kind}.`);
     const key = `${c.kind}:${c.oid}:${c.grant}`;
-    const g = groups.get(key) ?? groups.set(key, { kind: c.kind, oid: c.oid, grant: c.grant, privileges: new Set() }).get(key)!;
+    const g =
+      groups.get(key) ?? groups.set(key, { kind: c.kind, oid: c.oid, grant: c.grant, privileges: new Set() }).get(key)!;
     g.privileges.add(c.privilege);
   }
   const r = quoteIdent(role);

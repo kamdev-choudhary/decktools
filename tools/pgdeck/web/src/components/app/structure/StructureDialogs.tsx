@@ -18,7 +18,14 @@ import {
 } from '@deck/ui/components/alert-dialog';
 import { Button } from '@deck/ui/components/button';
 import { Checkbox } from '@deck/ui/components/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@deck/ui/components/dialog';
 import { Input } from '@deck/ui/components/input';
 import { Label } from '@deck/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@deck/ui/components/select';
@@ -62,7 +69,17 @@ export function SqlPreview({ statements }: { statements: string[] }) {
   );
 }
 
-export function Field({ label, htmlFor, hint, children }: { label: string; htmlFor?: string; hint?: React.ReactNode; children: React.ReactNode }) {
+export function Field({
+  label,
+  htmlFor,
+  hint,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  hint?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={htmlFor} className="text-xs">
@@ -76,7 +93,10 @@ export function Field({ label, htmlFor, hint, children }: { label: string; htmlF
 
 function useTypeOptions(db: string): ComboOption[] {
   const catalog = useQuery({ queryKey: [...keys.db(db), 'catalog'], queryFn: () => api.catalog(db) });
-  return useMemo(() => [...COMMON_TYPES, ...(catalog.data?.types ?? []).map((t) => ({ value: t.name, hint: t.kind }))], [catalog.data]);
+  return useMemo(
+    () => [...COMMON_TYPES, ...(catalog.data?.types ?? []).map((t) => ({ value: t.name, hint: t.kind }))],
+    [catalog.data],
+  );
 }
 
 export function DialogShell({
@@ -125,7 +145,9 @@ export function DialogShell({
           <DialogFooter className="items-center border-t px-6 py-4 sm:justify-between">
             <div className="min-w-0 flex-1 text-xs">
               {error ? (
-                <p className="max-h-20 overflow-auto font-mono whitespace-pre-wrap text-destructive">{errorMessage(error)}</p>
+                <p className="max-h-20 overflow-auto font-mono whitespace-pre-wrap text-destructive">
+                  {errorMessage(error)}
+                </p>
               ) : touched && errors.length ? (
                 <p className="text-destructive">{errors[0]}</p>
               ) : null}
@@ -147,13 +169,29 @@ export function DialogShell({
 }
 
 /** Add a column, or edit an existing one (name, type, default, not null, comment). */
-export function ColumnDialog({ db, meta, column, onClose }: { db: string; meta: TableMeta; column?: Column; onClose: () => void }) {
+export function ColumnDialog({
+  db,
+  meta,
+  column,
+  onClose,
+}: {
+  db: string;
+  meta: TableMeta;
+  column?: Column;
+  onClose: () => void;
+}) {
   const typeOptions = useTypeOptions(db);
   const alter = useAlter(db, meta.schema, meta.table, onClose);
   const editing = !!column;
   const [c, setC] = useState<NewColumn>(() =>
     column
-      ? emptyColumn({ name: column.name, type: column.type, nullable: column.nullable, default: column.default ?? '', comment: column.comment ?? '' })
+      ? emptyColumn({
+          name: column.name,
+          type: column.type,
+          nullable: column.nullable,
+          default: column.default ?? '',
+          comment: column.comment ?? '',
+        })
       : emptyColumn({ name: '', type: 'text' }),
   );
   const [using, setUsing] = useState('');
@@ -176,7 +214,8 @@ export function ColumnDialog({ db, meta, column, onClose }: { db: string; meta: 
     }
     if (c.nullable !== column.nullable) a.nullable = c.nullable;
     // With a type change, always send the default: it is dropped and re-set around the change.
-    if (!column.identity && (a.type !== undefined || c.default.trim() !== (column.default ?? ''))) a.default = c.default.trim() || null;
+    if (!column.identity && (a.type !== undefined || c.default.trim() !== (column.default ?? '')))
+      a.default = c.default.trim() || null;
     if (c.comment.trim() !== (column.comment ?? '')) a.comment = c.comment.trim() || null;
     return a;
   }, [c, column, using]);
@@ -205,10 +244,27 @@ export function ColumnDialog({ db, meta, column, onClose }: { db: string; meta: 
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Name" htmlFor="col-name">
-          <Input id="col-name" value={c.name} onChange={(e) => set({ name: e.target.value })} autoFocus spellCheck={false} autoComplete="off" className="font-mono" />
+          <Input
+            id="col-name"
+            value={c.name}
+            onChange={(e) => set({ name: e.target.value })}
+            autoFocus
+            spellCheck={false}
+            autoComplete="off"
+            className="font-mono"
+          />
         </Field>
         <Field label="Type">
-          <Combobox value={c.type} onChange={(type) => set({ type })} options={typeOptions} mono creatable searchPlaceholder="Type or search…" className="h-9 w-full" aria-label="Type" />
+          <Combobox
+            value={c.type}
+            onChange={(type) => set({ type })}
+            options={typeOptions}
+            mono
+            creatable
+            searchPlaceholder="Type or search…"
+            className="h-9 w-full"
+            aria-label="Type"
+          />
         </Field>
       </div>
       {typeChanged && (
@@ -217,14 +273,31 @@ export function ColumnDialog({ db, meta, column, onClose }: { db: string; meta: 
           htmlFor="col-using"
           hint={
             <>
-              A USING expression, e.g. <span className="font-mono">{`${column!.name}::${c.type.trim() || 'type'}`}</span>. Needed when Postgres can't cast automatically.
+              A USING expression, e.g.{' '}
+              <span className="font-mono">{`${column!.name}::${c.type.trim() || 'type'}`}</span>. Needed when Postgres
+              can't cast automatically.
             </>
           }
         >
-          <Input id="col-using" value={using} onChange={(e) => setUsing(e.target.value)} placeholder={`${column!.name}::${c.type.trim()}`} spellCheck={false} className="font-mono text-xs" />
+          <Input
+            id="col-using"
+            value={using}
+            onChange={(e) => setUsing(e.target.value)}
+            placeholder={`${column!.name}::${c.type.trim()}`}
+            spellCheck={false}
+            className="font-mono text-xs"
+          />
         </Field>
       )}
-      <Field label="Default" htmlFor="col-default" hint={column?.identity ? 'Identity column: values are generated automatically.' : 'A SQL expression, e.g. now(), 0 or \'draft\'. Leave empty for none.'}>
+      <Field
+        label="Default"
+        htmlFor="col-default"
+        hint={
+          column?.identity
+            ? 'Identity column: values are generated automatically.'
+            : "A SQL expression, e.g. now(), 0 or 'draft'. Leave empty for none."
+        }
+      >
         <Input
           id="col-default"
           value={c.default}
@@ -246,11 +319,21 @@ export function ColumnDialog({ db, meta, column, onClose }: { db: string; meta: 
         <Label className="text-xs">Constraints</Label>
         <div className="flex flex-wrap items-center gap-1.5">
           {!editing && (
-            <Flag on={c.primaryKey} onToggle={() => set({ primaryKey: !c.primaryKey })} title={hasPk ? 'This table already has a primary key' : 'Primary key'} disabled={hasPk}>
+            <Flag
+              on={c.primaryKey}
+              onToggle={() => set({ primaryKey: !c.primaryKey })}
+              title={hasPk ? 'This table already has a primary key' : 'Primary key'}
+              disabled={hasPk}
+            >
               PK
             </Flag>
           )}
-          <Flag on={!c.nullable} onToggle={() => set({ nullable: !c.nullable })} title="Not null" disabled={c.primaryKey}>
+          <Flag
+            on={!c.nullable}
+            onToggle={() => set({ nullable: !c.nullable })}
+            title="Not null"
+            disabled={c.primaryKey}
+          >
             NOT NULL
           </Flag>
           {!editing && (
@@ -258,23 +341,37 @@ export function ColumnDialog({ db, meta, column, onClose }: { db: string; meta: 
               <Flag on={c.unique} onToggle={() => set({ unique: !c.unique })} title="Unique" disabled={c.primaryKey}>
                 UNIQUE
               </Flag>
-              <Flag on={c.identity} onToggle={() => set({ identity: !c.identity })} title="Auto-increment (identity)" disabled={!isIntegerType(c.type)}>
+              <Flag
+                on={c.identity}
+                onToggle={() => set({ identity: !c.identity })}
+                title="Auto-increment (identity)"
+                disabled={!isIntegerType(c.type)}
+              >
                 AUTO-INCREMENT
               </Flag>
               <ReferencePicker
                 db={db}
                 value={c.references}
-                onChange={(references, refType) => set({ references, ...(references && refType ? { type: refType, identity: false } : {}) })}
+                onChange={(references, refType) =>
+                  set({ references, ...(references && refType ? { type: refType, identity: false } : {}) })
+                }
               />
             </>
           )}
         </div>
         {!editing && !c.nullable && !c.default.trim() && !c.identity && meta.estimate > 0 && (
-          <p className="text-[11px] text-warning">The table has rows: a NOT NULL column needs a default, or adding it will fail.</p>
+          <p className="text-[11px] text-warning">
+            The table has rows: a NOT NULL column needs a default, or adding it will fail.
+          </p>
         )}
       </div>
       <Field label="Comment" htmlFor="col-comment">
-        <Input id="col-comment" value={c.comment} onChange={(e) => set({ comment: e.target.value })} placeholder="What this column holds" />
+        <Input
+          id="col-comment"
+          value={c.comment}
+          onChange={(e) => set({ comment: e.target.value })}
+          placeholder="What this column holds"
+        />
       </Field>
     </DialogShell>
   );
@@ -290,11 +387,24 @@ export function IndexDialog({ db, meta, onClose }: { db: string; meta: TableMeta
   const [concurrently, setConcurrently] = useState(true);
   const [where, setWhere] = useState('');
 
-  const toggle = (col: string) => setCols((prev) => (prev.some((c) => c.name === col) ? prev.filter((c) => c.name !== col) : [...prev, { name: col, desc: false }]));
-  const change: AlterAction = { action: 'createIndex', name: name.trim(), columns: cols, unique, method, concurrently, where };
+  const toggle = (col: string) =>
+    setCols((prev) =>
+      prev.some((c) => c.name === col) ? prev.filter((c) => c.name !== col) : [...prev, { name: col, desc: false }],
+    );
+  const change: AlterAction = {
+    action: 'createIndex',
+    name: name.trim(),
+    columns: cols,
+    unique,
+    method,
+    concurrently,
+    where,
+  };
   const statements = cols.length ? alterSql(meta.schema, meta.table, change) : [];
   const errors = validateAlter(change);
-  const suggested = cols.length ? `${meta.table}_${cols.map((c) => c.name).join('_')}_${unique ? 'key' : 'idx'}`.slice(0, 63) : 'auto';
+  const suggested = cols.length
+    ? `${meta.table}_${cols.map((c) => c.name).join('_')}_${unique ? 'key' : 'idx'}`.slice(0, 63)
+    : 'auto';
 
   return (
     <DialogShell
@@ -322,13 +432,17 @@ export function IndexDialog({ db, meta, onClose }: { db: string; meta: TableMeta
                 </label>
                 {sel && (
                   <>
-                    <span className="rounded bg-primary px-1.5 font-mono text-[10px] text-primary-foreground tabular-nums">{pos + 1}</span>
+                    <span className="rounded bg-primary px-1.5 font-mono text-[10px] text-primary-foreground tabular-nums">
+                      {pos + 1}
+                    </span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       className="h-7 gap-1 px-1.5 font-mono text-[11px]"
-                      onClick={() => setCols((prev) => prev.map((c) => (c.name === col.name ? { ...c, desc: !c.desc } : c)))}
+                      onClick={() =>
+                        setCols((prev) => prev.map((c) => (c.name === col.name ? { ...c, desc: !c.desc } : c)))
+                      }
                     >
                       {sel.desc ? <ArrowDownWideNarrow /> : <ArrowUpNarrowWide />}
                       {sel.desc ? 'DESC' : 'ASC'}
@@ -342,7 +456,15 @@ export function IndexDialog({ db, meta, onClose }: { db: string; meta: TableMeta
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Name (optional)" htmlFor="idx-name">
-          <Input id="idx-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={suggested} spellCheck={false} autoComplete="off" className="font-mono text-xs" />
+          <Input
+            id="idx-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={suggested}
+            spellCheck={false}
+            autoComplete="off"
+            className="font-mono text-xs"
+          />
         </Field>
         <Field label="Method">
           <Select value={method} onValueChange={(v) => setMethod(v as IndexMethod)}>
@@ -354,7 +476,17 @@ export function IndexDialog({ db, meta, onClose }: { db: string; meta: TableMeta
                 <SelectItem key={m} value={m} className="font-mono text-xs">
                   {m}
                   <span className="ml-2 font-sans text-muted-foreground">
-                    {m === 'btree' ? 'default, sorting & ranges' : m === 'gin' ? 'jsonb, arrays, full-text' : m === 'gist' ? 'geometry, ranges' : m === 'brin' ? 'huge, naturally ordered' : m === 'hash' ? 'equality only' : 'partitioned data'}
+                    {m === 'btree'
+                      ? 'default, sorting & ranges'
+                      : m === 'gin'
+                        ? 'jsonb, arrays, full-text'
+                        : m === 'gist'
+                          ? 'geometry, ranges'
+                          : m === 'brin'
+                            ? 'huge, naturally ordered'
+                            : m === 'hash'
+                              ? 'equality only'
+                              : 'partitioned data'}
                   </span>
                 </SelectItem>
               ))}
@@ -363,11 +495,23 @@ export function IndexDialog({ db, meta, onClose }: { db: string; meta: TableMeta
         </Field>
       </div>
       <Field label="Only rows where (optional)" htmlFor="idx-where" hint="A partial index, e.g. deleted_at IS NULL.">
-        <Input id="idx-where" value={where} onChange={(e) => setWhere(e.target.value)} placeholder="none" spellCheck={false} className="font-mono text-xs" />
+        <Input
+          id="idx-where"
+          value={where}
+          onChange={(e) => setWhere(e.target.value)}
+          placeholder="none"
+          spellCheck={false}
+          className="font-mono text-xs"
+        />
       </Field>
       <div className="space-y-2.5">
         <label className="flex cursor-pointer items-start gap-2 text-sm">
-          <Checkbox className="mt-0.5" checked={unique} disabled={method !== 'btree'} onCheckedChange={(v) => setUnique(v === true)} />
+          <Checkbox
+            className="mt-0.5"
+            checked={unique}
+            disabled={method !== 'btree'}
+            onCheckedChange={(v) => setUnique(v === true)}
+          />
           <span>
             Unique
             <span className="block text-xs text-muted-foreground">Reject rows that repeat these values.</span>
@@ -377,7 +521,9 @@ export function IndexDialog({ db, meta, onClose }: { db: string; meta: TableMeta
           <Checkbox className="mt-0.5" checked={concurrently} onCheckedChange={(v) => setConcurrently(v === true)} />
           <span>
             Build concurrently
-            <span className="block text-xs text-muted-foreground">Slower, but doesn't block writes to the table while it builds.</span>
+            <span className="block text-xs text-muted-foreground">
+              Slower, but doesn't block writes to the table while it builds.
+            </span>
           </span>
         </label>
       </div>
@@ -419,27 +565,43 @@ export function DropStructureDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Drop {target.kind}?</AlertDialogTitle>
           <AlertDialogDescription>
-            <span className="font-mono break-all text-foreground">{target.name}</span> on {meta.schema}.{meta.table}. {what}
+            <span className="font-mono break-all text-foreground">{target.name}</span> on {meta.schema}.{meta.table}.{' '}
+            {what}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-2.5">
           {target.kind === 'index' && (
             <label className="flex cursor-pointer items-start gap-2 text-sm">
-              <Checkbox className="mt-0.5" checked={concurrently} onCheckedChange={(v) => setConcurrently(v === true)} />
+              <Checkbox
+                className="mt-0.5"
+                checked={concurrently}
+                onCheckedChange={(v) => setConcurrently(v === true)}
+              />
               <span>
                 Concurrently
-                <span className="block text-xs text-muted-foreground">Don't block the table while dropping. Can't be combined with cascade.</span>
+                <span className="block text-xs text-muted-foreground">
+                  Don't block the table while dropping. Can't be combined with cascade.
+                </span>
               </span>
             </label>
           )}
           <label className="flex cursor-pointer items-start gap-2 text-sm">
-            <Checkbox className="mt-0.5" checked={cascade} disabled={concurrently} onCheckedChange={(v) => setCascade(v === true)} />
+            <Checkbox
+              className="mt-0.5"
+              checked={cascade}
+              disabled={concurrently}
+              onCheckedChange={(v) => setCascade(v === true)}
+            />
             <span>
               Cascade
-              <span className="block text-xs text-muted-foreground">Also drop views, indexes and constraints that depend on it.</span>
+              <span className="block text-xs text-muted-foreground">
+                Also drop views, indexes and constraints that depend on it.
+              </span>
             </span>
           </label>
-          <pre className="overflow-x-auto rounded-md border bg-muted/30 px-3 py-2 font-mono text-xs">{alterSql(meta.schema, meta.table, change).join('\n')}</pre>
+          <pre className="overflow-x-auto rounded-md border bg-muted/30 px-3 py-2 font-mono text-xs">
+            {alterSql(meta.schema, meta.table, change).join('\n')}
+          </pre>
           {alter.isError && <p className="text-sm text-destructive">{errorMessage(alter.error)}</p>}
         </div>
         <AlertDialogFooter>

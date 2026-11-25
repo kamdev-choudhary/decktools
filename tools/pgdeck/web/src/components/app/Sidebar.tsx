@@ -1,4 +1,18 @@
-import { ChevronRight, Eye, FileDown, FileUp, Layers, LayoutGrid, Network, Plus, Search, SquareTerminal, Table2, UsersRound, type LucideIcon } from 'lucide-react';
+import {
+  ChevronRight,
+  Eye,
+  FileDown,
+  FileUp,
+  Layers,
+  LayoutGrid,
+  Network,
+  Plus,
+  Search,
+  SquareTerminal,
+  Table2,
+  UsersRound,
+  type LucideIcon,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { REL_KIND_LABEL, type RelKind, type TableRef } from '@shared/types';
 import { useInfo, useTables } from '@/api/hooks';
@@ -15,7 +29,17 @@ import { TruncatedText } from '@deck/ui/components/truncated-text';
 
 const KIND_ICON: Record<RelKind, LucideIcon> = { r: Table2, p: Table2, f: Table2, v: Eye, m: Layers };
 
-function NavLink({ href, active, icon: Icon, children }: { href: string; active: boolean; icon: LucideIcon; children: React.ReactNode }) {
+function NavLink({
+  href,
+  active,
+  icon: Icon,
+  children,
+}: {
+  href: string;
+  active: boolean;
+  icon: LucideIcon;
+  children: React.ReactNode;
+}) {
   return (
     <a
       href={href}
@@ -99,7 +123,13 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
         {!readonly && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="icon-sm" aria-label="New table" onClick={() => setCreating(true)} className="size-8">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                aria-label="New table"
+                onClick={() => setCreating(true)}
+                className="size-8"
+              >
                 <Plus />
               </Button>
             </TooltipTrigger>
@@ -107,7 +137,13 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
           </Tooltip>
         )}
       </div>
-      {creating && <CreateTableDialog db={db} defaultSchema={route.view === 'table' ? route.schema : 'public'} onClose={() => setCreating(false)} />}
+      {creating && (
+        <CreateTableDialog
+          db={db}
+          defaultSchema={route.view === 'table' ? route.schema : 'public'}
+          onClose={() => setCreating(false)}
+        />
+      )}
 
       <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
         <nav className="px-3 pb-4" aria-label="Tables">
@@ -118,7 +154,9 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
           )}
           {tables.isError && <ErrorAlert error={tables.error} className="mt-2" />}
           {tables.isSuccess && !groups.length && (
-            <p className="px-2 py-3 text-sm text-muted-foreground">{filter ? 'No matching tables' : 'No tables in this database'}</p>
+            <p className="px-2 py-3 text-sm text-muted-foreground">
+              {filter ? 'No matching tables' : 'No tables in this database'}
+            </p>
           )}
 
           {groups.map(([schema, items]) => {
@@ -167,7 +205,14 @@ export function SidebarNav({ db, route }: { db: string; route: Route }) {
                               }
                             />
                           </a>
-                          <TableActionsMenu db={db} schema={t.schema} table={t.name} kind={t.kind} variant="sidebar" className="shrink-0" />
+                          <TableActionsMenu
+                            db={db}
+                            schema={t.schema}
+                            table={t.name}
+                            kind={t.kind}
+                            variant="sidebar"
+                            className="shrink-0"
+                          />
                         </div>
                       );
                     })}

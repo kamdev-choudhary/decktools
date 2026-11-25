@@ -16,7 +16,11 @@ export function detectFormat(name: string): { format: ImportFormat; gzip: boolea
   const lower = name.toLowerCase();
   const gzip = lower.endsWith('.gz');
   const base = gzip ? lower.slice(0, -3) : lower;
-  const format: ImportFormat = /\.(ndjson|jsonl|json)$/.test(base) ? 'ndjson' : /\.(tsv|tab)$/.test(base) ? 'tsv' : 'csv';
+  const format: ImportFormat = /\.(ndjson|jsonl|json)$/.test(base)
+    ? 'ndjson'
+    : /\.(tsv|tab)$/.test(base)
+      ? 'tsv'
+      : 'csv';
   return { format, gzip };
 }
 
@@ -100,7 +104,8 @@ export function buildPreview(text: string, format: ImportFormat, delimiter: stri
       }
     }
     const columns = [...new Set(objects.flatMap((o) => Object.keys(o)))];
-    const show = (v: unknown) => (v === null || v === undefined ? null : typeof v === 'object' ? JSON.stringify(v) : String(v));
+    const show = (v: unknown) =>
+      v === null || v === undefined ? null : typeof v === 'object' ? JSON.stringify(v) : String(v);
     return { columns, rows: objects.map((o) => columns.map((c) => show(o[c]))) };
   }
 
@@ -114,9 +119,13 @@ export function buildPreview(text: string, format: ImportFormat, delimiter: stri
       : parseCsv(clean, delimiter, SAMPLE_ROWS + 1);
 
   const width = Math.max(0, ...records.map((r) => r.length));
-  const columns = header && records[0] ? records[0].map((c, i) => c.trim() || `column ${i + 1}`) : Array.from({ length: width }, (_, i) => `column ${i + 1}`);
+  const columns =
+    header && records[0]
+      ? records[0].map((c, i) => c.trim() || `column ${i + 1}`)
+      : Array.from({ length: width }, (_, i) => `column ${i + 1}`);
   const body = (header ? records.slice(1) : records).slice(0, SAMPLE_ROWS);
-  const cell = (v: string | undefined) => (v === undefined ? null : format === 'tsv' ? tsvUnescape(v) : v === '' ? null : v);
+  const cell = (v: string | undefined) =>
+    v === undefined ? null : format === 'tsv' ? tsvUnescape(v) : v === '' ? null : v;
   return { columns, rows: body.map((r) => columns.map((_, i) => cell(r[i]))) };
 }
 

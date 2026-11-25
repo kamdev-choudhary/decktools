@@ -64,7 +64,9 @@ export function BucketsHome() {
                 <Database />
               </EmptyMedia>
               <EmptyTitle>No buckets yet</EmptyTitle>
-              <EmptyDescription>{canCreate ? 'Create one to get started.' : 'This key has no buckets.'}</EmptyDescription>
+              <EmptyDescription>
+                {canCreate ? 'Create one to get started.' : 'This key has no buckets.'}
+              </EmptyDescription>
             </EmptyHeader>
             {canCreate && (
               <Button onClick={() => setCreateOpen(true)}>

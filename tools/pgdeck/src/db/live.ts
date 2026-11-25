@@ -111,18 +111,16 @@ export function createLiveSampler(ctx: DbContext) {
       rowsReadPerSec: rate('rowsRead'),
       rowsWrittenPerSec: rate('rowsWritten'),
       cacheHitRatio: hit + read > 0 ? hit / (hit + read) : null,
-      activity: activity.rows.map(
-        (a): LiveActivity => ({
-          pid: a.pid,
-          user: a.user,
-          application: a.application,
-          client: a.client,
-          state: a.state,
-          waitEvent: a.wait_event,
-          durationSeconds: a.duration_seconds,
-          query: a.query,
-        }),
-      ),
+      activity: activity.rows.map((a): LiveActivity => ({
+        pid: a.pid,
+        user: a.user,
+        application: a.application,
+        client: a.client,
+        state: a.state,
+        waitEvent: a.wait_event,
+        durationSeconds: a.duration_seconds,
+        query: a.query,
+      })),
     };
   };
 }

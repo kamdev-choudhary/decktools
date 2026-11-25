@@ -37,7 +37,14 @@ export function syncRoutes(ctx: ServerContext) {
       }
       const title = `${input.mode === 'mirror' ? 'Mirror' : 'Copy'} ${describe(source)} → ${describe(target)}`;
       const job = ctx.jobs.start(c.get('session').user, title, (signal, progress) =>
-        runSync({ source, target, sameConnection: source.connectionId === target.connectionId, mode: input.mode, signal, progress }),
+        runSync({
+          source,
+          target,
+          sameConnection: source.connectionId === target.connectionId,
+          mode: input.mode,
+          signal,
+          progress,
+        }),
       );
       logActivity(ctx, c, `sync.${input.mode}`, {
         bucket: target.bucket,
@@ -55,7 +62,8 @@ export function syncRoutes(ctx: ServerContext) {
     })
 
     .delete('/jobs/:id', (c) => {
-      if (!ctx.jobs.cancel(c.req.param('id'), owner(c))) throw new HttpError(404, 'NOT_FOUND', 'No running job with that ID');
+      if (!ctx.jobs.cancel(c.req.param('id'), owner(c)))
+        throw new HttpError(404, 'NOT_FOUND', 'No running job with that ID');
       return c.json({ ok: true });
     });
 }

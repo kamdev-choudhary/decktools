@@ -59,7 +59,12 @@ const pairs = (flat: Buffer[]) => {
   return out;
 };
 
-async function readValue(client: Redis, key: Buffer, type: string, { cursor = '0', offset = 0 }: DetailOptions): Promise<{ value: KeyValue; length: number }> {
+async function readValue(
+  client: Redis,
+  key: Buffer,
+  type: string,
+  { cursor = '0', offset = 0 }: DetailOptions,
+): Promise<{ value: KeyValue; length: number }> {
   switch (type) {
     case 'string': {
       const length = await client.strlen(key);
@@ -69,17 +74,27 @@ async function readValue(client: Redis, key: Buffer, type: string, { cursor = '0
     case 'hash': {
       const [next, flat] = (await client.callBuffer('HSCAN', [key, cursor, 'COUNT', PAGE])) as [Buffer, Buffer[]];
       return {
-        value: { type, entries: pairs(flat).map(([f, v]) => ({ field: toRText(f), value: toRText(v) })), cursor: next.toString() },
+        value: {
+          type,
+          entries: pairs(flat).map(([f, v]) => ({ field: toRText(f), value: toRText(v) })),
+          cursor: next.toString(),
+        },
         length: await client.hlen(key),
       };
     }
     case 'list': {
       const items = await client.lrangeBuffer(key, offset, offset + PAGE - 1);
-      return { value: { type, items: items.map((v, i) => ({ index: offset + i, value: toRText(v) })), offset }, length: await client.llen(key) };
+      return {
+        value: { type, items: items.map((v, i) => ({ index: offset + i, value: toRText(v) })), offset },
+        length: await client.llen(key),
+      };
     }
     case 'set': {
       const [next, members] = (await client.callBuffer('SSCAN', [key, cursor, 'COUNT', PAGE])) as [Buffer, Buffer[]];
-      return { value: { type, members: members.map(toRText), cursor: next.toString() }, length: await client.scard(key) };
+      return {
+        value: { type, members: members.map(toRText), cursor: next.toString() },
+        length: await client.scard(key),
+      };
     }
     case 'zset': {
       const flat = (await client.callBuffer('ZRANGE', [key, offset, offset + PAGE - 1, 'WITHSCORES'])) as Buffer[];
@@ -92,15 +107,27 @@ async function readValue(client: Redis, key: Buffer, type: string, { cursor = '0
       // Newest first; continue strictly after the last id shown.
       const start = cursor && cursor !== '0' ? `(${cursor}` : '+';
       const raw = (await client.callBuffer('XREVRANGE', [key, start, '-', 'COUNT', PAGE])) as [Buffer, Buffer[]][];
-      const entries = raw.map(([id, flat]) => ({ id: id.toString(), fields: pairs(flat).map(([f, v]) => ({ field: toRText(f), value: toRText(v) })) }));
-      return { value: { type, entries, next: entries.length === PAGE ? entries.at(-1)!.id : null }, length: await client.xlen(key) };
+      const entries = raw.map(([id, flat]) => ({
+        id: id.toString(),
+        fields: pairs(flat).map(([f, v]) => ({ field: toRText(f), value: toRText(v) })),
+      }));
+      return {
+        value: { type, entries, next: entries.length === PAGE ? entries.at(-1)!.id : null },
+        length: await client.xlen(key),
+      };
     }
     case 'ReJSON-RL': {
       const json = String(await client.call('JSON.GET', [key]));
       return { value: { type, json }, length: Buffer.byteLength(json) };
     }
     default:
-      return { value: { type: 'unsupported', message: `redisdeck can't display "${type}" keys yet. Use the console to work with them.` }, length: 0 };
+      return {
+        value: {
+          type: 'unsupported',
+          message: `redisdeck can't display "${type}" keys yet. Use the console to work with them.`,
+        },
+        length: 0,
+      };
   }
 }
 
@@ -111,7 +138,10 @@ export async function keyDetail(client: Redis, id: string, opts: DetailOptions =
   const [ttl, encoding, memory, read] = await Promise.all([
     client.pttl(key),
     client.call('OBJECT', ['ENCODING', key]).then(String, () => null),
-    client.call('MEMORY', ['USAGE', key]).then((v) => (v === null ? null : Number(v)), () => null),
+    client.call('MEMORY', ['USAGE', key]).then(
+      (v) => (v === null ? null : Number(v)),
+      () => null,
+    ),
     readValue(client, key, type, opts),
   ]);
   return { id, name: toRText(key), type, ttl, encoding, memory, length: read.length, value: read.value };
@@ -139,7 +169,7 @@ export async function applyAction(client: Redis, action: KeyAction, readonly: bo
   const key = keyFromId(action.id);
   switch (action.op) {
     case 'rename': {
-      if (!action.newName) throw new UserError('The new name can\'t be empty');
+      if (!action.newName) throw new UserError("The new name can't be empty");
       const ok = await client.renamenx(key, action.newName);
       if (!ok) throw new UserError(`A key named "${action.newName}" already exists`, 409);
       return `Renamed to ${action.newName}`;
@@ -149,7 +179,8 @@ export async function applyAction(client: Redis, action: KeyAction, readonly: bo
         await client.persist(key);
         return 'Expiry removed';
       }
-      if (!Number.isInteger(action.seconds) || action.seconds <= 0) throw new UserError('TTL must be a whole number of seconds, above 0');
+      if (!Number.isInteger(action.seconds) || action.seconds <= 0)
+        throw new UserError('TTL must be a whole number of seconds, above 0');
       await client.expire(key, action.seconds);
       return `Expires in ${action.seconds} s`;
     }
@@ -158,7 +189,8 @@ export async function applyAction(client: Redis, action: KeyAction, readonly: bo
       return 'Value saved';
     case 'hash.set': {
       const renaming = action.previousField !== undefined && action.previousField !== action.field;
-      if (renaming && (await client.hexists(key, action.field))) throw new UserError(`Field "${action.field}" already exists`, 409);
+      if (renaming && (await client.hexists(key, action.field)))
+        throw new UserError(`Field "${action.field}" already exists`, 409);
       const m = client.multi();
       if (renaming) m.hdel(key, action.previousField!);
       m.hset(key, action.field, action.value);
@@ -230,7 +262,8 @@ export async function createKey(client: Redis, spec: NewKey, readonly: boolean):
   writable(readonly);
   if (!spec.name) throw new UserError('The key needs a name');
   if (await client.exists(spec.name)) throw new UserError(`A key named "${spec.name}" already exists`, 409);
-  if (spec.ttl !== undefined && (!Number.isInteger(spec.ttl) || spec.ttl <= 0)) throw new UserError('TTL must be a whole number of seconds, above 0');
+  if (spec.ttl !== undefined && (!Number.isInteger(spec.ttl) || spec.ttl <= 0))
+    throw new UserError('TTL must be a whole number of seconds, above 0');
 
   const m = client.multi();
   switch (spec.type) {

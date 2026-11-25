@@ -18,7 +18,8 @@ const SIDEBAR_KEY = 'redisdeck.sidebar';
 export function App() {
   const session = useSession();
   if (session.isPending) return <CenteredSpinner />;
-  if (session.isError) return <ErrorAlert error={session.error} title="Cannot reach redisdeck" className="m-6 w-auto" />;
+  if (session.isError)
+    return <ErrorAlert error={session.error} title="Cannot reach redisdeck" className="m-6 w-auto" />;
   if (!session.data.authenticated) return <LoginView />;
   return <Workspace session={session.data} />;
 }
@@ -65,7 +66,13 @@ function Shell({ route, session }: { route: Exclude<Route, { view: 'root' }>; se
   };
 
   const content =
-    route.view === 'console' ? <ConsoleView key={route.db} db={route.db} /> : route.view === 'server' ? <ServerView /> : <KeysView key={route.db} db={route.db} selected={route.key} />;
+    route.view === 'console' ? (
+      <ConsoleView key={route.db} db={route.db} />
+    ) : route.view === 'server' ? (
+      <ServerView />
+    ) : (
+      <KeysView key={route.db} db={route.db} selected={route.key} />
+    );
 
   return (
     <div className="flex h-dvh flex-col">

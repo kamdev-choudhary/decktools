@@ -1,4 +1,15 @@
-import type { Column, Constraint, DatabaseSummary, DbInfo, ForeignKey, IncomingReference, Index, RelKind, TableMeta, TableRef } from '../shared/types.js';
+import type {
+  Column,
+  Constraint,
+  DatabaseSummary,
+  DbInfo,
+  ForeignKey,
+  IncomingReference,
+  Index,
+  RelKind,
+  TableMeta,
+  TableRef,
+} from '../shared/types.js';
 import type { DbContext } from './client.js';
 import { UserError } from './errors.js';
 

@@ -6,7 +6,13 @@ export class UserError extends Error {
 }
 
 /** Error codes that mean "this provider doesn't implement the feature". */
-const UNSUPPORTED = new Set(['NotImplemented', 'NotSupported', 'XNotImplemented', 'MethodNotAllowed', 'UnsupportedOperation']);
+const UNSUPPORTED = new Set([
+  'NotImplemented',
+  'NotSupported',
+  'XNotImplemented',
+  'MethodNotAllowed',
+  'UnsupportedOperation',
+]);
 
 /** Error codes that mean "the setting isn't configured" for bucket settings reads. */
 const NOT_CONFIGURED = new Set([

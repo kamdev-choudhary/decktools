@@ -52,12 +52,19 @@ export function UserMenu({ session, info }: { session: SessionInfo; info?: DbInf
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Type /> Interface font
-            <span className="ml-auto pl-3 text-xs text-muted-foreground">{SANS_FONTS.find((f) => f.id === fonts.sans)?.label}</span>
+            <span className="ml-auto pl-3 text-xs text-muted-foreground">
+              {SANS_FONTS.find((f) => f.id === fonts.sans)?.label}
+            </span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-52">
             <DropdownMenuRadioGroup value={fonts.sans} onValueChange={(v) => fonts.setSans(v as SansFont)}>
               {SANS_FONTS.map((f) => (
-                <DropdownMenuRadioItem key={f.id} value={f.id} onSelect={(e) => e.preventDefault()} style={{ fontFamily: f.stack }}>
+                <DropdownMenuRadioItem
+                  key={f.id}
+                  value={f.id}
+                  onSelect={(e) => e.preventDefault()}
+                  style={{ fontFamily: f.stack }}
+                >
                   {f.label}
                   <span className="ml-auto text-xs text-muted-foreground tabular-nums">Ag 0469</span>
                 </DropdownMenuRadioItem>
@@ -68,12 +75,19 @@ export function UserMenu({ session, info }: { session: SessionInfo; info?: DbInf
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Type /> Code font
-            <span className="ml-auto pl-3 text-xs text-muted-foreground">{MONO_FONTS.find((f) => f.id === fonts.mono)?.label}</span>
+            <span className="ml-auto pl-3 text-xs text-muted-foreground">
+              {MONO_FONTS.find((f) => f.id === fonts.mono)?.label}
+            </span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-56">
             <DropdownMenuRadioGroup value={fonts.mono} onValueChange={(v) => fonts.setMono(v as MonoFont)}>
               {MONO_FONTS.map((f) => (
-                <DropdownMenuRadioItem key={f.id} value={f.id} onSelect={(e) => e.preventDefault()} style={{ fontFamily: f.stack }}>
+                <DropdownMenuRadioItem
+                  key={f.id}
+                  value={f.id}
+                  onSelect={(e) => e.preventDefault()}
+                  style={{ fontFamily: f.stack }}
+                >
                   {f.label}
                   <span className="ml-auto text-xs text-muted-foreground">0O1lI !=</span>
                 </DropdownMenuRadioItem>

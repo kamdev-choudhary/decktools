@@ -8,4 +8,3 @@ export interface SessionInfo {
   authenticated: boolean;
   username: string | null;
 }
-

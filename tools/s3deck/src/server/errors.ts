@@ -56,17 +56,25 @@ export function toErrorResponse(err: unknown): { status: ContentfulStatusCode; b
   const code = errorCode(err);
   const httpStatus = errorStatus(err);
   if (httpStatus || code in S3_STATUS) {
-    let status = S3_STATUS[code] ?? (httpStatus && httpStatus >= 400 && httpStatus < 600 ? (httpStatus as ContentfulStatusCode) : 502);
+    let status =
+      S3_STATUS[code] ??
+      (httpStatus && httpStatus >= 400 && httpStatus < 600 ? (httpStatus as ContentfulStatusCode) : 502);
     if (status === 401) status = 400;
     return { status, body: { error: { code, message: errorMessage(err) } } };
   }
   if (err instanceof Error && (err.name === 'AbortError' || err.name === 'TimeoutError')) {
-    return { status: 499 as ContentfulStatusCode, body: { error: { code: 'ABORTED', message: 'Request was cancelled' } } };
+    return {
+      status: 499 as ContentfulStatusCode,
+      body: { error: { code: 'ABORTED', message: 'Request was cancelled' } },
+    };
   }
   // Network-level failures talking to the endpoint (ECONNREFUSED, DNS, TLS…)
   const sysCode = (err as { code?: string } | null)?.code;
   if (sysCode && /^E[A-Z]+$/.test(sysCode)) {
-    return { status: 502, body: { error: { code: sysCode, message: `Can't reach the storage endpoint (${sysCode})` } } };
+    return {
+      status: 502,
+      body: { error: { code: sysCode, message: `Can't reach the storage endpoint (${sysCode})` } },
+    };
   }
   return { status: 500, body: { error: { code: 'INTERNAL', message: errorMessage(err) } } };
 }

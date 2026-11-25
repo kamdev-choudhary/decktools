@@ -41,7 +41,8 @@ async function commandFlags(client: Redis): Promise<Map<string, string[]>> {
   const all = (await client.call('COMMAND').catch(() => [])) as unknown[][];
   for (const c of all) {
     out.set(String(c[0]).toLowerCase(), (c[2] as unknown[]).map(String));
-    for (const sub of (c[9] as unknown[][] | undefined) ?? []) out.set(String(sub[0]).toLowerCase(), (sub[2] as unknown[]).map(String));
+    for (const sub of (c[9] as unknown[][] | undefined) ?? [])
+      out.set(String(sub[0]).toLowerCase(), (sub[2] as unknown[]).map(String));
   }
   return out;
 }

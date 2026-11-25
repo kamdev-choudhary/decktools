@@ -61,7 +61,9 @@ export async function slowlog(client: Redis, count = 50): Promise<SlowlogEntry[]
     id: Number(e[0]),
     at: Number(e[1]) * 1000,
     micros: Number(e[2]),
-    command: (e[3] as unknown[]).map((a) => (/[\s"]/.test(String(a)) ? JSON.stringify(String(a)) : String(a))).join(' '),
+    command: (e[3] as unknown[])
+      .map((a) => (/[\s"]/.test(String(a)) ? JSON.stringify(String(a)) : String(a)))
+      .join(' '),
     client: String(e[4] ?? ''),
   }));
 }

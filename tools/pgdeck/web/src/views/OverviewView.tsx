@@ -1,4 +1,14 @@
-import { Activity, Database, Plus, Gauge, HardDrive, RefreshCw, SquareTerminal, Users, type LucideIcon } from 'lucide-react';
+import {
+  Activity,
+  Database,
+  Plus,
+  Gauge,
+  HardDrive,
+  RefreshCw,
+  SquareTerminal,
+  Users,
+  type LucideIcon,
+} from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useInfo, useStats, keys } from '@/api/hooks';
@@ -24,8 +34,12 @@ function LiveBadge({ status }: { status: LiveStatus }) {
   return (
     <span className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium">
       <span className="relative flex size-2">
-        {status === 'live' && <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-60" />}
-        <span className={cn('relative inline-flex size-2 rounded-full', status === 'live' ? 'bg-success' : 'bg-warning')} />
+        {status === 'live' && (
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-60" />
+        )}
+        <span
+          className={cn('relative inline-flex size-2 rounded-full', status === 'live' ? 'bg-success' : 'bg-warning')}
+        />
       </span>
       {label}
     </span>
@@ -44,7 +58,17 @@ function Fact({ label, value, icon: Icon }: { label: string; value: string; icon
   );
 }
 
-function Card({ title, aside, children, className }: { title: string; aside?: React.ReactNode; children: React.ReactNode; className?: string }) {
+function Card({
+  title,
+  aside,
+  children,
+  className,
+}: {
+  title: string;
+  aside?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <section className={cn('rounded-lg border bg-card', className)}>
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
@@ -83,9 +107,10 @@ export function OverviewView({ db }: { db: string }) {
 
   const conns = l?.connections ?? s?.connections;
   const cache = l?.cacheHitRatio ?? s?.cacheHitRatio ?? null;
-  const rollbackShare = s && s.transactions.commits + s.transactions.rollbacks > 0
-    ? s.transactions.rollbacks / (s.transactions.commits + s.transactions.rollbacks)
-    : 0;
+  const rollbackShare =
+    s && s.transactions.commits + s.transactions.rollbacks > 0
+      ? s.transactions.rollbacks / (s.transactions.commits + s.transactions.rollbacks)
+      : 0;
 
   const times = live.samples.map((x) => x.t);
 
@@ -155,7 +180,9 @@ export function OverviewView({ db }: { db: string }) {
             label="Transactions / s"
             icon={Activity}
             value={l ? perSec(l.commitsPerSec + l.rollbacksPerSec) : s ? '—' : undefined}
-            detail={s && `${formatCompact(s.transactions.commits)} committed · ${formatPercent(rollbackShare)} rolled back`}
+            detail={
+              s && `${formatCompact(s.transactions.commits)} committed · ${formatPercent(rollbackShare)} rolled back`
+            }
           />
           <StatTile
             label="Cache hit ratio"
@@ -163,7 +190,13 @@ export function OverviewView({ db }: { db: string }) {
             value={s ? (cache === null ? '—' : formatPercent(cache, 2)) : undefined}
             meter={cache ?? undefined}
             meterTone={cache === null ? 'neutral' : cache >= 0.99 ? 'good' : 'warning'}
-            detail={cache === null ? 'No block reads yet' : cache >= 0.99 ? 'Healthy (≥ 99%)' : 'Below 99%: reads going to disk'}
+            detail={
+              cache === null
+                ? 'No block reads yet'
+                : cache >= 0.99
+                  ? 'Healthy (≥ 99%)'
+                  : 'Below 99%: reads going to disk'
+            }
           />
           <StatTile
             label="Database size"
@@ -217,7 +250,11 @@ export function OverviewView({ db }: { db: string }) {
         ) : s ? (
           <>
             <div className="grid gap-3 lg:grid-cols-3">
-              <Card title="Storage" aside={<span className="text-xs text-muted-foreground">Largest relations</span>} className="lg:col-span-2">
+              <Card
+                title="Storage"
+                aside={<span className="text-xs text-muted-foreground">Largest relations</span>}
+                className="lg:col-span-2"
+              >
                 <StorageChart db={db} tables={s.tables} />
               </Card>
               <Card title="Health checks">

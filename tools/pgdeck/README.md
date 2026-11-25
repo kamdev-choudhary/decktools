@@ -67,13 +67,13 @@ any reverse proxy to reach it remotely.
 
 ## Why pgdeck?
 
-| | |
-| --- | --- |
-| **Zero setup** | One `npx` command. No Docker image, no config file, no desktop app. |
-| **Whole server** | Switch between every database without restarting. |
+|                         |                                                                                                 |
+| ----------------------- | ----------------------------------------------------------------------------------------------- |
+| **Zero setup**          | One `npx` command. No Docker image, no config file, no desktop app.                             |
+| **Whole server**        | Switch between every database without restarting.                                               |
 | **Built for real data** | Streams imports and exports of any size; never loses `bigint`, `numeric` or timezone precision. |
-| **Secure by default** | Generated password, localhost binding, CSRF protection, optional read-only mode. |
-| **Proxy friendly** | One port, relative URLs, optional base path. Works behind nginx, Caddy or Traefik. |
+| **Secure by default**   | Generated password, localhost binding, CSRF protection, optional read-only mode.                |
+| **Proxy friendly**      | One port, relative URLs, optional base path. Works behind nginx, Caddy or Traefik.              |
 
 ## Features
 
@@ -135,7 +135,7 @@ any reverse proxy to reach it remotely.
 - **Query performance.** Explain any statement (<kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>Enter</kbd>) as a plan
   tree with time per step, estimated vs. actual rows, the slowest step
   highlighted and plain-language warnings (filters discarding rows, sorts
-  spilling to disk, bad row estimates). *Explain analyze* runs the query for
+  spilling to disk, bad row estimates). _Explain analyze_ runs the query for
   real timings inside a transaction that is always rolled back. The overview
   lists the slowest queries from `pg_stat_statements` (with setup help if it's
   off) and lets you cancel a running query or terminate a session.
@@ -203,11 +203,11 @@ any reverse proxy to reach it remotely.
 
 ## Requirements
 
-| | Version |
-| --- | --- |
-| [Node.js](https://nodejs.org) | 20 or newer |
-| [PostgreSQL](https://www.postgresql.org) | 12 or newer |
-| `pg_restore` *(optional)* | Only for restoring custom-format backups |
+|                                          | Version                                  |
+| ---------------------------------------- | ---------------------------------------- |
+| [Node.js](https://nodejs.org)            | 20 or newer                              |
+| [PostgreSQL](https://www.postgresql.org) | 12 or newer                              |
+| `pg_restore` _(optional)_                | Only for restoring custom-format backups |
 
 ## Usage
 
@@ -222,29 +222,29 @@ environment variables (`PGHOST`, `PGUSER`, `PGDATABASE`, …).
 
 ### Options
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `-p, --port <port>` | `47615` (or `$PORT`) | Port for the web UI |
-| `-H, --host <host>` | `127.0.0.1` | Interface to bind. Use `0.0.0.0` in containers or to expose on a LAN |
-| `-u, --user <name>` | `admin` | Login username |
-| `-P, --password <password>` | random | Login password (or `$PGDECK_PASSWORD`). A new random one is printed on each start if not set |
-| `--no-auth` | | Disable the login page. Only on a trusted machine |
-| `--readonly` | | Open every database session read-only and disable editing |
-| `--ssl` | | Connect with SSL without verifying the certificate (or add `sslmode=require` to the URL) |
-| `--base-path <path>` | | Serve under a path prefix such as `/db` (see [reverse proxy](#behind-a-reverse-proxy)) |
-| `--max-rows <n>` | `2000` | Maximum rows returned by a single query |
-| `--open` | | Open the UI in your browser |
-| `-v, --version` | | Print the version |
-| `-h, --help` | | Show help |
+| Option                      | Default              | Description                                                                                  |
+| --------------------------- | -------------------- | -------------------------------------------------------------------------------------------- |
+| `-p, --port <port>`         | `47615` (or `$PORT`) | Port for the web UI                                                                          |
+| `-H, --host <host>`         | `127.0.0.1`          | Interface to bind. Use `0.0.0.0` in containers or to expose on a LAN                         |
+| `-u, --user <name>`         | `admin`              | Login username                                                                               |
+| `-P, --password <password>` | random               | Login password (or `$PGDECK_PASSWORD`). A new random one is printed on each start if not set |
+| `--no-auth`                 |                      | Disable the login page. Only on a trusted machine                                            |
+| `--readonly`                |                      | Open every database session read-only and disable editing                                    |
+| `--ssl`                     |                      | Connect with SSL without verifying the certificate (or add `sslmode=require` to the URL)     |
+| `--base-path <path>`        |                      | Serve under a path prefix such as `/db` (see [reverse proxy](#behind-a-reverse-proxy))       |
+| `--max-rows <n>`            | `2000`               | Maximum rows returned by a single query                                                      |
+| `--open`                    |                      | Open the UI in your browser                                                                  |
+| `-v, --version`             |                      | Print the version                                                                            |
+| `-h, --help`                |                      | Show help                                                                                    |
 
 ### Environment variables
 
-| Variable | Used for |
-| --- | --- |
-| `DATABASE_URL` | Connection string when none is passed as an argument |
+| Variable                                                    | Used for                                                       |
+| ----------------------------------------------------------- | -------------------------------------------------------------- |
+| `DATABASE_URL`                                              | Connection string when none is passed as an argument           |
 | `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, … | Standard libpq settings, used when neither of the above is set |
-| `PGDECK_PASSWORD` | Login password (same as `--password`) |
-| `PORT` | Web UI port (same as `--port`) |
+| `PGDECK_PASSWORD`                                           | Login password (same as `--password`)                          |
+| `PORT`                                                      | Web UI port (same as `--port`)                                 |
 
 ### Examples
 
@@ -264,11 +264,11 @@ npx pgdeck postgres://postgres@db:5432 --host 0.0.0.0 --password "$SECRET"
 
 ### Keyboard shortcuts
 
-| Shortcut | Action |
-| --- | --- |
-| <kbd>⌘</kbd> <kbd>K</kbd> | Switch database / command menu |
-| <kbd>⌘</kbd> <kbd>Enter</kbd> | Run the selection, or the whole editor |
-| <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>Enter</kbd> | Explain the statement |
+| Shortcut                                   | Action                                 |
+| ------------------------------------------ | -------------------------------------- |
+| <kbd>⌘</kbd> <kbd>K</kbd>                  | Switch database / command menu         |
+| <kbd>⌘</kbd> <kbd>Enter</kbd>              | Run the selection, or the whole editor |
+| <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>Enter</kbd> | Explain the statement                  |
 
 <sub>On Windows and Linux, use <kbd>Ctrl</kbd> in place of <kbd>⌘</kbd>.</sub>
 
@@ -385,15 +385,15 @@ Open <http://localhost:47616>.
 
 Run these in `tools/pgdeck` (or from the root with `pnpm --filter pgdeck <script>`):
 
-| Script | What it does |
-| --- | --- |
-| `pnpm dev` | API with auto-restart and the UI with hot reload |
-| `pnpm build` | Build the UI (Vite) and the CLI (tsdown) into `dist/` |
-| `pnpm start` | Run the built CLI |
-| `pnpm typecheck` | Type-check the server and the UI |
-| `pnpm lint` | Lint with oxlint |
-| `pnpm test` | Unit and HTTP contract tests (node:test) |
-| `pnpm pack:check` | Build and list exactly what would be published |
+| Script            | What it does                                          |
+| ----------------- | ----------------------------------------------------- |
+| `pnpm dev`        | API with auto-restart and the UI with hot reload      |
+| `pnpm build`      | Build the UI (Vite) and the CLI (tsdown) into `dist/` |
+| `pnpm start`      | Run the built CLI                                     |
+| `pnpm typecheck`  | Type-check the server and the UI                      |
+| `pnpm lint`       | Lint with oxlint                                      |
+| `pnpm test`       | Unit and HTTP contract tests (node:test)              |
+| `pnpm pack:check` | Build and list exactly what would be published        |
 
 From the repository root, `pnpm site:dev` runs the website (Astro).
 

@@ -3,7 +3,21 @@ import { Prec } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CodeMirror from '@uiw/react-codemirror';
-import { ArrowUpCircle, Blocks, Copy, Hash, Power, PowerOff, RotateCcw, Save, SquareFunction, SquareTerminal, Trash2, Zap, type LucideIcon } from 'lucide-react';
+import {
+  ArrowUpCircle,
+  Blocks,
+  Copy,
+  Hash,
+  Power,
+  PowerOff,
+  RotateCcw,
+  Save,
+  SquareFunction,
+  SquareTerminal,
+  Trash2,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { ObjectAction, ObjectKind } from '@shared/types';
@@ -22,7 +36,14 @@ import {
 import { Badge } from '@deck/ui/components/badge';
 import { Button } from '@deck/ui/components/button';
 import { Checkbox } from '@deck/ui/components/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@deck/ui/components/dialog';
 import { Input } from '@deck/ui/components/input';
 import { Label } from '@deck/ui/components/label';
 import { dbHref, navigate, objectHref } from '@/lib/router';
@@ -37,9 +58,23 @@ const KIND: Record<ObjectKind, { label: string; icon: LucideIcon }> = {
   extension: { label: 'Extension', icon: Blocks },
 };
 
-export function ObjectView({ db, kind, oid, readonly }: { db: string; kind: ObjectKind; oid: number; readonly: boolean }) {
+export function ObjectView({
+  db,
+  kind,
+  oid,
+  readonly,
+}: {
+  db: string;
+  kind: ObjectKind;
+  oid: number;
+  readonly: boolean;
+}) {
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: [...keys.db(db), 'object', kind, oid], queryFn: () => api.object(db, kind, oid), retry: false });
+  const q = useQuery({
+    queryKey: [...keys.db(db), 'object', kind, oid],
+    queryFn: () => api.object(db, kind, oid),
+    retry: false,
+  });
   const [dialog, setDialog] = useState<'drop' | 'restart' | null>(null);
 
   const act = useMutation({
@@ -49,7 +84,8 @@ export function ObjectView({ db, kind, oid, readonly }: { db: string; kind: Obje
       void qc.invalidateQueries({ queryKey: keys.db(db) });
       setDialog(null);
       if (a.action === 'drop') navigate(dbHref(db), true);
-      else if (a.kind === 'function' && a.action === 'replace' && r.oid && r.oid !== a.oid) navigate(objectHref(db, 'function', r.oid), true);
+      else if (a.kind === 'function' && a.action === 'replace' && r.oid && r.oid !== a.oid)
+        navigate(objectHref(db, 'function', r.oid), true);
     },
     onError: (e) => toast.error('That didn’t work', { description: errorMessage(e) }),
   });
@@ -67,13 +103,25 @@ export function ObjectView({ db, kind, oid, readonly }: { db: string; kind: Obje
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Icon className="size-3.5" /> {label}
               {d.schema && <span className="font-mono">· {d.schema}</span>}
-              {kind === 'trigger' && d.properties.find(([k]) => k === 'Status')?.[1] === 'disabled' && <Badge variant="outline">disabled</Badge>}
-              {d.update && <Badge variant="outline" className="border-warning/40 text-warning">update to {d.update} available</Badge>}
+              {kind === 'trigger' && d.properties.find(([k]) => k === 'Status')?.[1] === 'disabled' && (
+                <Badge variant="outline">disabled</Badge>
+              )}
+              {d.update && (
+                <Badge variant="outline" className="border-warning/40 text-warning">
+                  update to {d.update} available
+                </Badge>
+              )}
             </div>
             <h1 className="font-mono text-xl font-semibold break-all">{d.title}</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => void navigator.clipboard.writeText(d.definition).then(() => toast.success('Copied definition'))}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                void navigator.clipboard.writeText(d.definition).then(() => toast.success('Copied definition'))
+              }
+            >
               <Copy /> Copy SQL
             </Button>
             {kind === 'function' && (
@@ -108,12 +156,22 @@ export function ObjectView({ db, kind, oid, readonly }: { db: string; kind: Obje
               </Button>
             )}
             {!readonly && kind === 'extension' && d.update && (
-              <Button variant="outline" size="sm" disabled={act.isPending} onClick={() => act.mutate({ kind: 'extension', oid, action: 'update' })}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={act.isPending}
+                onClick={() => act.mutate({ kind: 'extension', oid, action: 'update' })}
+              >
                 <ArrowUpCircle /> Update to {d.update}
               </Button>
             )}
             {!readonly && (
-              <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={() => setDialog('drop')}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={() => setDialog('drop')}
+              >
                 <Trash2 /> {kind === 'extension' ? 'Remove' : 'Drop'}
               </Button>
             )}
@@ -206,8 +264,14 @@ function DefinitionEditor({
       sqlLanguage({ dialect: PostgreSQL }),
       EditorView.lineWrapping,
       // Key handlers run on key presses, after render, so reading the ref here is safe.
-      // oxlint-disable-next-line react/refs
-      Prec.highest(keymap.of([{ key: 'Mod-s', run: () => (saveRef.current(), true) }, { key: 'Mod-Enter', run: () => (saveRef.current(), true) }])),
+      /* oxlint-disable react/refs */
+      Prec.highest(
+        keymap.of([
+          { key: 'Mod-s', run: () => (saveRef.current(), true) },
+          { key: 'Mod-Enter', run: () => (saveRef.current(), true) },
+        ]),
+      ),
+      /* oxlint-enable react/refs */
     ],
     [],
   );
@@ -274,14 +338,18 @@ function DropObjectDialog({
           <AlertDialogTitle>{extension ? 'Remove extension?' : 'Drop this object?'}</AlertDialogTitle>
           <AlertDialogDescription>
             <span className="font-mono break-all text-foreground">{what}</span>{' '}
-            {extension ? 'and every function, type and operator it added will be removed.' : 'will be permanently removed.'}
+            {extension
+              ? 'and every function, type and operator it added will be removed.'
+              : 'will be permanently removed.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <label className="flex cursor-pointer items-start gap-2 text-sm">
           <Checkbox className="mt-0.5" checked={cascade} onCheckedChange={(v) => setCascade(v === true)} />
           <span>
             Cascade
-            <span className="block text-xs text-muted-foreground">Also drop what depends on it (triggers, defaults, columns using its types…).</span>
+            <span className="block text-xs text-muted-foreground">
+              Also drop what depends on it (triggers, defaults, columns using its types…).
+            </span>
           </span>
         </label>
         <AlertDialogFooter>
@@ -327,14 +395,23 @@ function RestartDialog({
           <DialogHeader>
             <DialogTitle>Set next value</DialogTitle>
             <DialogDescription>
-              The next call to <span className="font-mono text-foreground">nextval('{name}')</span> returns this number. Last handed out:{' '}
-              <span className="font-mono text-foreground">{current ?? 'none yet'}</span>.
+              The next call to <span className="font-mono text-foreground">nextval('{name}')</span> returns this number.
+              Last handed out: <span className="font-mono text-foreground">{current ?? 'none yet'}</span>.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
             <Label htmlFor="seq-next">Next value</Label>
-            <Input id="seq-next" value={value} onChange={(e) => setValue(e.target.value)} autoFocus inputMode="numeric" className="font-mono" />
-            <p className="text-xs text-muted-foreground">Going lower than values already in use can cause duplicate key errors.</p>
+            <Input
+              id="seq-next"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              autoFocus
+              inputMode="numeric"
+              className="font-mono"
+            />
+            <p className="text-xs text-muted-foreground">
+              Going lower than values already in use can cause duplicate key errors.
+            </p>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={pending}>

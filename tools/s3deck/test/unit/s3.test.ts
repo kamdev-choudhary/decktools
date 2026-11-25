@@ -48,18 +48,33 @@ describe('URLs', () => {
 
   it('builds public object URLs', () => {
     const base = { bucket: 'b', key: 'a/b c.txt', region: 'eu-west-1' };
-    expect(publicObjectUrl({ ...base, forcePathStyle: false })).toBe('https://b.s3.eu-west-1.amazonaws.com/a/b%20c.txt');
-    expect(publicObjectUrl({ ...base, region: 'us-east-1', forcePathStyle: false })).toBe('https://b.s3.amazonaws.com/a/b%20c.txt');
-    expect(publicObjectUrl({ ...base, endpoint: 'http://localhost:9000', forcePathStyle: true })).toBe('http://localhost:9000/b/a/b%20c.txt');
+    expect(publicObjectUrl({ ...base, forcePathStyle: false })).toBe(
+      'https://b.s3.eu-west-1.amazonaws.com/a/b%20c.txt',
+    );
+    expect(publicObjectUrl({ ...base, region: 'us-east-1', forcePathStyle: false })).toBe(
+      'https://b.s3.amazonaws.com/a/b%20c.txt',
+    );
+    expect(publicObjectUrl({ ...base, endpoint: 'http://localhost:9000', forcePathStyle: true })).toBe(
+      'http://localhost:9000/b/a/b%20c.txt',
+    );
     expect(publicObjectUrl({ ...base, forcePathStyle: false, publicUrlBase: 'https://cdn.example.com/' })).toBe(
       'https://cdn.example.com/a/b%20c.txt',
     );
   });
 
   it('has no public URL for R2 unless a public base (r2.dev or custom domain) is set', () => {
-    const r2 = { bucket: 'b', key: 'a/b c.txt', region: 'auto', forcePathStyle: true, endpoint: 'https://acc.r2.cloudflarestorage.com', providerId: 'r2' };
+    const r2 = {
+      bucket: 'b',
+      key: 'a/b c.txt',
+      region: 'auto',
+      forcePathStyle: true,
+      endpoint: 'https://acc.r2.cloudflarestorage.com',
+      providerId: 'r2',
+    };
     expect(publicObjectUrl(r2)).toBeNull();
-    expect(publicObjectUrl({ ...r2, publicUrlBase: 'https://pub-123.r2.dev' })).toBe('https://pub-123.r2.dev/a/b%20c.txt');
+    expect(publicObjectUrl({ ...r2, publicUrlBase: 'https://pub-123.r2.dev' })).toBe(
+      'https://pub-123.r2.dev/a/b%20c.txt',
+    );
   });
 
   it('Content-Disposition keeps UTF-8 names and an ASCII fallback', () => {

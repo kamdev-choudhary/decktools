@@ -43,7 +43,10 @@ export interface ServeAssetsOptions {
   csp?: string;
 }
 
-export function serveAssets(assets: Map<string, Asset> | null, { name, csp = contentSecurityPolicy() }: ServeAssetsOptions): MiddlewareHandler {
+export function serveAssets(
+  assets: Map<string, Asset> | null,
+  { name, csp = contentSecurityPolicy() }: ServeAssetsOptions,
+): MiddlewareHandler {
   return async (c) => {
     if (!assets) {
       return c.text(`${name} UI is not built. Run "pnpm build", or use "pnpm dev" during development.`, 503);

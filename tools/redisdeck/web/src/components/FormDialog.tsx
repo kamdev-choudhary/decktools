@@ -1,6 +1,13 @@
 import { useState, type ReactNode } from 'react';
 import { Button } from '@deck/ui/components/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@deck/ui/components/dialog';
 import { Input } from '@deck/ui/components/input';
 import { Label } from '@deck/ui/components/label';
 import { Textarea } from '@deck/ui/components/textarea';
@@ -45,7 +52,9 @@ export function FormDialog(props: FormDialogProps) {
 }
 
 function FormBody({ title, description, fields, submitLabel, pending, error, onSubmit, children }: FormDialogProps) {
-  const [values, setValues] = useState<Record<string, string>>(() => Object.fromEntries(fields.map((f) => [f.name, f.initial ?? ''])));
+  const [values, setValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(fields.map((f) => [f.name, f.initial ?? ''])),
+  );
   const missing = fields.some((f) => f.required && !(values[f.name] ?? '').length);
 
   return (

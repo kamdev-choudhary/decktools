@@ -35,7 +35,12 @@ export function seal(key: Buffer, value: unknown): Sealed {
   const iv = randomBytes(12);
   const cipher = createCipheriv(ALGO, key, iv);
   const data = Buffer.concat([cipher.update(JSON.stringify(value), 'utf8'), cipher.final()]);
-  return { v: 1, iv: iv.toString('base64'), tag: cipher.getAuthTag().toString('base64'), data: data.toString('base64') };
+  return {
+    v: 1,
+    iv: iv.toString('base64'),
+    tag: cipher.getAuthTag().toString('base64'),
+    data: data.toString('base64'),
+  };
 }
 
 export function unseal<T>(key: Buffer, sealed: Sealed): T {

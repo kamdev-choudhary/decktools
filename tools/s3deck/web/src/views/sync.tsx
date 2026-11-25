@@ -50,7 +50,10 @@ function LocationPicker({ title, value, onChange }: { title: string; value: Loc;
       <CardContent className="px-5">
         <FieldGroup className="gap-3">
           <FormField label="Connection" htmlFor={`${title}-conn`}>
-            <Select value={value.connectionId} onValueChange={(v) => onChange({ connectionId: v, bucket: '', prefix: '' })}>
+            <Select
+              value={value.connectionId}
+              onValueChange={(v) => onChange({ connectionId: v, bucket: '', prefix: '' })}
+            >
               <SelectTrigger id={`${title}-conn`} className="w-full">
                 <SelectValue placeholder="Choose a connection" />
               </SelectTrigger>
@@ -68,7 +71,11 @@ function LocationPicker({ title, value, onChange }: { title: string; value: Loc;
             htmlFor={`${title}-bucket`}
             error={buckets.isError ? errorText(buckets.error) : undefined}
           >
-            <Select value={value.bucket} onValueChange={(v) => onChange({ ...value, bucket: v })} disabled={!value.connectionId || buckets.isPending}>
+            <Select
+              value={value.bucket}
+              onValueChange={(v) => onChange({ ...value, bucket: v })}
+              disabled={!value.connectionId || buckets.isPending}
+            >
               <SelectTrigger id={`${title}-bucket`} className="w-full">
                 <SelectValue placeholder={buckets.isPending && value.connectionId ? 'Loading…' : 'Choose a bucket'} />
               </SelectTrigger>
@@ -112,7 +119,10 @@ function JobRow({ job }: { job: JobInfo }) {
         <p className="min-w-0 flex-1 truncate text-sm font-medium" title={job.title}>
           {job.title}
         </p>
-        <Badge variant={job.status === 'failed' ? 'destructive' : job.status === 'running' ? 'secondary' : 'outline'} className="capitalize">
+        <Badge
+          variant={job.status === 'failed' ? 'destructive' : job.status === 'running' ? 'secondary' : 'outline'}
+          className="capitalize"
+        >
           {job.status === 'running' && <Spinner className="size-3" />} {job.status}
         </Badge>
         {job.status === 'running' && (
@@ -132,8 +142,8 @@ function JobRow({ job }: { job: JobInfo }) {
       </div>
       <Progress value={pct} className="h-1.5" />
       <p className="text-xs text-muted-foreground">
-        {formatNumber(job.done)} / {formatNumber(job.total)} objects · {formatBytes(job.bytesDone)} of {formatBytes(job.bytesTotal)} · started{' '}
-        {formatRelative(job.startedAt)}
+        {formatNumber(job.done)} / {formatNumber(job.total)} objects · {formatBytes(job.bytesDone)} of{' '}
+        {formatBytes(job.bytesTotal)} · started {formatRelative(job.startedAt)}
         {job.errors.length > 0 && <span className="text-destructive"> · {job.errors.length} errors</span>}
       </p>
       {job.errors.length > 0 && (
@@ -165,7 +175,10 @@ export function SyncView() {
 
   const ready = source.connectionId && source.bucket && target.connectionId && target.bucket;
   const sameSpot =
-    !!ready && source.connectionId === target.connectionId && source.bucket === target.bucket && source.prefix === target.prefix;
+    !!ready &&
+    source.connectionId === target.connectionId &&
+    source.bucket === target.bucket &&
+    source.prefix === target.prefix;
 
   const compare = async () => {
     setComparing(true);
@@ -192,7 +205,10 @@ export function SyncView() {
   };
 
   const shown = useMemo(
-    () => (result?.items ?? []).filter((i) => (filter === 'all-changes' ? i.status !== 'same' : i.status === filter)).slice(0, 500),
+    () =>
+      (result?.items ?? [])
+        .filter((i) => (filter === 'all-changes' ? i.status !== 'same' : i.status === filter))
+        .slice(0, 500),
     [result, filter],
   );
 
@@ -228,7 +244,9 @@ export function SyncView() {
             {result.truncated && (
               <Alert>
                 <CircleAlert />
-                <AlertDescription>One side has more than 200,000 objects; only the first 200,000 were compared.</AlertDescription>
+                <AlertDescription>
+                  One side has more than 200,000 objects; only the first 200,000 were compared.
+                </AlertDescription>
               </Alert>
             )}
             <dl className="grid divide-y rounded-lg border sm:grid-cols-4 sm:divide-x sm:divide-y-0">
@@ -241,16 +259,29 @@ export function SyncView() {
             </dl>
 
             <div className="flex flex-wrap items-center gap-3 rounded-lg border px-4 py-3">
-              <ToggleGroup type="single" variant="outline" size="sm" value={mode} onValueChange={(v) => v && setMode(v as typeof mode)}>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                size="sm"
+                value={mode}
+                onValueChange={(v) => v && setMode(v as typeof mode)}
+              >
                 <ToggleGroupItem value="copy">Copy new and changed</ToggleGroupItem>
                 <ToggleGroupItem value="mirror">Mirror (also delete extras)</ToggleGroupItem>
               </ToggleGroup>
               <p className="min-w-0 flex-1 text-sm text-muted-foreground">
-                {formatNumber(result.counts.missing + result.counts.changed)} objects ({formatBytes(result.bytesToCopy)}) to copy
-                {mode === 'mirror' && result.counts.extra > 0 && `, ${formatNumber(result.counts.extra)} to delete from the target`}.
+                {formatNumber(result.counts.missing + result.counts.changed)} objects ({formatBytes(result.bytesToCopy)}
+                ) to copy
+                {mode === 'mirror' &&
+                  result.counts.extra > 0 &&
+                  `, ${formatNumber(result.counts.extra)} to delete from the target`}
+                .
               </p>
               <Button
-                disabled={readonly || (result.counts.missing + result.counts.changed + (mode === 'mirror' ? result.counts.extra : 0) === 0)}
+                disabled={
+                  readonly ||
+                  result.counts.missing + result.counts.changed + (mode === 'mirror' ? result.counts.extra : 0) === 0
+                }
                 variant={mode === 'mirror' && result.counts.extra > 0 ? 'destructive' : 'default'}
                 onClick={() => (mode === 'mirror' && result.counts.extra > 0 ? setConfirmMirror(true) : void start())}
               >
@@ -260,7 +291,12 @@ export function SyncView() {
 
             <div className="overflow-hidden rounded-lg border">
               <div className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
-                <ToggleGroup type="single" size="sm" value={filter} onValueChange={(v) => v && setFilter(v as typeof filter)}>
+                <ToggleGroup
+                  type="single"
+                  size="sm"
+                  value={filter}
+                  onValueChange={(v) => v && setFilter(v as typeof filter)}
+                >
                   <ToggleGroupItem value="all-changes">Changes</ToggleGroupItem>
                   <ToggleGroupItem value="missing">Only in source</ToggleGroupItem>
                   <ToggleGroupItem value="changed">Different</ToggleGroupItem>
@@ -289,10 +325,20 @@ export function SyncView() {
                           {i.key}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={i.status === 'extra' ? 'destructive' : i.status === 'same' ? 'outline' : 'secondary'}>{STATUS_LABEL[i.status]}</Badge>
+                          <Badge
+                            variant={
+                              i.status === 'extra' ? 'destructive' : i.status === 'same' ? 'outline' : 'secondary'
+                            }
+                          >
+                            {STATUS_LABEL[i.status]}
+                          </Badge>
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">{i.sourceSize !== null ? formatBytes(i.sourceSize) : '—'}</TableCell>
-                        <TableCell className="pr-4 text-right tabular-nums">{i.targetSize !== null ? formatBytes(i.targetSize) : '—'}</TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {i.sourceSize !== null ? formatBytes(i.sourceSize) : '—'}
+                        </TableCell>
+                        <TableCell className="pr-4 text-right tabular-nums">
+                          {i.targetSize !== null ? formatBytes(i.targetSize) : '—'}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -308,7 +354,9 @@ export function SyncView() {
             {jobs.data?.jobs.length ? (
               jobs.data.jobs.map((j) => <JobRow key={j.id} job={j} />)
             ) : (
-              <p className="px-4 py-3 text-sm text-muted-foreground">No sync jobs yet. Jobs run on the server and stop if s3deck restarts.</p>
+              <p className="px-4 py-3 text-sm text-muted-foreground">
+                No sync jobs yet. Jobs run on the server and stop if s3deck restarts.
+              </p>
             )}
           </div>
         </section>
@@ -317,9 +365,12 @@ export function SyncView() {
       <AlertDialog open={confirmMirror} onOpenChange={setConfirmMirror}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Mirror and delete {result ? formatNumber(result.counts.extra) : 0} objects?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Mirror and delete {result ? formatNumber(result.counts.extra) : 0} objects?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Objects that exist only in the target ({target.bucket}/{target.prefix}) will be deleted so it matches the source.
+              Objects that exist only in the target ({target.bucket}/{target.prefix}) will be deleted so it matches the
+              source.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

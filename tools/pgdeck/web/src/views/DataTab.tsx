@@ -113,13 +113,24 @@ export function DataTab({ db, meta, initialEq, actionsSlot, readonly }: DataTabP
         createPortal(
           <>
             {meta.editable && selected.size > 0 && (
-              <Button variant="outline" size="sm" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 text-destructive hover:text-destructive"
+                onClick={() => setConfirmDelete(true)}
+              >
                 <Trash2 /> Delete {selected.size}
               </Button>
             )}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon-sm" onClick={() => rows.refetch()} disabled={rows.isFetching} aria-label="Refresh">
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => rows.refetch()}
+                  disabled={rows.isFetching}
+                  aria-label="Refresh"
+                >
                   <RefreshCw className={cn(rows.isFetching && 'animate-spin')} />
                 </Button>
               </TooltipTrigger>
@@ -151,7 +162,13 @@ export function DataTab({ db, meta, initialEq, actionsSlot, readonly }: DataTabP
                       ...(sort ? { sort: sort.col, dir: sort.dir } : {}),
                     })}`,
                 },
-                { id: 'page', label: 'This page', count: data?.rows.length ?? 0, rows: data?.rows ?? [], disabled: !data?.rows.length },
+                {
+                  id: 'page',
+                  label: 'This page',
+                  count: data?.rows.length ?? 0,
+                  rows: data?.rows ?? [],
+                  disabled: !data?.rows.length,
+                },
                 {
                   id: 'selected',
                   label: 'Selected rows',
@@ -193,7 +210,9 @@ export function DataTab({ db, meta, initialEq, actionsSlot, readonly }: DataTabP
         rowOffset={page * pageSize}
         selection={meta.editable ? { selected, onChange: setSelected } : undefined}
         onOpenRow={meta.editable ? (index, focusField) => setEditor({ mode: 'edit', index, focusField }) : undefined}
-        emptyText={rows.isPending ? 'Loading…' : filters.length ? 'No rows match these filters.' : 'This table is empty.'}
+        emptyText={
+          rows.isPending ? 'Loading…' : filters.length ? 'No rows match these filters.' : 'This table is empty.'
+        }
       />
 
       <Pagination

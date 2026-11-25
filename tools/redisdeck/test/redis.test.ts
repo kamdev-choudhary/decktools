@@ -63,7 +63,11 @@ describe('redisdeck against a real Redis', { skip: !hasRedis && 'redis-server no
   before(async () => {
     port = await freePort();
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'redisdeck-test-'));
-    server = spawn('redis-server', ['--port', String(port), '--bind', '127.0.0.1', '--save', '', '--appendonly', 'no', '--dir', dir], { stdio: 'ignore' });
+    server = spawn(
+      'redis-server',
+      ['--port', String(port), '--bind', '127.0.0.1', '--save', '', '--appendonly', 'no', '--dir', dir],
+      { stdio: 'ignore' },
+    );
     await waitForPort(port);
     raw = new Redis({ port, lazyConnect: true });
     await raw.connect();
@@ -93,7 +97,10 @@ describe('redisdeck against a real Redis', { skip: !hasRedis && 'redis-server no
     const { body } = await rw().get<ServerInfo>('server');
     assert.match(body.version, /^\d+\./);
     assert.equal(body.databases, 16);
-    assert.deepEqual(body.keyspace.map((d) => d.index), [0, 3]);
+    assert.deepEqual(
+      body.keyspace.map((d) => d.index),
+      [0, 3],
+    );
   });
 
   it('scans keys with types and TTLs, per database and by pattern and type', async () => {
@@ -104,9 +111,18 @@ describe('redisdeck against a real Redis', { skip: !hasRedis && 'redis-server no
     assert.ok(byName.greeting!.ttl > 0);
     assert.equal(byName.queue!.ttl, -1);
 
-    assert.deepEqual((await rw().get<KeyPage>('db/0/keys?match=user:*')).body.keys.map((k) => k.name.text), ['user:1']);
-    assert.deepEqual((await rw().get<KeyPage>('db/0/keys?type=zset')).body.keys.map((k) => k.name.text), ['scores']);
-    assert.deepEqual((await rw().get<KeyPage>('db/3/keys')).body.keys.map((k) => k.name.text), ['in-db-3']);
+    assert.deepEqual(
+      (await rw().get<KeyPage>('db/0/keys?match=user:*')).body.keys.map((k) => k.name.text),
+      ['user:1'],
+    );
+    assert.deepEqual(
+      (await rw().get<KeyPage>('db/0/keys?type=zset')).body.keys.map((k) => k.name.text),
+      ['scores'],
+    );
+    assert.deepEqual(
+      (await rw().get<KeyPage>('db/3/keys')).body.keys.map((k) => k.name.text),
+      ['in-db-3'],
+    );
     assert.equal((await rw().get('db/16/keys')).status, 404);
   });
 
@@ -123,7 +139,10 @@ describe('redisdeck against a real Redis', { skip: !hasRedis && 'redis-server no
     assert.deepEqual((await d('greeting')).value, { type: 'string', value: { text: 'hello' }, truncated: false });
     const hash = await d('user:1');
     assert.equal(hash.length, 2);
-    assert.ok(hash.value.type === 'hash' && hash.value.entries.some((e) => e.field.text === 'email' && e.value.text === 'ada@example.com'));
+    assert.ok(
+      hash.value.type === 'hash' &&
+        hash.value.entries.some((e) => e.field.text === 'email' && e.value.text === 'ada@example.com'),
+    );
     const list = await d('queue');
     assert.ok(list.value.type === 'list' && list.value.items.map((i) => i.value.text).join() === 'a,b,c');
     const zset = await d('scores');
@@ -141,7 +160,10 @@ describe('redisdeck against a real Redis', { skip: !hasRedis && 'redis-server no
 
     await act({ op: 'hash.set', id: id('user:1'), field: 'mail', value: 'ada@x.io', previousField: 'email' });
     assert.deepEqual(await raw.hgetall('user:1'), { name: 'Ada', mail: 'ada@x.io' });
-    assert.equal((await act({ op: 'hash.set', id: id('user:1'), field: 'name', value: 'x', previousField: 'mail' })).status, 409);
+    assert.equal(
+      (await act({ op: 'hash.set', id: id('user:1'), field: 'name', value: 'x', previousField: 'mail' })).status,
+      409,
+    );
 
     await act({ op: 'list.delete', id: id('queue'), index: 1 });
     assert.deepEqual(await raw.lrange('queue', 0, -1), ['a', 'c']);
@@ -165,7 +187,13 @@ describe('redisdeck against a real Redis', { skip: !hasRedis && 'redis-server no
   });
 
   it('creates and deletes keys', async () => {
-    const created = await rw().post<{ id: string }>('db/0/key/create', { type: 'hash', name: 'new:hash', field: 'f', value: 'v', ttl: 60 });
+    const created = await rw().post<{ id: string }>('db/0/key/create', {
+      type: 'hash',
+      name: 'new:hash',
+      field: 'f',
+      value: 'v',
+      ttl: 60,
+    });
     assert.equal(created.status, 200);
     assert.ok((await raw.ttl('new:hash')) > 0);
     assert.equal((await rw().post('db/0/key/create', { type: 'string', name: 'new:hash', value: 'x' })).status, 409);
@@ -207,7 +235,14 @@ describe('redisdeck against a real Redis', { skip: !hasRedis && 'redis-server no
     const ro = apps.ro;
     assert.equal((await ro.post('db/0/key/action', { op: 'delete', ids: [id('queue')] })).status, 403);
     assert.equal((await ro.post('db/0/key/create', { type: 'string', name: 'x', value: 'y' })).status, 403);
-    for (const c of ['SET a b', 'DEL queue', 'FLUSHALL', 'EVAL "return 1" 0', 'PUBLISH ch hi', 'CONFIG SET maxmemory 1']) {
+    for (const c of [
+      'SET a b',
+      'DEL queue',
+      'FLUSHALL',
+      'EVAL "return 1" 0',
+      'PUBLISH ch hi',
+      'CONFIG SET maxmemory 1',
+    ]) {
       assert.equal((await ro.post('db/0/command', { command: c })).status, 403, c);
     }
     for (const c of ['GET greeting', 'CONFIG GET maxmemory', 'EVAL_RO "return 1" 0', 'INFO server', 'SLOWLOG GET 1']) {

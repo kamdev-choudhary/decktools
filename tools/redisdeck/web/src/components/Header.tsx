@@ -27,7 +27,9 @@ function DatabaseSwitcher({ route, info }: { route: Exclude<Route, { view: 'root
         <Button variant="ghost" size="sm" role="combobox" aria-expanded={open} className="gap-2 px-2 font-medium">
           <Database className="text-muted-foreground" />
           db{route.db}
-          <span className="text-xs font-normal text-muted-foreground tabular-nums">{formatNumber(counts.get(route.db) ?? 0)} keys</span>
+          <span className="text-xs font-normal text-muted-foreground tabular-nums">
+            {formatNumber(counts.get(route.db) ?? 0)} keys
+          </span>
           <ChevronsUpDown className="size-3.5 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
@@ -46,7 +48,9 @@ function DatabaseSwitcher({ route, info }: { route: Exclude<Route, { view: 'root
                 >
                   <Check className={cn('size-4', db === route.db ? 'opacity-100' : 'opacity-0')} />
                   <span className={cn('font-mono', !counts.get(db) && 'text-muted-foreground')}>db{db}</span>
-                  <span className="ml-auto text-xs text-muted-foreground tabular-nums">{counts.get(db) ? formatNumber(counts.get(db)!) : 'empty'}</span>
+                  <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+                    {counts.get(db) ? formatNumber(counts.get(db)!) : 'empty'}
+                  </span>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -59,7 +63,17 @@ function DatabaseSwitcher({ route, info }: { route: Exclude<Route, { view: 'root
 
 const CRUMB = { console: 'Console', server: 'Server' } as const;
 
-export function Header({ route, session, info, onToggleSidebar }: { route: Exclude<Route, { view: 'root' }>; session: SessionInfo; info?: ServerInfo; onToggleSidebar: () => void }) {
+export function Header({
+  route,
+  session,
+  info,
+  onToggleSidebar,
+}: {
+  route: Exclude<Route, { view: 'root' }>;
+  session: SessionInfo;
+  info?: ServerInfo;
+  onToggleSidebar: () => void;
+}) {
   return (
     <header className="flex h-14 shrink-0 items-center gap-1 border-b bg-background px-3 md:px-4">
       <Tooltip>

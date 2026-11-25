@@ -46,7 +46,10 @@ export function createLiveHub({ manager, basePath, authorizeCookieHeader }: Live
         } catch (err) {
           // The pool was closed (database renamed, copied or dropped); reopen on the next beat.
           if (/after calling end/i.test((err as Error).message)) {
-            sample = await manager.get(dbName).then((db) => db.liveSampler()).catch(() => sample);
+            sample = await manager
+              .get(dbName)
+              .then((db) => db.liveSampler())
+              .catch(() => sample);
             return;
           }
           const msg: LiveMessage = { type: 'error', error: (err as Error).message };

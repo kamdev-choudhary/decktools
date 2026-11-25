@@ -35,8 +35,16 @@ describe('resolveAuth', () => {
   it('prefers the flag, then the environment, then generates', () => {
     process.env[env] = 'from-env';
     try {
-      assert.deepEqual(resolveAuth({ enabled: true, username: 'a', password: 'flag', passwordEnv: env }), { username: 'a', password: 'flag', generated: false });
-      assert.deepEqual(resolveAuth({ enabled: true, username: 'a', passwordEnv: env }), { username: 'a', password: 'from-env', generated: false });
+      assert.deepEqual(resolveAuth({ enabled: true, username: 'a', password: 'flag', passwordEnv: env }), {
+        username: 'a',
+        password: 'flag',
+        generated: false,
+      });
+      assert.deepEqual(resolveAuth({ enabled: true, username: 'a', passwordEnv: env }), {
+        username: 'a',
+        password: 'from-env',
+        generated: false,
+      });
     } finally {
       delete process.env[env];
     }

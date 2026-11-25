@@ -5,7 +5,34 @@ import { stream } from 'hono/streaming';
 import { EXPORT_META } from '../../shared/export.js';
 import type { Database, DatabaseManager } from '../../db/index.js';
 import { UserError } from '../../db/errors.js';
-import { grantPresetBody, grantsBody, roleActionBody, roleQuery, alterBody, createDatabaseBody, objectActionBody, objectQuery, explainBody, signalBody, statementsQuery, createTableBody, databaseActionBody, deleteBody, dumpQuery, exportQuery, importQuery, insertBody, maintenanceBody, metaQuery, parse, queryBody, restoreQuery, rowsBody, tableActionBody, updateBody } from '../schemas.js';
+import {
+  grantPresetBody,
+  grantsBody,
+  roleActionBody,
+  roleQuery,
+  alterBody,
+  createDatabaseBody,
+  objectActionBody,
+  objectQuery,
+  explainBody,
+  signalBody,
+  statementsQuery,
+  createTableBody,
+  databaseActionBody,
+  deleteBody,
+  dumpQuery,
+  exportQuery,
+  importQuery,
+  insertBody,
+  maintenanceBody,
+  metaQuery,
+  parse,
+  queryBody,
+  restoreQuery,
+  rowsBody,
+  tableActionBody,
+  updateBody,
+} from '../schemas.js';
 import { createGzip } from 'node:zlib';
 import yazl from 'yazl';
 
@@ -55,7 +82,10 @@ function databaseRoutes() {
       const first = await chunks.next();
 
       c.header('content-type', `${meta.mime}; charset=utf-8`);
-      c.header('content-disposition', `attachment; filename="${name.replace(/[^\w.-]/g, '_')}"; filename*=UTF-8''${encodeURIComponent(name)}`);
+      c.header(
+        'content-disposition',
+        `attachment; filename="${name.replace(/[^\w.-]/g, '_')}"; filename*=UTF-8''${encodeURIComponent(name)}`,
+      );
       c.header('cache-control', 'no-store');
       c.header('x-content-type-options', 'nosniff');
       return stream(c, async (s) => {
@@ -78,10 +108,16 @@ function databaseRoutes() {
         // schema.sql (if wanted) + one file per table, each streamed when its turn comes.
         const zip = new yazl.ZipFile();
         if (q.structure) {
-          zip.addReadStreamLazy('schema.sql', (cb) => cb(null, Readable.from(c.var.db.dumpSql({ ...dumpOpts, data: false }))));
+          zip.addReadStreamLazy('schema.sql', (cb) =>
+            cb(null, Readable.from(c.var.db.dumpSql({ ...dumpOpts, data: false }))),
+          );
         }
         if (q.data) {
-          const tables = q.tables.length ? q.tables : (await c.var.db.tables()).filter((t) => t.kind === 'r' || t.kind === 'p').map((t) => ({ schema: t.schema, table: t.name }));
+          const tables = q.tables.length
+            ? q.tables
+            : (await c.var.db.tables())
+                .filter((t) => t.kind === 'r' || t.kind === 'p')
+                .map((t) => ({ schema: t.schema, table: t.name }));
           const ext = EXPORT_META[q.dataFormat].ext;
           for (const t of tables) {
             zip.addReadStreamLazy(`data/${t.schema}.${t.table}.${ext}`, (cb) =>
@@ -121,7 +157,14 @@ function databaseRoutes() {
       const body = c.req.raw.body;
       if (!body) throw new UserError('The upload is empty');
       const stream = Readable.fromWeb(body as unknown as WebReadableStream<Uint8Array>);
-      return c.json(await c.var.db.restore(stream, { gzip: q.gzip, custom: q.custom, singleTransaction: q.single, skipOwnership: q.skipOwnership }));
+      return c.json(
+        await c.var.db.restore(stream, {
+          gzip: q.gzip,
+          custom: q.custom,
+          singleTransaction: q.single,
+          skipOwnership: q.skipOwnership,
+        }),
+      );
     })
     .post('/import', async (c) => {
       const q = parse(importQuery, c.req.query());
@@ -169,7 +212,9 @@ function databaseRoutes() {
       return c.json(await c.var.db.object(kind, oid));
     })
     .get('/extensions/available', async (c) => c.json(await c.var.db.availableExtensions()))
-    .post('/object-action', async (c) => c.json(await c.var.db.objectAction(parse(objectActionBody, await jsonBody(c.req)) as never)))
+    .post('/object-action', async (c) =>
+      c.json(await c.var.db.objectAction(parse(objectActionBody, await jsonBody(c.req)) as never)),
+    )
     .get('/roles', async (c) => c.json(await c.var.db.roles()))
     .get('/role', async (c) => c.json(await c.var.db.role(parse(roleQuery, c.req.query()).name)))
     .post('/role-action', async (c) => c.json(await c.var.db.roleAction(parse(roleActionBody, await jsonBody(c.req)))))
@@ -205,7 +250,9 @@ export function apiRoutes(manager: DatabaseManager) {
     })
     .post('/databases/action', async (c) => {
       const a = parse(databaseActionBody, await jsonBody(c.req));
-      return c.json(a.action === 'drop' ? await manager.dropDb(a.name, a.force) : await manager.renameDb(a.name, a.newName));
+      return c.json(
+        a.action === 'drop' ? await manager.dropDb(a.name, a.force) : await manager.renameDb(a.name, a.newName),
+      );
     })
     .route('/db/:database', perDb);
 }

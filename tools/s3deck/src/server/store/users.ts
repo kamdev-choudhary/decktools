@@ -69,7 +69,10 @@ export class UserStore {
     return record;
   }
 
-  async update(username: string, patch: { role?: Role; disabled?: boolean; password?: string }): Promise<UserRecord | undefined> {
+  async update(
+    username: string,
+    patch: { role?: Role; disabled?: boolean; password?: string },
+  ): Promise<UserRecord | undefined> {
     const u = this.get(username);
     if (!u) return undefined;
     if (patch.role) u.role = patch.role;

@@ -40,7 +40,11 @@ export async function getSchemaGraph(ctx: DbContext): Promise<SchemaGraph> {
       order by n.nspname, c.relname, k.conname`),
   ]);
   return {
-    tables: tables.rows.map((t) => ({ ...t, rows: Number(t.rows), columns: (t.columns ?? []).map((c) => ({ ...c, pk: Number(c.pk) })) })),
+    tables: tables.rows.map((t) => ({
+      ...t,
+      rows: Number(t.rows),
+      columns: (t.columns ?? []).map((c) => ({ ...c, pk: Number(c.pk) })),
+    })),
     foreignKeys: fks.rows.map(({ del, ...f }) => ({ ...f, onDelete: DEL[del] ?? 'NO ACTION' })),
   };
 }

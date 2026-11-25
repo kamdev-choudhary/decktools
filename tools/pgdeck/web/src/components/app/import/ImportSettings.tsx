@@ -79,7 +79,11 @@ export function ImportSettings({ file, meta, disabled, onPlan }: ImportSettingsP
   const [parsedFor, setParsedFor] = useState<typeof parseKey | null>(null);
   if (
     head !== null &&
-    (parsedFor?.head !== head || parsedFor.format !== format || parsedFor.delimiter !== delimiter || parsedFor.header !== header || parsedFor.meta !== meta)
+    (parsedFor?.head !== head ||
+      parsedFor.format !== format ||
+      parsedFor.delimiter !== delimiter ||
+      parsedFor.header !== header ||
+      parsedFor.meta !== meta)
   ) {
     setParsedFor(parseKey);
     const p = buildPreview(head, format, delimiter, header);
@@ -93,7 +97,9 @@ export function ImportSettings({ file, meta, disabled, onPlan }: ImportSettingsP
     );
   }
 
-  const mapped = mapping.map((m, i) => ({ fileColumn: preview?.columns[i] ?? '', target: m })).filter((m) => m.target && m.target !== SKIP);
+  const mapped = mapping
+    .map((m, i) => ({ fileColumn: preview?.columns[i] ?? '', target: m }))
+    .filter((m) => m.target && m.target !== SKIP);
   const duplicate = mapped.find((m, i) => mapped.findIndex((x) => x.target === m.target) !== i);
   const unmappedCsv = format !== 'ndjson' && mapping.some((m) => !m || m === SKIP);
   const problem = readError
@@ -221,7 +227,10 @@ export function ImportSettings({ file, meta, disabled, onPlan }: ImportSettingsP
         {preview && (
           <div className="divide-y overflow-hidden rounded-lg border">
             {preview.columns.map((col, i) => (
-              <div key={`${col}-${i}`} className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,14rem)] items-center gap-3 px-3 py-2">
+              <div
+                key={`${col}-${i}`}
+                className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,14rem)] items-center gap-3 px-3 py-2"
+              >
                 <div className="min-w-0">
                   <div className="truncate font-mono text-[13px]" title={col}>
                     {col}

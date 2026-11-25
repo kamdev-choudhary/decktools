@@ -5,7 +5,14 @@ import type { Column, Filter, TableMeta } from '@shared/types';
 import { api } from '@/api/client';
 import { useMeta } from '@/api/hooks';
 import { Button } from '@deck/ui/components/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@deck/ui/components/command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@deck/ui/components/command';
 import { Input } from '@deck/ui/components/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@deck/ui/components/popover';
 import { tableHref } from '@/lib/router';
@@ -31,7 +38,18 @@ export function singleColumnFks(meta: TableMeta): Record<string, FkTarget> {
   return out;
 }
 
-const LABEL_NAMES = ['name', 'title', 'label', 'display_name', 'full_name', 'username', 'email', 'slug', 'code', 'description'];
+const LABEL_NAMES = [
+  'name',
+  'title',
+  'label',
+  'display_name',
+  'full_name',
+  'username',
+  'email',
+  'slug',
+  'code',
+  'description',
+];
 
 /** A human-readable column of the referenced table to show next to keys. */
 function labelColumn(meta: TableMeta | undefined, keyColumn: string): Column | undefined {
@@ -105,7 +123,11 @@ function PeekBody({ db, fk, value }: { db: string; fk: FkTarget; value: string }
           </div>
         )}
         {row.isError && <ErrorAlert error={row.error} className="m-4 w-auto" />}
-        {row.isSuccess && !row.data.rows.length && <p className="px-4 py-8 text-center text-sm text-muted-foreground">No matching row. The reference may be broken.</p>}
+        {row.isSuccess && !row.data.rows.length && (
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+            No matching row. The reference may be broken.
+          </p>
+        )}
         {row.isSuccess && row.data.rows[0] && (
           <dl>
             {row.data.fields.map((f, i) => {
@@ -124,7 +146,9 @@ function PeekBody({ db, fk, value }: { db: string; fk: FkTarget; value: string }
                       {isKey && <KeyRound className="size-3 shrink-0 text-warning" aria-label="Referenced key" />}
                       <span className="truncate">{f}</span>
                     </div>
-                    {types.get(f) && <div className="truncate font-mono text-[10.5px] text-muted-foreground">{types.get(f)}</div>}
+                    {types.get(f) && (
+                      <div className="truncate font-mono text-[10.5px] text-muted-foreground">{types.get(f)}</div>
+                    )}
                   </dt>
                   <dd className={cn('min-w-0 pt-px font-mono text-[12.5px]', v === null && 'text-null italic')}>
                     <TruncatedText text={v ?? 'NULL'} side="left" />
@@ -170,19 +194,40 @@ export function FkPeek({ db, fk, value }: { db: string; fk: FkTarget; value: str
 /* Row editor: searchable picker                                        */
 /* ------------------------------------------------------------------ */
 
-function PickerOptions({ db, fk, current, onPick }: { db: string; fk: FkTarget; current: string; onPick: (v: string) => void }) {
+function PickerOptions({
+  db,
+  fk,
+  current,
+  onPick,
+}: {
+  db: string;
+  fk: FkTarget;
+  current: string;
+  onPick: (v: string) => void;
+}) {
   const [search, setSearch] = useState('');
   const term = useDeferredValue(search.trim());
   const meta = useMeta(db, fk.schema, fk.table);
   const label = labelColumn(meta.data, fk.column);
 
   const filters: Filter[] = term
-    ? [{ col: fk.column, op: 'contains', val: term }, ...(label ? [{ col: label.name, op: 'contains' as const, val: term }] : [])]
+    ? [
+        { col: fk.column, op: 'contains', val: term },
+        ...(label ? [{ col: label.name, op: 'contains' as const, val: term }] : []),
+      ]
     : [];
   const rows = useQuery({
     queryKey: ['db', db, 'fk-options', fk.schema, fk.table, fk.column, label?.name ?? '', term],
     queryFn: () =>
-      api.rows(db, { schema: fk.schema, table: fk.table, limit: 50, offset: 0, filters, match: 'or', sort: label?.name }),
+      api.rows(db, {
+        schema: fk.schema,
+        table: fk.table,
+        limit: 50,
+        offset: 0,
+        filters,
+        match: 'or',
+        sort: label?.name,
+      }),
     enabled: meta.isSuccess || meta.isError,
   });
 
@@ -191,7 +236,11 @@ function PickerOptions({ db, fk, current, onPick }: { db: string; fk: FkTarget; 
 
   return (
     <Command shouldFilter={false}>
-      <CommandInput value={search} onValueChange={setSearch} placeholder={`Search ${fk.table}${label ? ` by ${fk.column} or ${label.name}` : ''}…`} />
+      <CommandInput
+        value={search}
+        onValueChange={setSearch}
+        placeholder={`Search ${fk.table}${label ? ` by ${fk.column} or ${label.name}` : ''}…`}
+      />
       <CommandList className="max-h-72">
         {(rows.isPending || meta.isPending) && (
           <div className="flex justify-center p-6">
@@ -201,15 +250,28 @@ function PickerOptions({ db, fk, current, onPick }: { db: string; fk: FkTarget; 
         {rows.isError && <ErrorAlert error={rows.error} className="m-2 w-auto" />}
         {rows.isSuccess && <CommandEmpty>No rows match.</CommandEmpty>}
         {rows.isSuccess && rows.data.rows.length > 0 && (
-          <CommandGroup heading={`${fk.schema}.${fk.table}${rows.data.total > rows.data.rows.length ? ` · first ${rows.data.rows.length} of ${rows.data.total}` : ''}`}>
+          <CommandGroup
+            heading={`${fk.schema}.${fk.table}${rows.data.total > rows.data.rows.length ? ` · first ${rows.data.rows.length} of ${rows.data.total}` : ''}`}
+          >
             {rows.data.rows.map((r, i) => {
               const key = r[keyIdx] ?? '';
               const text = labelIdx >= 0 ? r[labelIdx] : null;
               return (
-                <CommandItem key={`${key}-${i}`} value={key} onSelect={() => onPick(key)} className="flex items-center gap-3">
-                  <span className={cn('size-1.5 shrink-0 rounded-full', key === current ? 'bg-primary' : 'bg-transparent')} />
-                  <span className="min-w-0 flex-1 truncate">{text ?? <span className="text-muted-foreground">—</span>}</span>
-                  <span className="max-w-[55%] shrink-0 truncate font-mono text-[11px] text-muted-foreground">{key}</span>
+                <CommandItem
+                  key={`${key}-${i}`}
+                  value={key}
+                  onSelect={() => onPick(key)}
+                  className="flex items-center gap-3"
+                >
+                  <span
+                    className={cn('size-1.5 shrink-0 rounded-full', key === current ? 'bg-primary' : 'bg-transparent')}
+                  />
+                  <span className="min-w-0 flex-1 truncate">
+                    {text ?? <span className="text-muted-foreground">—</span>}
+                  </span>
+                  <span className="max-w-[55%] shrink-0 truncate font-mono text-[11px] text-muted-foreground">
+                    {key}
+                  </span>
                 </CommandItem>
               );
             })}

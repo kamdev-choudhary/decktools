@@ -41,7 +41,10 @@ function RelationList({ items, empty }: { items: RelationItem[]; empty: string }
     <ul className="w-full divide-y">
       {items.map((it) => (
         <li key={it.key}>
-          <a href={it.href} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-sm transition-colors hover:bg-muted/40">
+          <a
+            href={it.href}
+            className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-sm transition-colors hover:bg-muted/40"
+          >
             <Link2 className="size-3.5 shrink-0 text-muted-foreground" />
             <span className="font-mono text-[13px]">{it.from}</span>
             <ArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
@@ -54,7 +57,17 @@ function RelationList({ items, empty }: { items: RelationItem[]; empty: string }
   );
 }
 
-function Section({ title, count, action, children }: { title: string; count: number; action?: React.ReactNode; children: React.ReactNode }) {
+function Section({
+  title,
+  count,
+  action,
+  children,
+}: {
+  title: string;
+  count: number;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <section className="space-y-3">
       <div className="flex min-h-8 items-center justify-between gap-3">
@@ -74,7 +87,12 @@ function RowMenu({ label, children }: { label: string; children: React.ReactNode
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-xs" aria-label={label} className="text-muted-foreground opacity-60 group-hover/row:opacity-100 data-[state=open]:opacity-100">
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          aria-label={label}
+          className="text-muted-foreground opacity-60 group-hover/row:opacity-100 data-[state=open]:opacity-100"
+        >
           <MoreHorizontal />
         </Button>
       </DropdownMenuTrigger>
@@ -101,8 +119,11 @@ export function StructureTab({ db, meta }: { db: string; meta: TableMeta }) {
   const canEdit = isTable && !(info.data?.readonly ?? true);
   const [dialog, setDialog] = useState<Dialog>(null);
   const pk = new Set(meta.primaryKey);
-  const constraintNames = new Set(meta.constraints.filter((c) => c.type === 'p' || c.type === 'u' || c.type === 'x').map((c) => c.name));
-  const copy = (text: string, what: string) => void navigator.clipboard.writeText(text).then(() => toast.success(`Copied ${what}`));
+  const constraintNames = new Set(
+    meta.constraints.filter((c) => c.type === 'p' || c.type === 'u' || c.type === 'x').map((c) => c.name),
+  );
+  const copy = (text: string, what: string) =>
+    void navigator.clipboard.writeText(text).then(() => toast.success(`Copied ${what}`));
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-6 md:px-6">
@@ -148,7 +169,9 @@ export function StructureTab({ db, meta }: { db: string; meta: TableMeta }) {
                     {pk.has(c.name) && <Badge variant="secondary">primary key</Badge>}
                     {c.identity && <Badge variant="secondary">identity</Badge>}
                     {c.generated && <Badge variant="secondary">generated</Badge>}
-                    {meta.foreignKeys.some((f) => f.columns.includes(c.name)) && <Badge variant="outline">foreign key</Badge>}
+                    {meta.foreignKeys.some((f) => f.columns.includes(c.name)) && (
+                      <Badge variant="outline">foreign key</Badge>
+                    )}
                   </div>
                 </td>
                 <td className={cn(td, 'max-w-60 text-muted-foreground')}>{c.comment ?? <Null />}</td>
@@ -163,7 +186,10 @@ export function StructureTab({ db, meta }: { db: string; meta: TableMeta }) {
                           <PencilLine /> Edit column…
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive" onSelect={() => setDialog({ kind: 'drop', target: { kind: 'column', name: c.name } })}>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onSelect={() => setDialog({ kind: 'drop', target: { kind: 'column', name: c.name } })}
+                        >
                           <Trash2 /> Drop column…
                         </DropdownMenuItem>
                       </>
@@ -204,7 +230,13 @@ export function StructureTab({ db, meta }: { db: string; meta: TableMeta }) {
                   <tr key={ix.name} className="group/row hover:bg-muted/30">
                     <td className={cn(td, 'font-mono')}>{ix.name}</td>
                     <td className={td}>
-                      {ix.primary ? <Badge variant="secondary">primary</Badge> : ix.unique ? <Badge variant="secondary">unique</Badge> : <span className="text-muted-foreground">index</span>}
+                      {ix.primary ? (
+                        <Badge variant="secondary">primary</Badge>
+                      ) : ix.unique ? (
+                        <Badge variant="secondary">unique</Badge>
+                      ) : (
+                        <span className="text-muted-foreground">index</span>
+                      )}
                     </td>
                     <td className={cn(td, 'font-mono break-all text-muted-foreground')}>{ix.definition}</td>
                     <td className="px-2 py-1.5 text-right align-top">
@@ -217,7 +249,12 @@ export function StructureTab({ db, meta }: { db: string; meta: TableMeta }) {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               variant="destructive"
-                              onSelect={() => setDialog({ kind: 'drop', target: { kind: backsConstraint ? 'constraint' : 'index', name: ix.name } })}
+                              onSelect={() =>
+                                setDialog({
+                                  kind: 'drop',
+                                  target: { kind: backsConstraint ? 'constraint' : 'index', name: ix.name },
+                                })
+                              }
                             >
                               <Trash2 /> {backsConstraint ? 'Drop constraint…' : 'Drop index…'}
                             </DropdownMenuItem>
@@ -285,7 +322,10 @@ export function StructureTab({ db, meta }: { db: string; meta: TableMeta }) {
                       {canEdit && (
                         <>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem variant="destructive" onSelect={() => setDialog({ kind: 'drop', target: { kind: 'constraint', name: c.name } })}>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={() => setDialog({ kind: 'drop', target: { kind: 'constraint', name: c.name } })}
+                          >
                             <Trash2 /> Drop constraint…
                           </DropdownMenuItem>
                         </>
@@ -302,9 +342,13 @@ export function StructureTab({ db, meta }: { db: string; meta: TableMeta }) {
       </Section>
 
       {dialog?.kind === 'add-column' && <ColumnDialog db={db} meta={meta} onClose={() => setDialog(null)} />}
-      {dialog?.kind === 'edit-column' && <ColumnDialog db={db} meta={meta} column={dialog.column} onClose={() => setDialog(null)} />}
+      {dialog?.kind === 'edit-column' && (
+        <ColumnDialog db={db} meta={meta} column={dialog.column} onClose={() => setDialog(null)} />
+      )}
       {dialog?.kind === 'add-index' && <IndexDialog db={db} meta={meta} onClose={() => setDialog(null)} />}
-      {dialog?.kind === 'drop' && <DropStructureDialog db={db} meta={meta} target={dialog.target} onClose={() => setDialog(null)} />}
+      {dialog?.kind === 'drop' && (
+        <DropStructureDialog db={db} meta={meta} target={dialog.target} onClose={() => setDialog(null)} />
+      )}
     </div>
   );
 }

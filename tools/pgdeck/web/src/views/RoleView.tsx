@@ -1,5 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, KeyRound, LayoutList, Pencil, Search, ShieldCheck, Trash2, User, UsersRound, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  KeyRound,
+  LayoutList,
+  Pencil,
+  Search,
+  ShieldCheck,
+  Trash2,
+  User,
+  UsersRound,
+  X,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -17,7 +28,14 @@ import { api } from '@/api/client';
 import { keys } from '@/api/hooks';
 import { Combobox } from '@deck/ui/components/combobox';
 import { CenteredSpinner, ErrorAlert, errorMessage, Spinner } from '@/components/app/feedback';
-import { DropRoleDialog, EditRoleDialog, PasswordDialog, rolesKey, SchemaPresetDialog, useRoleAction } from '@/components/app/roles/RoleDialogs';
+import {
+  DropRoleDialog,
+  EditRoleDialog,
+  PasswordDialog,
+  rolesKey,
+  SchemaPresetDialog,
+  useRoleAction,
+} from '@/components/app/roles/RoleDialogs';
 import { SqlPreview } from '@/components/app/structure/StructureDialogs';
 import { Badge } from '@deck/ui/components/badge';
 import { Button } from '@deck/ui/components/button';
@@ -44,7 +62,11 @@ const q = (s: string) => (/^[a-z_][a-z0-9_$]*$/.test(s) ? s : `"${s.replace(/"/g
 
 export function RoleView({ db, name, readonly }: { db: string; name: string; readonly: boolean }) {
   const qc = useQueryClient();
-  const detail = useQuery({ queryKey: [...keys.db(db), 'role', name], queryFn: () => api.role(db, name), retry: false });
+  const detail = useQuery({
+    queryKey: [...keys.db(db), 'role', name],
+    queryFn: () => api.role(db, name),
+    retry: false,
+  });
   const roles = useQuery({ queryKey: rolesKey(db), queryFn: () => api.roles(db) });
   const [dialog, setDialog] = useState<'edit' | 'password' | 'drop' | 'preset' | null>(null);
   const [presetSchema, setPresetSchema] = useState<string | undefined>();
@@ -89,7 +111,14 @@ export function RoleView({ db, name, readonly }: { db: string; name: string; rea
               {r.name}
               {r.current && <Badge variant="outline">you</Badge>}
               {roleBadges(r).map((b) => (
-                <Badge key={b.label} variant="outline" className={cn('font-sans', b.tone === 'warning' ? 'border-warning/40 text-warning' : 'text-muted-foreground')}>
+                <Badge
+                  key={b.label}
+                  variant="outline"
+                  className={cn(
+                    'font-sans',
+                    b.tone === 'warning' ? 'border-warning/40 text-warning' : 'text-muted-foreground',
+                  )}
+                >
                   {b.label}
                 </Badge>
               ))}
@@ -110,7 +139,12 @@ export function RoleView({ db, name, readonly }: { db: string; name: string; rea
                 <LayoutList /> Set schema access…
               </Button>
               {!r.current && (
-                <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={() => setDialog('drop')}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => setDialog('drop')}
+                >
                   <Trash2 /> Drop
                 </Button>
               )}
@@ -123,7 +157,9 @@ export function RoleView({ db, name, readonly }: { db: string; name: string; rea
             {r.superuser && (
               <p className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/5 px-4 py-3 text-sm">
                 <ShieldCheck className="mt-0.5 size-4 shrink-0 text-warning" />
-                <span>Superusers skip every permission check, so the privileges below don’t limit what {r.name} can do.</span>
+                <span>
+                  Superusers skip every permission check, so the privileges below don’t limit what {r.name} can do.
+                </span>
               </p>
             )}
             <PrivilegeGrid
@@ -157,9 +193,21 @@ export function RoleView({ db, name, readonly }: { db: string; name: string; rea
           <aside className="h-fit space-y-4">
             <dl className="divide-y overflow-hidden rounded-lg border text-sm">
               <Prop label="Can log in">{r.login ? 'yes' : 'no'}</Prop>
-              <Prop label="Uses privileges of its groups">{r.inherit ? 'yes, automatically' : 'only after SET ROLE'}</Prop>
+              <Prop label="Uses privileges of its groups">
+                {r.inherit ? 'yes, automatically' : 'only after SET ROLE'}
+              </Prop>
               {r.login && <Prop label="Connection limit">{r.connLimit === -1 ? 'unlimited' : r.connLimit}</Prop>}
-              {r.login && <Prop label="Password expires">{exp ? <span className={cn(exp.expired && 'text-destructive')}>{`${exp.expired ? 'expired ' : ''}${exp.text}`}</span> : 'never'}</Prop>}
+              {r.login && (
+                <Prop label="Password expires">
+                  {exp ? (
+                    <span
+                      className={cn(exp.expired && 'text-destructive')}
+                    >{`${exp.expired ? 'expired ' : ''}${exp.text}`}</span>
+                  ) : (
+                    'never'
+                  )}
+                </Prop>
+              )}
               {d.ownedDatabases.length > 0 && <Prop label="Owns databases">{d.ownedDatabases.join(', ')}</Prop>}
             </dl>
 
@@ -185,14 +233,32 @@ export function RoleView({ db, name, readonly }: { db: string; name: string; rea
               onRemove={(m) => membership.mutate({ action: 'membership', role: m, group: r.name, grant: false })}
               db={db}
             />
-            {membership.error && <p className="font-mono text-xs whitespace-pre-wrap text-destructive">{errorMessage(membership.error)}</p>}
+            {membership.error && (
+              <p className="font-mono text-xs whitespace-pre-wrap text-destructive">{errorMessage(membership.error)}</p>
+            )}
           </aside>
         </div>
       </div>
 
-      {dialog === 'edit' && <EditRoleDialog db={db} role={r} me={me} onClose={() => setDialog(null)} onRenamed={(n) => navigate(roleHref(db, n), true)} />}
+      {dialog === 'edit' && (
+        <EditRoleDialog
+          db={db}
+          role={r}
+          me={me}
+          onClose={() => setDialog(null)}
+          onRenamed={(n) => navigate(roleHref(db, n), true)}
+        />
+      )}
       {dialog === 'password' && <PasswordDialog db={db} role={r} onClose={() => setDialog(null)} />}
-      {dialog === 'drop' && <DropRoleDialog db={db} detail={d} roles={otherRoles} onClose={() => setDialog(null)} onDropped={() => navigate(rolesHref(db), true)} />}
+      {dialog === 'drop' && (
+        <DropRoleDialog
+          db={db}
+          detail={d}
+          roles={otherRoles}
+          onClose={() => setDialog(null)}
+          onDropped={() => navigate(rolesHref(db), true)}
+        />
+      )}
       {dialog === 'preset' && (
         <SchemaPresetDialog
           db={db}
@@ -245,7 +311,10 @@ function MembershipList({
       {items.length === 0 && <p className="text-xs text-muted-foreground">None.</p>}
       <div className="flex flex-wrap gap-1.5">
         {items.map((m) => (
-          <span key={m.role} className="inline-flex h-7 max-w-full items-center gap-1 rounded-md border pr-1 pl-2 font-mono text-xs">
+          <span
+            key={m.role}
+            className="inline-flex h-7 max-w-full items-center gap-1 rounded-md border pr-1 pl-2 font-mono text-xs"
+          >
             <a href={roleHref(db, m.role)} className="truncate hover:underline">
               {m.role}
             </a>
@@ -269,7 +338,16 @@ function MembershipList({
         ))}
       </div>
       {editable && (
-        <Combobox value={undefined} onChange={onAdd} options={options.map((o) => ({ value: o }))} placeholder="Add a role…" searchPlaceholder="Search roles…" mono disabled={busy} className="h-8 w-full text-xs" />
+        <Combobox
+          value={undefined}
+          onChange={onAdd}
+          options={options.map((o) => ({ value: o }))}
+          placeholder="Add a role…"
+          searchPlaceholder="Search roles…"
+          mono
+          disabled={busy}
+          className="h-8 w-full text-xs"
+        />
       )}
     </section>
   );
@@ -305,7 +383,11 @@ function previewSql(d: RoleDetail, pending: Map<string, boolean>): string[] {
   }
   return [...groups.values()]
     .sort((a, b) => Number(a.grant) - Number(b.grant))
-    .map((g) => (g.grant ? `GRANT ${g.privs.join(', ')} ON ${targetName(g.o)} TO ${q(d.role.name)};` : `REVOKE ${g.privs.join(', ')} ON ${targetName(g.o)} FROM ${q(d.role.name)};`));
+    .map((g) =>
+      g.grant
+        ? `GRANT ${g.privs.join(', ')} ON ${targetName(g.o)} TO ${q(d.role.name)};`
+        : `REVOKE ${g.privs.join(', ')} ON ${targetName(g.o)} FROM ${q(d.role.name)};`,
+    );
 }
 
 function PrivilegeGrid({
@@ -374,14 +456,18 @@ function PrivilegeGrid({
       <div className="space-y-3 border-b px-4 pt-3 pb-3">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h2 className="text-sm font-medium">Privileges in {detail.database}</h2>
-          <p className="text-xs text-muted-foreground">Granted directly to {role}. It also has whatever its groups and PUBLIC have.</p>
+          <p className="text-xs text-muted-foreground">
+            Granted directly to {role}. It also has whatever its groups and PUBLIC have.
+          </p>
         </div>
         <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
           <TabsList variant="line" className="h-8 p-0">
             {TABS.map((t) => (
               <TabsTrigger key={t.value} value={t.value} className="px-2.5 text-xs">
                 {t.label}
-                {counts[t.value] > 0 && <span className="ml-1 rounded bg-muted px-1 text-[10px] tabular-nums">{counts[t.value]}</span>}
+                {counts[t.value] > 0 && (
+                  <span className="ml-1 rounded bg-muted px-1 text-[10px] tabular-nums">{counts[t.value]}</span>
+                )}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -389,7 +475,14 @@ function PrivilegeGrid({
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative w-full max-w-64">
             <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input type="search" value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by name or schema…" className="h-8 pl-8 text-[13px]" spellCheck={false} />
+            <Input
+              type="search"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="Filter by name or schema…"
+              className="h-8 pl-8 text-[13px]"
+              spellCheck={false}
+            />
           </div>
           <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
             <Checkbox checked={onlyGranted} onCheckedChange={(v) => setOnlyGranted(v === true)} />
@@ -402,7 +495,8 @@ function PrivilegeGrid({
         <div key={s.oid} className="flex flex-wrap items-center gap-2 border-b bg-warning/5 px-4 py-2 text-xs">
           <AlertTriangle className="size-3.5 shrink-0 text-warning" />
           <span className="min-w-0 flex-1">
-            {role} has no <span className="font-mono">USAGE</span> on schema <span className="font-mono">{s.name}</span>, so it can’t reach anything inside it.
+            {role} has no <span className="font-mono">USAGE</span> on schema <span className="font-mono">{s.name}</span>
+            , so it can’t reach anything inside it.
           </span>
           {editable && (
             <Button variant="outline" size="xs" onClick={() => toggle(s, 'USAGE')}>
@@ -415,7 +509,11 @@ function PrivilegeGrid({
       {kinds.map((kind) => {
         const all = detail.objects.filter((o) => o.kind === kind);
         const rows = all.filter(
-          (o) => (!needle || `${o.schema ?? ''}.${o.name}`.toLowerCase().includes(needle)) && (!onlyGranted || o.privileges.length > 0 || [...pending.keys()].some((k) => k.startsWith(`${o.kind}:${o.oid}:`))),
+          (o) =>
+            (!needle || `${o.schema ?? ''}.${o.name}`.toLowerCase().includes(needle)) &&
+            (!onlyGranted ||
+              o.privileges.length > 0 ||
+              [...pending.keys()].some((k) => k.startsWith(`${o.kind}:${o.oid}:`))),
         );
         return (
           <GrantTable
@@ -470,7 +568,11 @@ function GrantTable({
   const editableRows = shown.filter((o) => o.owner !== role);
   return (
     <div>
-      {showHeading && <h3 className="border-b bg-muted/30 px-4 py-1.5 text-xs font-medium text-muted-foreground">{kind === 'database' ? 'This database' : 'Schemas'}</h3>}
+      {showHeading && (
+        <h3 className="border-b bg-muted/30 px-4 py-1.5 text-xs font-medium text-muted-foreground">
+          {kind === 'database' ? 'This database' : 'Schemas'}
+        </h3>
+      )}
       <div className="max-h-[32rem] overflow-auto">
         <table className="w-full text-[13px]">
           <thead className="sticky top-0 z-[1] border-b bg-grid-header text-[11px] text-muted-foreground">
@@ -493,7 +595,11 @@ function GrantTable({
                       </TooltipTrigger>
                       <TooltipContent>
                         {PRIVILEGE_HINT[p]}
-                        {editable && editableRows.length > 0 && <span className="block opacity-70">Click to {all ? 'revoke from' : 'grant on'} every row shown</span>}
+                        {editable && editableRows.length > 0 && (
+                          <span className="block opacity-70">
+                            Click to {all ? 'revoke from' : 'grant on'} every row shown
+                          </span>
+                        )}
                       </TooltipContent>
                     </Tooltip>
                   </th>
@@ -513,9 +619,15 @@ function GrantTable({
                         {o.schema && <span className="text-muted-foreground">{o.schema}.</span>}
                         {o.name}
                       </span>
-                      {o.sub && REL_KIND[o.sub] && kind === 'table' && <span className="shrink-0 text-[11px] text-muted-foreground">{REL_KIND[o.sub]}</span>}
+                      {o.sub && REL_KIND[o.sub] && kind === 'table' && (
+                        <span className="shrink-0 text-[11px] text-muted-foreground">{REL_KIND[o.sub]}</span>
+                      )}
                       {owner && (
-                        <Badge variant="outline" className="shrink-0 text-[10px]" title="Owners always have every privilege">
+                        <Badge
+                          variant="outline"
+                          className="shrink-0 text-[10px]"
+                          title="Owners always have every privilege"
+                        >
                           owner
                         </Badge>
                       )}
@@ -541,7 +653,13 @@ function GrantTable({
                   })}
                   {onPreset && editable && (
                     <td className="px-2 py-1 text-right">
-                      <Button variant="ghost" size="xs" className="text-muted-foreground" onClick={() => onPreset(o.name)} title="Grant access to everything in this schema">
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="text-muted-foreground"
+                        onClick={() => onPreset(o.name)}
+                        title="Grant access to everything in this schema"
+                      >
                         All…
                       </Button>
                     </td>
@@ -551,16 +669,22 @@ function GrantTable({
             })}
           </tbody>
         </table>
-        {!rows.length && <p className="px-4 py-6 text-center text-sm text-muted-foreground">{total ? 'Nothing matches.' : `No ${GRANT_KIND_LABEL[kind].toLowerCase()}s in this database.`}</p>}
+        {!rows.length && (
+          <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+            {total ? 'Nothing matches.' : `No ${GRANT_KIND_LABEL[kind].toLowerCase()}s in this database.`}
+          </p>
+        )}
         {rows.length > ROW_CAP && (
           <p className="border-t px-4 py-2 text-xs text-muted-foreground">
-            Showing {ROW_CAP} of {rows.length}. Filter to narrow the list, or use “Set schema access” for a whole schema.
+            Showing {ROW_CAP} of {rows.length}. Filter to narrow the list, or use “Set schema access” for a whole
+            schema.
           </p>
         )}
       </div>
       {rows.some((o) => !o.privileges.length && o.public.length) && (
         <p className="flex items-center gap-2 border-t px-4 py-1.5 text-[11px] text-muted-foreground">
-          <span className="inline-block size-3 rounded-[3px] border border-dashed border-muted-foreground" /> granted to everyone through PUBLIC
+          <span className="inline-block size-3 rounded-[3px] border border-dashed border-muted-foreground" /> granted to
+          everyone through PUBLIC
         </p>
       )}
     </div>
@@ -574,11 +698,16 @@ function DefaultPrivileges({ db, detail, editable }: { db: string; detail: RoleD
     <section className="overflow-hidden rounded-lg border">
       <div className="border-b px-4 py-3">
         <h2 className="text-sm font-medium">Granted automatically on new objects</h2>
-        <p className="text-xs text-muted-foreground">Default privileges: when these roles create objects, {detail.role.name} gets these privileges on them.</p>
+        <p className="text-xs text-muted-foreground">
+          Default privileges: when these roles create objects, {detail.role.name} gets these privileges on them.
+        </p>
       </div>
       <ul className="divide-y text-[13px]">
         {detail.defaults.map((p) => (
-          <li key={`${p.forRole}:${p.schema}:${p.type}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2">
+          <li
+            key={`${p.forRole}:${p.schema}:${p.type}`}
+            className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2"
+          >
             <span className="min-w-0 flex-1">
               New {DEFAULT_ACL_LABEL[p.type] ?? p.type} created by <span className="font-mono">{p.forRole}</span>
               {p.schema ? (
@@ -597,7 +726,15 @@ function DefaultPrivileges({ db, detail, editable }: { db: string; detail: RoleD
                 size="xs"
                 className="text-muted-foreground"
                 disabled={action.isPending}
-                onClick={() => action.mutate({ action: 'revokeDefault', role: detail.role.name, forRole: p.forRole, schema: p.schema, type: p.type })}
+                onClick={() =>
+                  action.mutate({
+                    action: 'revokeDefault',
+                    role: detail.role.name,
+                    forRole: p.forRole,
+                    schema: p.schema,
+                    type: p.type,
+                  })
+                }
               >
                 Remove
               </Button>
@@ -605,7 +742,11 @@ function DefaultPrivileges({ db, detail, editable }: { db: string; detail: RoleD
           </li>
         ))}
       </ul>
-      {action.error && <p className="border-t px-4 py-2 font-mono text-xs whitespace-pre-wrap text-destructive">{errorMessage(action.error)}</p>}
+      {action.error && (
+        <p className="border-t px-4 py-2 font-mono text-xs whitespace-pre-wrap text-destructive">
+          {errorMessage(action.error)}
+        </p>
+      )}
     </section>
   );
 }

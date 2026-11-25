@@ -30,7 +30,11 @@ export function parseKeyspace(section: Record<string, string> | undefined): DbSu
   return Object.entries(section ?? {})
     .map(([name, v]) => {
       const fields = Object.fromEntries(v.split(',').map((kv) => kv.split('=') as [string, string]));
-      return { index: Number(name.replace(/^db/, '')), keys: Number(fields.keys ?? 0), expires: Number(fields.expires ?? 0) };
+      return {
+        index: Number(name.replace(/^db/, '')),
+        keys: Number(fields.keys ?? 0),
+        expires: Number(fields.expires ?? 0),
+      };
     })
     .filter((d) => Number.isInteger(d.index))
     .sort((a, b) => a.index - b.index);

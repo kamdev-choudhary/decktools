@@ -22,7 +22,9 @@ export async function createTable(ctx: DbContext, spec: NewTable): Promise<{ ok:
 }
 
 /** Schemas you can create tables in, and the user-defined types available for columns. */
-export async function getCatalog(ctx: DbContext): Promise<{ schemas: string[]; types: { name: string; kind: string }[] }> {
+export async function getCatalog(
+  ctx: DbContext,
+): Promise<{ schemas: string[]; types: { name: string; kind: string }[] }> {
   const [schemas, types] = await Promise.all([
     ctx.pool.query<{ name: string }>(`
       select nspname as name from pg_namespace
@@ -41,7 +43,12 @@ export async function getCatalog(ctx: DbContext): Promise<{ schemas: string[]; t
 }
 
 /** Apply one Structure-tab change (columns, indexes, constraints). */
-export async function alterTable(ctx: DbContext, schema: string, table: string, a: AlterAction): Promise<{ ok: true; message: string }> {
+export async function alterTable(
+  ctx: DbContext,
+  schema: string,
+  table: string,
+  a: AlterAction,
+): Promise<{ ok: true; message: string }> {
   if (ctx.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
   const errors = validateAlter(a);
   if (errors.length) throw new UserError(errors.join(' '));

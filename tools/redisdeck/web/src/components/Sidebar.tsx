@@ -4,7 +4,17 @@ import { cn } from '@deck/ui/lib/utils';
 import { formatBytes, formatNumber } from '@/lib/format';
 import { consoleHref, keysHref, serverHref, type Route } from '@/lib/router';
 
-function NavLink({ href, active, icon: Icon, children }: { href: string; active: boolean; icon: LucideIcon; children: React.ReactNode }) {
+function NavLink({
+  href,
+  active,
+  icon: Icon,
+  children,
+}: {
+  href: string;
+  active: boolean;
+  icon: LucideIcon;
+  children: React.ReactNode;
+}) {
   return (
     <a
       href={href}
@@ -51,7 +61,9 @@ export function SidebarNav({ route, info }: { route: Exclude<Route, { view: 'roo
               )}
             >
               db{d.index}
-              <span className="ml-auto font-sans text-xs text-muted-foreground tabular-nums">{formatNumber(d.keys)}</span>
+              <span className="ml-auto font-sans text-xs text-muted-foreground tabular-nums">
+                {formatNumber(d.keys)}
+              </span>
             </a>
           ))}
         </div>

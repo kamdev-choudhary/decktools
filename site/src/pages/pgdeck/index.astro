@@ -1,25 +1,36 @@
 ---
 import Base from '../../layouts/Base.astro';
+import Closing from '../../components/deck/Closing.astro';
+import Deploy from '../../components/deck/Deploy.astro';
+import Hero from '../../components/deck/Hero.astro';
+import Nav from '../../components/deck/Nav.astro';
+import Tour from '../../components/deck/Tour.astro';
 import Bento from '../../decks/pgdeck/components/Bento.astro';
-import Closing from '../../decks/pgdeck/components/Closing.astro';
-import Deploy from '../../decks/pgdeck/components/Deploy.astro';
-import Hero from '../../decks/pgdeck/components/Hero.astro';
-import Nav from '../../decks/pgdeck/components/Nav.astro';
 import Pipeline from '../../decks/pgdeck/components/Pipeline.astro';
-import Tour from '../../decks/pgdeck/components/Tour.astro';
+import { deploy, hero, SECTIONS, tour } from '../../decks/pgdeck/content';
+import { DOCS_URL, getPgdeckVersion, NPM_URL } from '../../decks/pgdeck/meta';
+
+const version = await getPgdeckVersion();
 ---
 
 <Base
   title="pgdeck: the PostgreSQL admin that starts with one command"
   description="Browse and edit data, run SQL, manage tables and watch live stats for every database on your PostgreSQL server. Run npx pgdeck and open the link."
 >
-  <Nav />
+  <Nav name="pgdeck" docsUrl={DOCS_URL} sections={SECTIONS} />
   <main id="main" class="rails">
-    <Hero />
+    <Hero deck="pgdeck" version={version} docsUrl={DOCS_URL} content={hero(version)} />
     <Pipeline />
     <Bento />
-    <Tour />
-    <Deploy />
-    <Closing />
+    <Tour deck="pgdeck" name="pgdeck" lede="Real screens from pgdeck, running against a demo shop database." stops={tour} />
+    <Deploy content={deploy} />
+    <Closing
+      name="pgdeck"
+      title="Point it at a database and press Enter."
+      lede="It prints a link and a password. Open the link. That’s the setup."
+      command="npx pgdeck postgres://localhost:5432"
+      docsUrl={DOCS_URL}
+      npmUrl={NPM_URL}
+    />
   </main>
 </Base>

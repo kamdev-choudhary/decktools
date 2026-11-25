@@ -41,7 +41,15 @@ interface ExportMenuProps {
   size?: 'sm' | 'xs';
 }
 
-export function ExportMenu({ baseName, columns, target, scopes, formats = EXPORT_FORMATS, disabled, size = 'sm' }: ExportMenuProps) {
+export function ExportMenu({
+  baseName,
+  columns,
+  target,
+  scopes,
+  formats = EXPORT_FORMATS,
+  disabled,
+  size = 'sm',
+}: ExportMenuProps) {
   const enabled = scopes.filter((s) => !s.disabled);
   const [scopeId, setScopeId] = useState(enabled[0]?.id ?? '');
   // Fall back if the chosen scope became unavailable (e.g. selection cleared).

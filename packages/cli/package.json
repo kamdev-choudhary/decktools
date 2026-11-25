@@ -15,12 +15,12 @@
   "dependencies": {
     "@deck/config": "workspace:*",
     "@deck/logger": "workspace:*",
-    "commander": "^15.1.0",
-    "open": "^11.0.4"
+    "commander": "catalog:",
+    "open": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^26.6.6",
-    "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

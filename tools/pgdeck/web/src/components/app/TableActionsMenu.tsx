@@ -30,7 +30,14 @@ import {
 } from '@deck/ui/components/alert-dialog';
 import { Button } from '@deck/ui/components/button';
 import { Checkbox } from '@deck/ui/components/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@deck/ui/components/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,7 +64,13 @@ interface TableActionsMenuProps {
   className?: string;
 }
 
-const KIND_WORD: Record<RelKind, string> = { r: 'table', p: 'table', f: 'foreign table', v: 'view', m: 'materialized view' };
+const KIND_WORD: Record<RelKind, string> = {
+  r: 'table',
+  p: 'table',
+  f: 'foreign table',
+  v: 'view',
+  m: 'materialized view',
+};
 
 function downloadUrl(href: string) {
   const a = Object.assign(document.createElement('a'), { href });
@@ -126,7 +139,11 @@ export function TableActionsMenu({ db, schema, table, kind, variant = 'toolbar',
             <MoreHorizontal />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align={variant === 'sidebar' ? 'start' : 'end'} side={variant === 'sidebar' ? 'right' : 'bottom'} className="w-60">
+        <DropdownMenuContent
+          align={variant === 'sidebar' ? 'start' : 'end'}
+          side={variant === 'sidebar' ? 'right' : 'bottom'}
+          className="w-60"
+        >
           <DropdownMenuLabel className="truncate font-mono text-xs font-normal text-muted-foreground" title={full}>
             {full}
           </DropdownMenuLabel>
@@ -231,7 +248,12 @@ export function TableActionsMenu({ db, schema, table, kind, variant = 'toolbar',
         />
       )}
       {dialog === 'truncate' && (
-        <TruncateDialog table={full} pending={run.isPending} onClose={() => setDialog(null)} onConfirm={(o) => run.mutate({ action: 'truncate', ...o })} />
+        <TruncateDialog
+          table={full}
+          pending={run.isPending}
+          onClose={() => setDialog(null)}
+          onConfirm={(o) => run.mutate({ action: 'truncate', ...o })}
+        />
       )}
       {dialog === 'drop' && (
         <DropDialog
@@ -287,7 +309,14 @@ function NameDialog({
           </DialogHeader>
           <div className="space-y-2">
             <Label htmlFor="table-name">{label}</Label>
-            <Input id="table-name" value={name} onChange={(e) => setName(e.target.value)} autoFocus spellCheck={false} className="font-mono" />
+            <Input
+              id="table-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+              spellCheck={false}
+              className="font-mono"
+            />
           </div>
           {withDataOption && (
             <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -328,22 +357,31 @@ function TruncateDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Empty this table?</AlertDialogTitle>
           <AlertDialogDescription>
-            Every row in <span className="font-mono text-foreground">{table}</span> will be deleted. The table and its structure stay. This can't be undone.
+            Every row in <span className="font-mono text-foreground">{table}</span> will be deleted. The table and its
+            structure stay. This can't be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-2.5">
           <label className="flex cursor-pointer items-start gap-2 text-sm">
-            <Checkbox className="mt-0.5" checked={restartIdentity} onCheckedChange={(v) => setRestartIdentity(v === true)} />
+            <Checkbox
+              className="mt-0.5"
+              checked={restartIdentity}
+              onCheckedChange={(v) => setRestartIdentity(v === true)}
+            />
             <span>
               Restart identity
-              <span className="block text-xs text-muted-foreground">Reset auto-increment sequences back to their start.</span>
+              <span className="block text-xs text-muted-foreground">
+                Reset auto-increment sequences back to their start.
+              </span>
             </span>
           </label>
           <label className="flex cursor-pointer items-start gap-2 text-sm">
             <Checkbox className="mt-0.5" checked={cascade} onCheckedChange={(v) => setCascade(v === true)} />
             <span>
               Cascade
-              <span className="block text-xs text-muted-foreground">Also empty tables that reference this one with foreign keys.</span>
+              <span className="block text-xs text-muted-foreground">
+                Also empty tables that reference this one with foreign keys.
+              </span>
             </span>
           </label>
         </div>
@@ -382,7 +420,8 @@ function DropDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Drop {word}?</AlertDialogTitle>
           <AlertDialogDescription>
-            <span className="font-mono text-foreground">{full}</span> and all of its data will be permanently deleted. This can't be undone.
+            <span className="font-mono text-foreground">{full}</span> and all of its data will be permanently deleted.
+            This can't be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-3">
@@ -390,13 +429,23 @@ function DropDialog({
             <Label htmlFor="confirm-drop" className="text-xs text-muted-foreground">
               Type <span className="font-mono text-foreground">{name}</span> to confirm
             </Label>
-            <Input id="confirm-drop" value={typed} onChange={(e) => setTyped(e.target.value)} autoFocus spellCheck={false} autoComplete="off" className="font-mono" />
+            <Input
+              id="confirm-drop"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              autoFocus
+              spellCheck={false}
+              autoComplete="off"
+              className="font-mono"
+            />
           </div>
           <label className="flex cursor-pointer items-start gap-2 text-sm">
             <Checkbox className="mt-0.5" checked={cascade} onCheckedChange={(v) => setCascade(v === true)} />
             <span>
               Cascade
-              <span className="block text-xs text-muted-foreground">Also drop views and foreign keys that depend on it.</span>
+              <span className="block text-xs text-muted-foreground">
+                Also drop views and foreign keys that depend on it.
+              </span>
             </span>
           </label>
         </div>

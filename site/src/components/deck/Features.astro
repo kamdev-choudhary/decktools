@@ -1,0 +1,59 @@
+---
+import Corners from '../Corners.astro';
+import Cross from '../Cross.astro';
+import { ICONS } from './icons';
+import type { Feature } from './types';
+
+/** A heading, an optional highlight slot, and a ruled three-column grid of features. */
+interface Props {
+  id?: string;
+  title: string;
+  lede?: string;
+  features: Feature[];
+}
+const { id = 'features', title, lede, features } = Astro.props;
+const n = features.length;
+---
+
+<section id={id} class="section">
+  <Corners />
+  <div class="pad py-20 md:py-28">
+    <div class="max-w-2xl">
+      <h2 class="h2">{title}</h2>
+      {lede && <p class="lede mt-5">{lede}</p>}
+    </div>
+    <slot />
+  </div>
+
+  <div class="relative grid border-t border-line sm:grid-cols-2 lg:grid-cols-3">
+    {
+      features.map((f, i) => (
+        <div
+          class:list={[
+            'cell relative border-line p-7 md:p-9',
+            'border-b',
+            i % 3 !== 2 && 'lg:border-r',
+            i % 2 === 0 && 'sm:max-lg:border-r',
+            i >= n - (n % 3 || 3) && 'lg:border-b-0',
+            i >= n - (n % 2 || 2) && 'sm:max-lg:border-b-0',
+            i === n - 1 && 'max-sm:border-b-0',
+          ]}
+        >
+          {i % 3 !== 0 && i >= 3 && <Cross class="-top-[7px] -left-[7px] hidden lg:block" />}
+          <svg viewBox="0 0 24 24" class="size-5 text-muted" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONS[f.icon] ?? ''} />
+          <h3 class="mt-4 font-medium">{f.title}</h3>
+          <p class="mt-1.5 text-[0.92rem] text-muted">{f.body}</p>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .cell {
+    transition: background-color 0.2s;
+  }
+  .cell:hover {
+    background: var(--surface);
+  }
+</style>

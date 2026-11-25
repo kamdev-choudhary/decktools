@@ -1,16 +1,17 @@
 ---
-import Corners from '../../../components/Corners.astro';
-import Shot from '../../../components/Shot.astro';
+import Corners from '../Corners.astro';
+import Shot from '../Shot.astro';
+import type { TourStop } from './types';
 
-const stops = [
-  { id: 'browse', shot: 'table', label: 'Browse', body: 'Sort, page and filter millions of rows. Headers show each type and where its foreign key points.', alt: 'The orders table: order ids, customer UUIDs linking to customers, statuses, totals and timestamps, with filters and pagination.' },
-  { id: 'edit', shot: 'editor', label: 'Edit', body: 'Double-click a row for a form with the right control for each column, including a picker for foreign keys.', alt: 'The Edit row dialog for an order, with a foreign key Browse button, a status menu and date pickers.' },
-  { id: 'sql', shot: 'sql', label: 'SQL', body: 'Highlighting and table autocomplete. Run the selection or the whole script, keep history, export results.', alt: 'The SQL editor with a revenue-by-country query and its result rows.' },
-  { id: 'structure', shot: 'structure', label: 'Structure', body: 'Columns, indexes, constraints and references, each with actions to change or drop it.', alt: 'The Structure tab for orders with columns, indexes and constraints.' },
-  { id: 'create', shot: 'create-table', label: 'Create', body: 'Build a table column by column, with constraints and foreign keys, and read the SQL as you go.', alt: 'The New table dialog with columns, constraint toggles and a references picker.' },
-  { id: 'import', shot: 'import', label: 'Import', body: 'Drop data files or a pg_dump backup. Files are matched to tables by name and streamed in.', alt: 'The Import page with drop zones for data files and backups.' },
-  { id: 'export', shot: 'export', label: 'Export', body: 'Pick tables and a format, or download the whole database as a restorable backup.', alt: 'The Export page with a table list and format options.' },
-];
+/** Tabbed screenshots of a deck, one caption per screen. */
+interface Props {
+  deck: string;
+  name: string;
+  title?: string;
+  lede?: string;
+  stops: TourStop[];
+}
+const { deck, name, title = 'Take the tour.', lede, stops } = Astro.props;
 ---
 
 <section id="tour" class="section">
@@ -18,10 +19,10 @@ const stops = [
   <div class="pad py-20 md:py-28">
     <div class="flex flex-wrap items-end justify-between gap-6">
       <div class="max-w-xl">
-        <h2 class="h2">Take the tour.</h2>
-        <p class="lede mt-5">Real screens from pgdeck, running against a demo shop database.</p>
+        <h2 class="h2">{title}</h2>
+        {lede && <p class="lede mt-5">{lede}</p>}
       </div>
-      <div role="tablist" aria-label="pgdeck screens" class="tour-tabs flex max-w-full gap-1 overflow-x-auto rounded-full border border-line-strong bg-surface p-1 [scrollbar-width:none]">
+      <div role="tablist" aria-label={`${name} screens`} class="tour-tabs flex max-w-full gap-1 overflow-x-auto rounded-full border border-line-strong bg-surface p-1 [scrollbar-width:none]">
         {
           stops.map((s, i) => (
             <button
@@ -51,7 +52,7 @@ const stops = [
             {
               stops.map((s, i) => (
                 <div role="tabpanel" id={`panel-${s.id}`} aria-labelledby={`tab-${s.id}`} data-active={i === 0 ? '' : undefined} class="panel col-start-1 row-start-1">
-                  <Shot name={s.shot} alt={s.alt} sizes="(min-width: 1200px) 1080px, 94vw" />
+                  <Shot deck={deck} name={s.shot} alt={s.alt} sizes="(min-width: 1200px) 1080px, 94vw" />
                 </div>
               ))
             }

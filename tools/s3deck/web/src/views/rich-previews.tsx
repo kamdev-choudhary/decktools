@@ -58,7 +58,11 @@ export default function RichPreview(props: RichPreviewProps) {
 /* Fetch helpers                                                       */
 /* ------------------------------------------------------------------ */
 
-async function fetchBytes(url: string, signal: AbortSignal, range?: [number, number]): Promise<Uint8Array<ArrayBuffer>> {
+async function fetchBytes(
+  url: string,
+  signal: AbortSignal,
+  range?: [number, number],
+): Promise<Uint8Array<ArrayBuffer>> {
   const headers: HeadersInit = range ? { Range: `bytes=${range[0]}-${range[1]}` } : {};
   const res = await fetch(url, { headers, signal, credentials: 'same-origin' });
   if (!res.ok) throw await readError(res);
@@ -71,7 +75,12 @@ async function fetchText(url: string, signal: AbortSignal) {
 }
 
 function useFile<T>(key: string, url: string, load: (signal: AbortSignal) => Promise<T>) {
-  return useQuery({ queryKey: ['rich-preview', key, url], queryFn: ({ signal }) => load(signal), staleTime: 30_000, retry: false });
+  return useQuery({
+    queryKey: ['rich-preview', key, url],
+    queryFn: ({ signal }) => load(signal),
+    staleTime: 30_000,
+    retry: false,
+  });
 }
 
 function Loading() {
@@ -83,13 +92,16 @@ function Loading() {
 }
 
 function Failed({ error }: { error: unknown }) {
-  return <EmptyState title="Couldn’t preview this file">{error instanceof Error ? error.message : String(error)}</EmptyState>;
+  return (
+    <EmptyState title="Couldn’t preview this file">{error instanceof Error ? error.message : String(error)}</EmptyState>
+  );
 }
 
 function TooLarge({ size }: { size: number }) {
   return (
     <EmptyState title="Too large to preview">
-      This file is {formatBytes(size)}. Files up to {formatBytes(MAX_PARSE_BYTES)} are previewed; download it to open it.
+      This file is {formatBytes(size)}. Files up to {formatBytes(MAX_PARSE_BYTES)} are previewed; download it to open
+      it.
     </EmptyState>
   );
 }
@@ -118,7 +130,11 @@ function RenderSourceToggle({ value, onChange }: { value: string; onChange: (v: 
 }
 
 function SourceView({ text }: { text: string }) {
-  return <pre className="min-h-full overflow-auto p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap break-all">{text}</pre>;
+  return (
+    <pre className="min-h-full overflow-auto p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap break-all">
+      {text}
+    </pre>
+  );
 }
 
 function cellText(v: unknown): string {
@@ -172,7 +188,10 @@ function DataTable({ head, rows }: { head: string[]; rows: unknown[][] }) {
 function SvgPreview({ url }: RichPreviewProps) {
   const q = useFile('text', url, (s) => fetchText(url, s));
   const [mode, setMode] = useState('rendered');
-  const blobUrl = useMemo(() => (q.data ? URL.createObjectURL(new Blob([q.data], { type: 'image/svg+xml' })) : null), [q.data]);
+  const blobUrl = useMemo(
+    () => (q.data ? URL.createObjectURL(new Blob([q.data], { type: 'image/svg+xml' })) : null),
+    [q.data],
+  );
   useEffect(() => () => void (blobUrl && URL.revokeObjectURL(blobUrl)), [blobUrl]);
 
   if (q.isPending) return <Loading />;
@@ -264,7 +283,10 @@ function FontPreview({ url, size }: RichPreviewProps) {
 
 function SpreadsheetPreview({ url, size }: RichPreviewProps) {
   const q = useFile('xlsx', url, async (s) => {
-    const [{ default: readXlsxFile }, bytes] = await Promise.all([import('read-excel-file/browser'), fetchBytes(url, s)]);
+    const [{ default: readXlsxFile }, bytes] = await Promise.all([
+      import('read-excel-file/browser'),
+      fetchBytes(url, s),
+    ]);
     return readXlsxFile(new Blob([bytes]));
   });
   const [active, setActive] = useState(0);
@@ -345,9 +367,12 @@ const PARQUET_ROWS = 200;
 
 function ParquetPreview({ url, size }: RichPreviewProps) {
   const q = useFile('parquet', url, async (signal) => {
-    const { asyncBufferFromUrl, cachedAsyncBuffer, parquetMetadataAsync, parquetReadObjects, parquetSchema } = await import('hyparquet');
+    const { asyncBufferFromUrl, cachedAsyncBuffer, parquetMetadataAsync, parquetReadObjects, parquetSchema } =
+      await import('hyparquet');
     // Range requests only: the footer, then the row groups covering the first rows.
-    const file = cachedAsyncBuffer(await asyncBufferFromUrl({ url, byteLength: size, requestInit: { credentials: 'same-origin', signal } }));
+    const file = cachedAsyncBuffer(
+      await asyncBufferFromUrl({ url, byteLength: size, requestInit: { credentials: 'same-origin', signal } }),
+    );
     const metadata = await parquetMetadataAsync(file);
     const columns = parquetSchema(metadata).children.map((c) => c.element.name);
     const rows = await parquetReadObjects({ file, metadata, rowStart: 0, rowEnd: PARQUET_ROWS });
@@ -406,8 +431,12 @@ function ZipPreview({ url, size }: RichPreviewProps) {
                   {e.name}
                 </TableCell>
                 <TableCell className="text-right whitespace-nowrap tabular-nums">{formatBytes(e.size)}</TableCell>
-                <TableCell className="text-right whitespace-nowrap text-muted-foreground tabular-nums">{formatBytes(e.compressed)}</TableCell>
-                <TableCell className="whitespace-nowrap text-muted-foreground">{e.modified ? formatDate(e.modified.toISOString()) : ''}</TableCell>
+                <TableCell className="text-right whitespace-nowrap text-muted-foreground tabular-nums">
+                  {formatBytes(e.compressed)}
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-muted-foreground">
+                  {e.modified ? formatDate(e.modified.toISOString()) : ''}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

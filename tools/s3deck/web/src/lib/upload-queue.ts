@@ -78,7 +78,13 @@ class RetryableError extends Error {}
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** One XHR PUT with progress. Resolves with the response JSON. */
-function put(url: string, body: Blob, headers: Record<string, string>, onProgress: (loaded: number) => void, track: (x: XMLHttpRequest) => () => void) {
+function put(
+  url: string,
+  body: Blob,
+  headers: Record<string, string>,
+  onProgress: (loaded: number) => void,
+  track: (x: XMLHttpRequest) => () => void,
+) {
   return new Promise<unknown>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const untrack = track(xhr);
@@ -137,7 +143,16 @@ class UploadQueue {
         rejected.push(key);
         continue;
       }
-      added.push({ id: `u${++this.seq}`, bucket, key, file: f.file, connectionId, loaded: 0, speed: 0, status: 'queued' });
+      added.push({
+        id: `u${++this.seq}`,
+        bucket,
+        key,
+        file: f.file,
+        connectionId,
+        loaded: 0,
+        speed: 0,
+        status: 'queued',
+      });
     }
     this.items = [...this.items, ...added];
     this.emit(true);
@@ -223,7 +238,11 @@ class UploadQueue {
       for (const fn of this.completeListeners) fn(item.bucket);
     } catch (err) {
       if (this.stops.has(item.id) || (err instanceof DOMException && err.name === 'AbortError')) return;
-      this.update(item.id, { status: 'error', error: err instanceof Error ? err.message : String(err), speed: 0 }, true);
+      this.update(
+        item.id,
+        { status: 'error', error: err instanceof Error ? err.message : String(err), speed: 0 },
+        true,
+      );
     } finally {
       this.xhrs.delete(item.id);
       this.pump();
@@ -276,7 +295,12 @@ class UploadQueue {
     let done: UploadPartInfo[] = [];
     if (record) {
       try {
-        done = (await api<{ parts: UploadPartInfo[] }>(base('/parts'), { query: { key: item.key, uploadId: record.uploadId }, headers })).parts;
+        done = (
+          await api<{ parts: UploadPartInfo[] }>(base('/parts'), {
+            query: { key: item.key, uploadId: record.uploadId },
+            headers,
+          })
+        ).parts;
         this.update(item.id, { resumed: true });
       } catch (err) {
         if (!(err instanceof ApiError && err.status === 404)) throw err;
@@ -314,7 +338,13 @@ class UploadQueue {
         const url = apiUrl(base('/part'), { key: item.key, uploadId, partNumber: n });
         for (let attempt = 1; ; attempt++) {
           try {
-            const res = (await put(url, blob, { 'Content-Type': 'application/octet-stream', ...headers }, (l) => (inflight.set(n, l), progress()), this.track(item.id))) as { etag: string };
+            const res = (await put(
+              url,
+              blob,
+              { 'Content-Type': 'application/octet-stream', ...headers },
+              (l) => (inflight.set(n, l), progress()),
+              this.track(item.id),
+            )) as { etag: string };
             etags.set(n, res.etag);
             break;
           } catch (err) {

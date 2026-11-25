@@ -27,7 +27,12 @@ export interface Completion {
  * Suggestions for the word at the caret: command names while typing the first
  * word, subcommands while typing the second word of a container (CONFIG, CLIENT...).
  */
-export function complete(before: string, docs: CommandDoc[], byName: Map<string, CommandDoc>, limit = 8): Completion | null {
+export function complete(
+  before: string,
+  docs: CommandDoc[],
+  byName: Map<string, CommandDoc>,
+  limit = 8,
+): Completion | null {
   const lead = before.length - before.trimStart().length;
   const parts = before.slice(lead).split(/\s+/);
   if (parts.length === 1) {
@@ -60,7 +65,7 @@ const DANGEROUS: Record<string, (db: number) => string> = {
   'function flush': () => 'Deletes every function library.',
   'function delete': () => 'Deletes a function library.',
   'acl deluser': () => 'Deletes ACL users.',
-  'acl setuser': () => 'Changes an ACL user\'s permissions.',
+  'acl setuser': () => "Changes an ACL user's permissions.",
   'client kill': () => 'Disconnects clients.',
   replicaof: () => 'Turns this server into a replica (or a primary).',
   slaveof: () => 'Turns this server into a replica (or a primary).',
@@ -68,7 +73,8 @@ const DANGEROUS: Record<string, (db: number) => string> = {
   'cluster reset': () => 'Resets this cluster node.',
   'cluster failover': () => 'Starts a cluster failover.',
   'module unload': () => 'Unloads a module.',
-  keys: () => 'KEYS walks the whole keyspace and blocks Redis while it runs. On a large database use SCAN, or the Keys page, instead.',
+  keys: () =>
+    'KEYS walks the whole keyspace and blocks Redis while it runs. On a large database use SCAN, or the Keys page, instead.',
 };
 
 /** Why a line deserves a confirmation, or null. */

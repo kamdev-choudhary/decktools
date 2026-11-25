@@ -2,11 +2,26 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp, ChevronDown, Link2, Plus, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { createTableSql, emptyColumn, FK_ACTIONS, isIntegerType, validateTable, type FkAction, type NewColumn } from '@shared/create-table';
+import {
+  createTableSql,
+  emptyColumn,
+  FK_ACTIONS,
+  isIntegerType,
+  validateTable,
+  type FkAction,
+  type NewColumn,
+} from '@shared/create-table';
 import { api } from '@/api/client';
 import { keys, useTables } from '@/api/hooks';
 import { Button } from '@deck/ui/components/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@deck/ui/components/dialog';
 import { Input } from '@deck/ui/components/input';
 import { Label } from '@deck/ui/components/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@deck/ui/components/popover';
@@ -66,7 +81,19 @@ const starter = (): Col[] => [
   col({ name: 'created_at', type: 'timestamptz', nullable: false, default: 'now()' }),
 ];
 
-export function Flag({ on, onToggle, title, disabled, children }: { on: boolean; onToggle: () => void; title: string; disabled?: boolean; children: React.ReactNode }) {
+export function Flag({
+  on,
+  onToggle,
+  title,
+  disabled,
+  children,
+}: {
+  on: boolean;
+  onToggle: () => void;
+  title: string;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -76,7 +103,9 @@ export function Flag({ on, onToggle, title, disabled, children }: { on: boolean;
       onClick={onToggle}
       className={cn(
         'h-8 shrink-0 rounded-md border px-2 font-mono text-[11px] transition-colors disabled:pointer-events-none disabled:opacity-40',
-        on ? 'border-primary bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+        on
+          ? 'border-primary bg-primary text-primary-foreground'
+          : 'text-muted-foreground hover:bg-accent hover:text-foreground',
       )}
     >
       {children}
@@ -84,7 +113,15 @@ export function Flag({ on, onToggle, title, disabled, children }: { on: boolean;
   );
 }
 
-export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { db: string; defaultSchema?: string; onClose: () => void }) {
+export function CreateTableDialog({
+  db,
+  defaultSchema = 'public',
+  onClose,
+}: {
+  db: string;
+  defaultSchema?: string;
+  onClose: () => void;
+}) {
   const qc = useQueryClient();
   const catalog = useQuery({ queryKey: [...keys.db(db), 'catalog'], queryFn: () => api.catalog(db) });
   const [schema, setSchema] = useState(defaultSchema);
@@ -103,7 +140,12 @@ export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { d
     return (list.includes(schema) ? list : [schema, ...list]).map((s) => ({ value: s }));
   }, [catalog.data, schema]);
 
-  const spec = { schema, name: name.trim(), comment, columns: columns.map(({ key: _k, ...c }) => ({ ...c, name: c.name.trim() })) };
+  const spec = {
+    schema,
+    name: name.trim(),
+    comment,
+    columns: columns.map(({ key: _k, ...c }) => ({ ...c, name: c.name.trim() })),
+  };
   const errors = validateTable(spec);
   const sql = createTableSql(spec);
 
@@ -166,7 +208,15 @@ export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { d
             <div className="grid gap-3 sm:grid-cols-[12rem_1fr_1fr]">
               <div className="space-y-1.5">
                 <Label className="text-xs">Schema</Label>
-                <Combobox value={schema} onChange={setSchema} options={schemaOptions} mono creatable className="h-9 w-full" aria-label="Schema" />
+                <Combobox
+                  value={schema}
+                  onChange={setSchema}
+                  options={schemaOptions}
+                  mono
+                  creatable
+                  className="h-9 w-full"
+                  aria-label="Schema"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="new-table-name" className="text-xs">
@@ -187,7 +237,12 @@ export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { d
                 <Label htmlFor="new-table-comment" className="text-xs">
                   Description <span className="text-muted-foreground">(optional)</span>
                 </Label>
-                <Input id="new-table-comment" value={comment} onChange={(e) => setComment(e.target.value)} placeholder="What's stored here" />
+                <Input
+                  id="new-table-comment"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="What's stored here"
+                />
               </div>
             </div>
 
@@ -197,8 +252,8 @@ export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { d
                   Columns <span className="font-normal text-muted-foreground">· {columns.length}</span>
                 </h3>
                 <p className="hidden text-[11px] text-muted-foreground md:block">
-                  <span className="font-mono">PK</span> primary key · <span className="font-mono">NN</span> not null · <span className="font-mono">UQ</span> unique ·{' '}
-                  <span className="font-mono">AI</span> auto-increment
+                  <span className="font-mono">PK</span> primary key · <span className="font-mono">NN</span> not null ·{' '}
+                  <span className="font-mono">UQ</span> unique · <span className="font-mono">AI</span> auto-increment
                 </p>
               </div>
 
@@ -256,19 +311,37 @@ export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { d
                           ))}
                         </datalist>
                         <div className="flex gap-1">
-                          <Flag on={c.primaryKey} onToggle={() => update(c.key, { primaryKey: !c.primaryKey })} title={pkCount > 1 && c.primaryKey ? 'Part of a composite primary key' : 'Primary key'}>
+                          <Flag
+                            on={c.primaryKey}
+                            onToggle={() => update(c.key, { primaryKey: !c.primaryKey })}
+                            title={pkCount > 1 && c.primaryKey ? 'Part of a composite primary key' : 'Primary key'}
+                          >
                             PK
                           </Flag>
-                          <Flag on={!c.nullable} onToggle={() => update(c.key, { nullable: !c.nullable })} title="Not null" disabled={c.primaryKey}>
+                          <Flag
+                            on={!c.nullable}
+                            onToggle={() => update(c.key, { nullable: !c.nullable })}
+                            title="Not null"
+                            disabled={c.primaryKey}
+                          >
                             NN
                           </Flag>
-                          <Flag on={c.unique} onToggle={() => update(c.key, { unique: !c.unique })} title="Unique" disabled={c.primaryKey && pkCount === 1}>
+                          <Flag
+                            on={c.unique}
+                            onToggle={() => update(c.key, { unique: !c.unique })}
+                            title="Unique"
+                            disabled={c.primaryKey && pkCount === 1}
+                          >
                             UQ
                           </Flag>
                           <Flag
                             on={c.identity}
                             onToggle={() => update(c.key, { identity: !c.identity })}
-                            title={isIntegerType(c.type) ? 'Auto-increment (identity)' : 'Auto-increment needs an integer type'}
+                            title={
+                              isIntegerType(c.type)
+                                ? 'Auto-increment (identity)'
+                                : 'Auto-increment needs an integer type'
+                            }
                             disabled={!isIntegerType(c.type)}
                           >
                             AI
@@ -282,15 +355,31 @@ export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { d
                               references,
                               // A FK column should have the referenced column's type (identity → plain integer).
                               ...(references && refType ? { type: refType, identity: false } : {}),
-                              ...(references && !c.name.trim() ? { name: `${references.table.replace(/s$/, '')}_${references.column}` } : {}),
+                              ...(references && !c.name.trim()
+                                ? { name: `${references.table.replace(/s$/, '')}_${references.column}` }
+                                : {}),
                             })
                           }
                         />
                         <div className="flex justify-end gap-0.5">
-                          <Button type="button" variant="ghost" size="icon-sm" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label="Move up"
+                            disabled={i === 0}
+                            onClick={() => move(i, -1)}
+                          >
                             <ArrowUp />
                           </Button>
-                          <Button type="button" variant="ghost" size="icon-sm" aria-label="Move down" disabled={i === columns.length - 1} onClick={() => move(i, 1)}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label="Move down"
+                            disabled={i === columns.length - 1}
+                            onClick={() => move(i, 1)}
+                          >
                             <ArrowDown />
                           </Button>
                           <Button
@@ -310,7 +399,12 @@ export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { d
                   })}
                 </div>
                 <div className="border-t p-2">
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setColumns((cols) => [...cols, col()])}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setColumns((cols) => [...cols, col()])}
+                  >
                     <Plus /> Add column
                   </Button>
                 </div>
@@ -327,14 +421,20 @@ export function CreateTableDialog({ db, defaultSchema = 'public', onClose }: { d
                 <ChevronDown className={cn('size-3.5 transition-transform', !showSql && '-rotate-90')} />
                 SQL preview
               </button>
-              {showSql && <pre className="max-h-72 overflow-auto border-t bg-muted/30 px-4 py-3 font-mono text-xs leading-relaxed">{sql}</pre>}
+              {showSql && (
+                <pre className="max-h-72 overflow-auto border-t bg-muted/30 px-4 py-3 font-mono text-xs leading-relaxed">
+                  {sql}
+                </pre>
+              )}
             </div>
           </div>
 
           <DialogFooter className="items-center border-t px-6 py-4 sm:justify-between">
             <div className="min-w-0 flex-1 text-xs">
               {create.isError ? (
-                <p className="max-h-20 overflow-auto font-mono whitespace-pre-wrap text-destructive">{errorMessage(create.error)}</p>
+                <p className="max-h-20 overflow-auto font-mono whitespace-pre-wrap text-destructive">
+                  {errorMessage(create.error)}
+                </p>
               ) : touched && errors.length ? (
                 <p className="text-destructive">{errors[0]}</p>
               ) : null}
@@ -376,7 +476,9 @@ export function ReferencePicker({
     queryFn: () => api.meta(db, picked!.schema, picked!.name),
     enabled: !!picked,
   });
-  const tableOptions = (tables.data ?? []).filter((t) => t.kind === 'r' || t.kind === 'p').map((t) => ({ value: `${t.schema}.${t.name}`, label: t.schema === 'public' ? t.name : undefined }));
+  const tableOptions = (tables.data ?? [])
+    .filter((t) => t.kind === 'r' || t.kind === 'p')
+    .map((t) => ({ value: `${t.schema}.${t.name}`, label: t.schema === 'public' ? t.name : undefined }));
   const columnOptions = picked && meta.data ? meta.data.columns.map((c) => ({ value: c.name, hint: c.type })) : [];
 
   const pickTable = (v: string) => {
@@ -393,7 +495,10 @@ export function ReferencePicker({
           type="button"
           variant="outline"
           size="sm"
-          className={cn('h-8 w-[7.5rem] justify-start gap-1.5 px-2 text-xs font-normal', !value && 'text-muted-foreground')}
+          className={cn(
+            'h-8 w-[7.5rem] justify-start gap-1.5 px-2 text-xs font-normal',
+            !value && 'text-muted-foreground',
+          )}
           title={value ? `References ${value.schema}.${value.table}(${value.column})` : 'Add a foreign key'}
         >
           <Link2 className="size-3.5 shrink-0" />
@@ -404,7 +509,15 @@ export function ReferencePicker({
         <div className="text-sm font-medium">Foreign key</div>
         <div className="space-y-1.5">
           <Label className="text-xs">Referenced table</Label>
-          <Combobox value={target} onChange={pickTable} options={tableOptions} mono placeholder="Pick a table…" className="w-full" aria-label="Referenced table" />
+          <Combobox
+            value={target}
+            onChange={pickTable}
+            options={tableOptions}
+            mono
+            placeholder="Pick a table…"
+            className="w-full"
+            aria-label="Referenced table"
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">Column</Label>
@@ -428,7 +541,15 @@ export function ReferencePicker({
             <SelectContent>
               {FK_ACTIONS.map((a) => (
                 <SelectItem key={a} value={a} className="text-xs">
-                  {a === 'NO ACTION' ? 'Block (no action)' : a === 'RESTRICT' ? 'Block (restrict)' : a === 'CASCADE' ? 'Delete this row too (cascade)' : a === 'SET NULL' ? 'Set to null' : 'Set to default'}
+                  {a === 'NO ACTION'
+                    ? 'Block (no action)'
+                    : a === 'RESTRICT'
+                      ? 'Block (restrict)'
+                      : a === 'CASCADE'
+                        ? 'Delete this row too (cascade)'
+                        : a === 'SET NULL'
+                          ? 'Set to null'
+                          : 'Set to default'}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -455,7 +576,10 @@ export function ReferencePicker({
             disabled={!picked || !column}
             onClick={() => {
               const refType = meta.data?.columns.find((c) => c.name === column)?.type;
-              onChange({ schema: picked!.schema, table: picked!.name, column, onDelete, onUpdate: 'NO ACTION' }, refType);
+              onChange(
+                { schema: picked!.schema, table: picked!.name, column, onDelete, onUpdate: 'NO ACTION' },
+                refType,
+              );
               setOpen(false);
             }}
           >

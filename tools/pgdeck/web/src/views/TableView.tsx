@@ -76,7 +76,9 @@ export function TableView({ db, schema, table, eq, readonly }: TableViewProps) {
               {schema}.{table}
             </div>
             {m.comment && <div className="mt-1 opacity-80">{m.comment}</div>}
-            {!readonly && !m.editable && <div className="mt-1 opacity-80">No primary key, so rows can't be edited here.</div>}
+            {!readonly && !m.editable && (
+              <div className="mt-1 opacity-80">No primary key, so rows can't be edited here.</div>
+            )}
           </TooltipContent>
         </Tooltip>
         <div ref={setActionsSlot} className="flex min-w-0 flex-1 items-center justify-end gap-2" />
@@ -84,7 +86,13 @@ export function TableView({ db, schema, table, eq, readonly }: TableViewProps) {
       </div>
 
       <TabsContent value="data" className="flex min-h-0 flex-col data-[state=inactive]:hidden">
-        <DataTab db={db} meta={m} initialEq={eq} readonly={readonly} actionsSlot={tab === 'data' ? actionsSlot : null} />
+        <DataTab
+          db={db}
+          meta={m}
+          initialEq={eq}
+          readonly={readonly}
+          actionsSlot={tab === 'data' ? actionsSlot : null}
+        />
       </TabsContent>
       <TabsContent value="structure" className="min-h-0 overflow-y-auto data-[state=inactive]:hidden">
         <StructureTab db={db} meta={m} />

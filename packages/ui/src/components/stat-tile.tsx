@@ -27,7 +27,13 @@ export function StatTile({ label, icon: Icon, value, detail, meter, meterTone = 
         <div className="text-2xl leading-none font-semibold tracking-tight tabular-nums">{value}</div>
       )}
       {meter !== undefined && (
-        <div className="h-1.5 overflow-hidden rounded-full bg-muted" role="meter" aria-valuenow={Math.round(meter * 100)} aria-valuemin={0} aria-valuemax={100}>
+        <div
+          className="h-1.5 overflow-hidden rounded-full bg-muted"
+          role="meter"
+          aria-valuenow={Math.round(meter * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
           <div
             className={cn(
               'h-full rounded-full transition-[width]',

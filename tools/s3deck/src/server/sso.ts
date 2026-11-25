@@ -89,7 +89,8 @@ export class SsoService {
     const state = callbackUrl.searchParams.get('state') ?? '';
     const pending = this.pending.get(state);
     this.pending.delete(state);
-    if (!pending || Date.now() - pending.createdAt > PENDING_TTL_MS) throw new Error('Sign-in expired. Please try again.');
+    if (!pending || Date.now() - pending.createdAt > PENDING_TTL_MS)
+      throw new Error('Sign-in expired. Please try again.');
 
     const config = await this.discover();
     const tokens = await oidc.authorizationCodeGrant(config, callbackUrl, {
@@ -100,7 +101,8 @@ export class SsoService {
     const claims = tokens.claims();
     const email = typeof claims?.email === 'string' ? claims.email : null;
     if (!email) throw new Error('The identity provider did not share an email address.');
-    if (claims?.email_verified === false) throw new Error('Your email address is not verified with the identity provider.');
+    if (claims?.email_verified === false)
+      throw new Error('Your email address is not verified with the identity provider.');
     return { email, name: typeof claims?.name === 'string' ? claims.name : null };
   }
 

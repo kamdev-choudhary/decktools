@@ -51,17 +51,38 @@ export function Pagination({ page, pageSize, shown, total, exact, loading, onPag
         </Select>
       </div>
       <div className="flex items-center gap-1">
-        <Button variant="outline" size="icon-xs" className="size-7" onClick={() => onPage(0)} disabled={page === 0} aria-label="First page">
+        <Button
+          variant="outline"
+          size="icon-xs"
+          className="size-7"
+          onClick={() => onPage(0)}
+          disabled={page === 0}
+          aria-label="First page"
+        >
           <ChevronsLeft />
         </Button>
-        <Button variant="outline" size="icon-xs" className="size-7" onClick={() => onPage(page - 1)} disabled={page === 0} aria-label="Previous page">
+        <Button
+          variant="outline"
+          size="icon-xs"
+          className="size-7"
+          onClick={() => onPage(page - 1)}
+          disabled={page === 0}
+          aria-label="Previous page"
+        >
           <ChevronLeft />
         </Button>
         <span className="min-w-16 text-center tabular-nums">
           Page {formatNumber(page + 1)}
           {lastPage !== null && ` of ${formatNumber(lastPage + 1)}`}
         </span>
-        <Button variant="outline" size="icon-xs" className="size-7" onClick={() => onPage(page + 1)} disabled={!hasNext} aria-label="Next page">
+        <Button
+          variant="outline"
+          size="icon-xs"
+          className="size-7"
+          onClick={() => onPage(page + 1)}
+          disabled={!hasNext}
+          aria-label="Next page"
+        >
           <ChevronRight />
         </Button>
         {lastPage !== null && (

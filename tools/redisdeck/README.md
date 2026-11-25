@@ -48,18 +48,18 @@ redisdeck prints a link and a login. Open the link and you're in.
 npx redisdeck [redis-url] [options]
 ```
 
-| Option | Description |
-| --- | --- |
-| `[redis-url]` | `redis://` or `rediss://` (TLS) URL. Default: `$REDIS_URL`, then `redis://127.0.0.1:6379`. A path selects the database the UI opens on (`/2`). |
-| `-p, --port <port>` | Port for the web UI (default `47815`, or `$PORT`) |
-| `-H, --host <host>` | Interface to bind (default `127.0.0.1`; `0.0.0.0` for containers/LAN) |
-| `-u, --user <name>` | Login username (default `admin`) |
-| `-P, --password <password>` | Login password (default: random, printed at startup; or `$REDISDECK_PASSWORD`) |
-| `--no-auth` | Disable the login page (only on a trusted machine) |
-| `--readonly` | Refuse every change: edits, deletes and write commands |
-| `--tls-insecure` | With `rediss://`, skip verifying the server certificate |
-| `--base-path <path>` | Serve under a path prefix, e.g. `/redis`, if your proxy does not strip it |
-| `--open` | Open the UI in your browser |
+| Option                      | Description                                                                                                                                    |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[redis-url]`               | `redis://` or `rediss://` (TLS) URL. Default: `$REDIS_URL`, then `redis://127.0.0.1:6379`. A path selects the database the UI opens on (`/2`). |
+| `-p, --port <port>`         | Port for the web UI (default `47815`, or `$PORT`)                                                                                              |
+| `-H, --host <host>`         | Interface to bind (default `127.0.0.1`; `0.0.0.0` for containers/LAN)                                                                          |
+| `-u, --user <name>`         | Login username (default `admin`)                                                                                                               |
+| `-P, --password <password>` | Login password (default: random, printed at startup; or `$REDISDECK_PASSWORD`)                                                                 |
+| `--no-auth`                 | Disable the login page (only on a trusted machine)                                                                                             |
+| `--readonly`                | Refuse every change: edits, deletes and write commands                                                                                         |
+| `--tls-insecure`            | With `rediss://`, skip verifying the server certificate                                                                                        |
+| `--base-path <path>`        | Serve under a path prefix, e.g. `/redis`, if your proxy does not strip it                                                                      |
+| `--open`                    | Open the UI in your browser                                                                                                                    |
 
 ## Read-only mode
 
@@ -103,13 +103,13 @@ cd tools/redisdeck
 REDIS_URL=redis://127.0.0.1:6379 pnpm dev
 ```
 
-| Script | What it does |
-| --- | --- |
-| `pnpm dev` | API with auto-restart and the UI with hot reload |
-| `pnpm build` | Build the UI (Vite) and the CLI (tsdown) into `dist/` |
-| `pnpm test` | Integration tests against a throwaway `redis-server` they start themselves (skipped if `redis-server` isn't installed) |
-| `pnpm lint` / `pnpm typecheck` | oxlint and TypeScript |
-| `pnpm pack:check` | Build and list exactly what would be published |
+| Script                         | What it does                                                                                                           |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`                     | API with auto-restart and the UI with hot reload                                                                       |
+| `pnpm build`                   | Build the UI (Vite) and the CLI (tsdown) into `dist/`                                                                  |
+| `pnpm test`                    | Integration tests against a throwaway `redis-server` they start themselves (skipped if `redis-server` isn't installed) |
+| `pnpm lint` / `pnpm typecheck` | oxlint and TypeScript                                                                                                  |
+| `pnpm pack:check`              | Build and list exactly what would be published                                                                         |
 
 ```
 src/

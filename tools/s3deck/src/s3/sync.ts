@@ -40,7 +40,11 @@ export function sameObject(a: Meta, b: Meta): boolean {
   return comparable ? a.etag === b.etag : true;
 }
 
-export async function compareLocations(source: Location, target: Location, signal?: AbortSignal): Promise<CompareResult> {
+export async function compareLocations(
+  source: Location,
+  target: Location,
+  signal?: AbortSignal,
+): Promise<CompareResult> {
   const [s, t] = await Promise.all([index(source, signal), index(target, signal)]);
   const items: CompareItem[] = [];
   const counts = { missing: 0, changed: 0, extra: 0, same: 0 };
@@ -103,7 +107,9 @@ export async function runSync(opts: {
           size: item.sourceSize ?? 0,
         });
       } else {
-        const got = await source.client.send(new GetObjectCommand({ Bucket: source.bucket, Key: sourceKey }), { abortSignal: signal });
+        const got = await source.client.send(new GetObjectCommand({ Bucket: source.bucket, Key: sourceKey }), {
+          abortSignal: signal,
+        });
         const upload = new Upload({
           client: target.client,
           params: {
@@ -136,7 +142,11 @@ export async function runSync(opts: {
   });
 
   if (toDelete.length && !signal.aborted) {
-    const result = await deleteKeys(target.client, target.bucket, toDelete.map((i) => target.prefix + i.key));
+    const result = await deleteKeys(
+      target.client,
+      target.bucket,
+      toDelete.map((i) => target.prefix + i.key),
+    );
     progress.errors.push(...result.errors);
     progress.done += toDelete.length;
   }

@@ -64,13 +64,20 @@ describe('auth, CSRF and roles', () => {
     expect((await admin.login(ADMIN.username, ADMIN.password)).status).toBe(200);
     expect((await admin.get('/api/auth/me')).json).toMatchObject({ role: 'admin', can: { write: true, admin: true } });
 
-    const created = await admin.post('/api/admin/users', { username: 'viv', password: 'viewer-pass-1', role: 'viewer' });
+    const created = await admin.post('/api/admin/users', {
+      username: 'viv',
+      password: 'viewer-pass-1',
+      role: 'viewer',
+    });
     expect(created.status).toBe(201);
     expect(created.json).not.toHaveProperty('passwordHash');
 
     const viewer = client(app);
     expect((await viewer.login('viv', 'viewer-pass-1')).status).toBe(200);
-    expect((await viewer.get('/api/auth/me')).json).toMatchObject({ role: 'viewer', can: { write: false, admin: false } });
+    expect((await viewer.get('/api/auth/me')).json).toMatchObject({
+      role: 'viewer',
+      can: { write: false, admin: false },
+    });
     expect((await viewer.get('/api/admin/users')).status).toBe(403);
     // Changes need at least the editor role (checked before anything touches storage).
     expect((await viewer.post('/api/sync', {})).status).toBe(403);

@@ -54,9 +54,12 @@ export async function detectFile(file: File): Promise<Detection> {
   if (!looksLikeDump) return { kind: 'table', gzip };
 
   const tables = new Set<string>();
-  for (const m of text.matchAll(/^\s*CREATE\s+(?:UNLOGGED\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([^\s(]+)/gim)) tables.add(unquote(m[1]!));
+  for (const m of text.matchAll(/^\s*CREATE\s+(?:UNLOGGED\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([^\s(]+)/gim))
+    tables.add(unquote(m[1]!));
   for (const m of text.matchAll(/^COPY\s+([^\s(]+)/gm)) tables.add(unquote(m[1]!));
-  const version = /Dumped (?:by|from) (pg_dump version [\d.]+)/.exec(text)?.[1] ?? (/^--\s*pgdeck dump/m.test(text) ? 'pgdeck' : null);
+  const version =
+    /Dumped (?:by|from) (pg_dump version [\d.]+)/.exec(text)?.[1] ??
+    (/^--\s*pgdeck dump/m.test(text) ? 'pgdeck' : null);
 
   return {
     kind: 'dump-sql',

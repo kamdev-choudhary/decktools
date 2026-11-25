@@ -46,7 +46,8 @@ export function validateColumn(c: NewColumn, label: string): string[] {
   if (!isValidType(c.type)) errors.push(`${label}: "${c.type}" is not a valid type.`);
   if (c.identity && !isIntegerType(c.type)) errors.push(`${label}: auto-increment needs an integer type.`);
   if (c.identity && c.default.trim()) errors.push(`${label}: auto-increment columns can't have a default.`);
-  if (c.references && (!c.references.table || !c.references.column)) errors.push(`${label}: pick the referenced table and column.`);
+  if (c.references && (!c.references.table || !c.references.column))
+    errors.push(`${label}: pick the referenced table and column.`);
   return errors;
 }
 
@@ -96,7 +97,8 @@ export function createTableSql(t: NewTable): string {
   let sql = `CREATE TABLE ${table} (\n  ${lines.join(',\n  ')}\n);`;
   if (t.comment.trim()) sql += `\n\nCOMMENT ON TABLE ${table} IS ${quoteLiteral(t.comment.trim())};`;
   for (const c of t.columns) {
-    if (c.comment.trim()) sql += `\nCOMMENT ON COLUMN ${table}.${quoteIdent(c.name)} IS ${quoteLiteral(c.comment.trim())};`;
+    if (c.comment.trim())
+      sql += `\nCOMMENT ON COLUMN ${table}.${quoteIdent(c.name)} IS ${quoteLiteral(c.comment.trim())};`;
   }
   return `${sql}\n`;
 }

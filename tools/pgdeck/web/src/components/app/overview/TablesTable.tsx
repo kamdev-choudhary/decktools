@@ -74,7 +74,8 @@ export function TablesTable({ db, tables }: { db: string; tables: TableStats[] }
     return list.sort((a, b) => (sort.desc ? -cmp(a, b) : cmp(a, b)));
   }, [tables, filter, kind, sort]);
 
-  const onSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, desc: !s.desc } : { key, desc: key !== 'name' }));
+  const onSort = (key: SortKey) =>
+    setSort((s) => (s.key === key ? { key, desc: !s.desc } : { key, desc: key !== 'name' }));
 
   const kinds: [KindFilter, string, number][] = [
     ['all', 'All', tables.length],
@@ -102,7 +103,12 @@ export function TablesTable({ db, tables }: { db: string; tables: TableStats[] }
         </div>
         <div className="relative ml-auto w-full sm:w-64">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter tables…" className="h-8 pl-8 text-sm" />
+          <Input
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Filter tables…"
+            className="h-8 pl-8 text-sm"
+          />
         </div>
       </div>
 
@@ -124,7 +130,11 @@ export function TablesTable({ db, tables }: { db: string; tables: TableStats[] }
               const href = tableHref(db, t.schema, t.name);
               const dead = deadRatio(t);
               return (
-                <tr key={`${t.schema}.${t.name}`} className="cursor-pointer transition-colors hover:bg-muted/40" onClick={() => navigate(href)}>
+                <tr
+                  key={`${t.schema}.${t.name}`}
+                  className="cursor-pointer transition-colors hover:bg-muted/40"
+                  onClick={() => navigate(href)}
+                >
                   <td className="max-w-72 px-4 py-2.5">
                     <a href={href} className="flex min-w-0 items-center gap-2.5" onClick={(e) => e.stopPropagation()}>
                       <Icon className="size-4 shrink-0 text-muted-foreground" />
@@ -142,7 +152,10 @@ export function TablesTable({ db, tables }: { db: string; tables: TableStats[] }
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-3">
                       <div className="h-1.5 w-24 shrink-0 overflow-hidden rounded-full bg-muted">
-                        <div className="bg-chart-data h-full rounded-full" style={{ width: `${(t.totalBytes / maxBytes) * 100}%` }} />
+                        <div
+                          className="bg-chart-data h-full rounded-full"
+                          style={{ width: `${(t.totalBytes / maxBytes) * 100}%` }}
+                        />
                       </div>
                       <span className="text-muted-foreground tabular-nums">{formatBytes(t.totalBytes)}</span>
                     </div>
@@ -150,10 +163,18 @@ export function TablesTable({ db, tables }: { db: string; tables: TableStats[] }
                   <td className="px-4 py-2.5 text-right whitespace-nowrap text-muted-foreground tabular-nums">
                     {t.indexCount} · {formatBytes(t.indexBytes)}
                   </td>
-                  <td className={cn('px-4 py-2.5 text-right tabular-nums', dead > 0.2 && t.deadRows > 1000 ? 'text-warning' : 'text-muted-foreground')}>
+                  <td
+                    className={cn(
+                      'px-4 py-2.5 text-right tabular-nums',
+                      dead > 0.2 && t.deadRows > 1000 ? 'text-warning' : 'text-muted-foreground',
+                    )}
+                  >
                     {t.deadRows ? `${formatCompact(t.deadRows)} (${formatPercent(dead, 0)})` : '—'}
                   </td>
-                  <td className="px-4 py-2.5 text-right whitespace-nowrap text-muted-foreground" title={t.lastAnalyze ?? undefined}>
+                  <td
+                    className="px-4 py-2.5 text-right whitespace-nowrap text-muted-foreground"
+                    title={t.lastAnalyze ?? undefined}
+                  >
                     {t.kind === 'v' ? '—' : formatRelative(t.lastAnalyze)}
                   </td>
                 </tr>

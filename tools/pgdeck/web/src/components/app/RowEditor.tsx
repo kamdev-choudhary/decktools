@@ -3,7 +3,14 @@ import { useRef, useState } from 'react';
 import type { Cell, Column, TableMeta } from '@shared/types';
 import { Badge } from '@deck/ui/components/badge';
 import { Button } from '@deck/ui/components/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@deck/ui/components/dialog';
 import { Label } from '@deck/ui/components/label';
 import { errorMessage, Kbd, Spinner } from './feedback';
 import { FieldInput } from './FieldInput';
@@ -41,7 +48,17 @@ function initialState(col: Column, mode: RowEditorProps['mode'], row?: Record<st
 }
 
 /** Small on/off button for NULL / Default, sized to sit beside a 36px input. */
-function ToggleChip({ pressed, onToggle, title, children }: { pressed: boolean; onToggle: (on: boolean) => void; title: string; children: React.ReactNode }) {
+function ToggleChip({
+  pressed,
+  onToggle,
+  title,
+  children,
+}: {
+  pressed: boolean;
+  onToggle: (on: boolean) => void;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -50,7 +67,9 @@ function ToggleChip({ pressed, onToggle, title, children }: { pressed: boolean; 
       onClick={() => onToggle(!pressed)}
       className={
         'h-9 shrink-0 rounded-md border px-2.5 font-mono text-[11px] transition-colors ' +
-        (pressed ? 'border-primary bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground')
+        (pressed
+          ? 'border-primary bg-primary text-primary-foreground'
+          : 'text-muted-foreground hover:bg-accent hover:text-foreground')
       }
     >
       {children}
@@ -76,7 +95,8 @@ export function RowEditor({ meta, db, foreignKeys, mode, row, focusField, onClos
   };
   const changedCount = columns.filter((c) => isChanged(c.name)).length;
 
-  const update = (name: string, patch: Partial<FieldState>) => setFields((f) => ({ ...f, [name]: { ...f[name]!, ...patch } }));
+  const update = (name: string, patch: Partial<FieldState>) =>
+    setFields((f) => ({ ...f, [name]: { ...f[name]!, ...patch } }));
 
   const submit = async () => {
     const values: Record<string, Cell> = {};
@@ -107,7 +127,10 @@ export function RowEditor({ meta, db, foreignKeys, mode, row, focusField, onClos
           e.preventDefault();
           const body = bodyRef.current;
           const selector = focusField ? `[data-field="${CSS.escape(focusField)}"]:not(:disabled)` : '';
-          ((selector && body?.querySelector<HTMLElement>(selector)) || body?.querySelector<HTMLElement>('[data-field]:not(:disabled)'))?.focus();
+          (
+            (selector && body?.querySelector<HTMLElement>(selector)) ||
+            body?.querySelector<HTMLElement>('[data-field]:not(:disabled)')
+          )?.focus();
         }}
       >
         <form
@@ -133,7 +156,11 @@ export function RowEditor({ meta, db, foreignKeys, mode, row, focusField, onClos
           <div ref={bodyRef} className="min-h-0 flex-1 divide-y overflow-y-auto px-6">
             {columns.map((c) => {
               const st = fields[c.name]!;
-              const placeholder = st.isNull ? 'NULL' : st.useDefault ? (c.default ?? (c.identity ? 'identity' : 'NULL')) : '';
+              const placeholder = st.isNull
+                ? 'NULL'
+                : st.useDefault
+                  ? (c.default ?? (c.identity ? 'identity' : 'NULL'))
+                  : '';
               const id = `field-${c.name}`;
               return (
                 <div
@@ -142,12 +169,20 @@ export function RowEditor({ meta, db, foreignKeys, mode, row, focusField, onClos
                 >
                   {/* Left: name, type, flags */}
                   <div className="min-w-0 sm:pt-1.5">
-                    <Label id={`${id}-label`} htmlFor={id} className="flex min-w-0 items-center gap-1.5 font-mono text-[13px]">
+                    <Label
+                      id={`${id}-label`}
+                      htmlFor={id}
+                      className="flex min-w-0 items-center gap-1.5 font-mono text-[13px]"
+                    >
                       {pk.has(c.name) && <KeyRound className="size-3 shrink-0 text-warning" aria-label="Primary key" />}
                       <TruncatedText text={c.name} side="left" />
                     </Label>
                     <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-                      <TruncatedText text={c.type} side="left" className="font-mono text-[11px] text-muted-foreground" />
+                      <TruncatedText
+                        text={c.type}
+                        side="left"
+                        className="font-mono text-[11px] text-muted-foreground"
+                      />
                       {c.generated && (
                         <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
                           generated
@@ -186,7 +221,11 @@ export function RowEditor({ meta, db, foreignKeys, mode, row, focusField, onClos
                       </ToggleChip>
                     )}
                     {c.nullable && !c.generated && (
-                      <ToggleChip pressed={st.isNull} onToggle={(on) => update(c.name, { isNull: on, useDefault: false })} title="Set to NULL">
+                      <ToggleChip
+                        pressed={st.isNull}
+                        onToggle={(on) => update(c.name, { isNull: on, useDefault: false })}
+                        title="Set to NULL"
+                      >
                         NULL
                       </ToggleChip>
                     )}
@@ -211,7 +250,11 @@ export function RowEditor({ meta, db, foreignKeys, mode, row, focusField, onClos
               </Button>
               <Button type="submit" disabled={saving || (mode === 'edit' && !changedCount)}>
                 {saving && <Spinner className="text-current" />}
-                {mode === 'insert' ? 'Insert row' : changedCount ? `Save ${changedCount} change${changedCount > 1 ? 's' : ''}` : 'Save'}
+                {mode === 'insert'
+                  ? 'Insert row'
+                  : changedCount
+                    ? `Save ${changedCount} change${changedCount > 1 ? 's' : ''}`
+                    : 'Save'}
               </Button>
             </div>
           </DialogFooter>

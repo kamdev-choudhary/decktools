@@ -8,7 +8,12 @@ import { createApp, CSRF_HEADER, SESSION_COOKIE } from '../src/server/app.js';
 // with the bundled UI; changing them logs people out or breaks every API call.
 describe('pgdeck HTTP contract', () => {
   const manager = {} as DatabaseManager; // not reached by these requests
-  const app = createApp({ manager, auth: { username: 'admin', password: 'pw' }, basePath: '', webRoot: '/nonexistent' }).app;
+  const app = createApp({
+    manager,
+    auth: { username: 'admin', password: 'pw' },
+    basePath: '',
+    webRoot: '/nonexistent',
+  }).app;
 
   it('keeps the pgdeck CSRF header and session cookie', async () => {
     assert.equal(CSRF_HEADER, 'x-pgdeck');
@@ -32,7 +37,17 @@ describe('pgdeck HTTP contract', () => {
 });
 
 describe('pgdeck CLI config', () => {
-  const opts: CliOptions = { port: 47615, host: '127.0.0.1', user: 'admin', auth: true, basePath: 'db/', open: false, readonly: false, ssl: false, maxRows: 2000 };
+  const opts: CliOptions = {
+    port: 47615,
+    host: '127.0.0.1',
+    user: 'admin',
+    auth: true,
+    basePath: 'db/',
+    open: false,
+    readonly: false,
+    ssl: false,
+    maxRows: 2000,
+  };
 
   it('reads PGDECK_PASSWORD and DATABASE_URL', () => {
     process.env.PGDECK_PASSWORD = 'env-pw';

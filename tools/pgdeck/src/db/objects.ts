@@ -98,7 +98,8 @@ export async function getObject(ctx: DbContext, kind: ObjectKind, oid: number): 
         name: f.name,
         schema: f.schema,
         title: `${f.name}(${f.args})`,
-        definition: f.def ?? `-- Aggregates can't be shown as a single CREATE statement.\n-- ${f.schema}.${f.name}(${f.args})`,
+        definition:
+          f.def ?? `-- Aggregates can't be shown as a single CREATE statement.\n-- ${f.schema}.${f.name}(${f.args})`,
         editable: f.kind !== 'a',
         properties: props,
       };
@@ -127,7 +128,9 @@ export async function getObject(ctx: DbContext, kind: ObjectKind, oid: number): 
           ['Function', f ? `${f.schema}.${f.name}()` : '?'],
           ...(t.comment ? [['Comment', t.comment] as [string, string]] : []),
         ],
-        triggerFunction: f ? { oid: Number(t.fn), title: `${f.schema}.${f.name}(${f.args})`, definition: f.def ?? '' } : null,
+        triggerFunction: f
+          ? { oid: Number(t.fn), title: `${f.schema}.${f.name}(${f.args})`, definition: f.def ?? '' }
+          : null,
       };
     }
     case 'sequence': {
@@ -202,13 +205,19 @@ export async function getObject(ctx: DbContext, kind: ObjectKind, oid: number): 
   }
 }
 
-export async function runObjectAction(ctx: DbContext, a: ObjectAction): Promise<{ ok: true; message: string; oid?: number }> {
+export async function runObjectAction(
+  ctx: DbContext,
+  a: ObjectAction,
+): Promise<{ ok: true; message: string; oid?: number }> {
   if (ctx.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
   const cascade = (c: boolean) => (c ? ' CASCADE' : '');
 
   if (a.kind === 'extension' && a.action === 'create') {
     await ctx.pool.query(`CREATE EXTENSION IF NOT EXISTS ${quoteIdent(a.name)}`);
-    const { rows } = await ctx.pool.query<{ oid: string }>(`select oid::int8 as oid from pg_extension where extname = $1`, [a.name]);
+    const { rows } = await ctx.pool.query<{ oid: string }>(
+      `select oid::int8 as oid from pg_extension where extname = $1`,
+      [a.name],
+    );
     return { ok: true, message: `Installed ${a.name}`, oid: Number(rows[0]?.oid) };
   }
 
@@ -217,7 +226,9 @@ export async function runObjectAction(ctx: DbContext, a: ObjectAction): Promise<
       const f = await functionDetail(ctx, a.oid);
       const sig = `${quoteIdent(f.schema)}.${quoteIdent(f.name)}(${f.args})`;
       if (a.action === 'drop') {
-        await ctx.pool.query(`DROP ${f.kind === 'p' ? 'PROCEDURE' : f.kind === 'a' ? 'AGGREGATE' : 'FUNCTION'} ${sig}${cascade(a.cascade)}`);
+        await ctx.pool.query(
+          `DROP ${f.kind === 'p' ? 'PROCEDURE' : f.kind === 'a' ? 'AGGREGATE' : 'FUNCTION'} ${sig}${cascade(a.cascade)}`,
+        );
         return { ok: true, message: `Dropped ${f.name}` };
       }
       if (!/^\s*create\s+(or\s+replace\s+)?(function|procedure)\b/i.test(a.sql.replace(/^(\s*--[^\n]*\n)*/, ''))) {
@@ -255,7 +266,9 @@ export async function runObjectAction(ctx: DbContext, a: ObjectAction): Promise<
         await ctx.pool.query(`DROP TRIGGER ${quoteIdent(t.name)} ON ${rel}${cascade(a.cascade)}`);
         return { ok: true, message: `Dropped trigger ${t.name}` };
       }
-      await ctx.pool.query(`ALTER TABLE ${rel} ${a.action === 'enable' ? 'ENABLE' : 'DISABLE'} TRIGGER ${quoteIdent(t.name)}`);
+      await ctx.pool.query(
+        `ALTER TABLE ${rel} ${a.action === 'enable' ? 'ENABLE' : 'DISABLE'} TRIGGER ${quoteIdent(t.name)}`,
+      );
       return { ok: true, message: `${a.action === 'enable' ? 'Enabled' : 'Disabled'} trigger ${t.name}` };
     }
     case 'sequence': {
@@ -275,7 +288,10 @@ export async function runObjectAction(ctx: DbContext, a: ObjectAction): Promise<
       return { ok: true, message: `${s.name} will hand out ${a.value.trim()} next` };
     }
     case 'extension': {
-      const { rows } = await ctx.pool.query<{ name: string }>(`select extname as name from pg_extension where oid = $1`, [a.oid]);
+      const { rows } = await ctx.pool.query<{ name: string }>(
+        `select extname as name from pg_extension where oid = $1`,
+        [a.oid],
+      );
       const e = rows[0];
       if (!e) throw new UserError('That extension is no longer installed.', 404);
       if (a.action === 'drop') {

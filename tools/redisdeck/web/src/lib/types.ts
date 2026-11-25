@@ -10,7 +10,15 @@ export const TYPE_LABEL: Record<string, string> = {
   'ReJSON-RL': 'JSON',
 };
 
-const SHORT: Record<string, string> = { string: 'STR', hash: 'HASH', list: 'LIST', set: 'SET', zset: 'ZSET', stream: 'STRM', 'ReJSON-RL': 'JSON' };
+const SHORT: Record<string, string> = {
+  string: 'STR',
+  hash: 'HASH',
+  list: 'LIST',
+  set: 'SET',
+  zset: 'ZSET',
+  stream: 'STRM',
+  'ReJSON-RL': 'JSON',
+};
 
 const VAR: Record<string, string> = {
   string: 'var(--type-string)',

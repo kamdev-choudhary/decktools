@@ -35,7 +35,8 @@ export const useServer = () => useQuery({ queryKey: keys.server, queryFn: api.se
 
 export const useSlowlog = () => useQuery({ queryKey: ['slowlog'], queryFn: api.slowlog, refetchInterval: 10_000 });
 
-export const useDbSize = (db: number) => useQuery({ queryKey: ['size', db], queryFn: () => api.size(db), refetchInterval: 15_000 });
+export const useDbSize = (db: number) =>
+  useQuery({ queryKey: ['size', db], queryFn: () => api.size(db), refetchInterval: 15_000 });
 
 /** Keys matching a pattern, fetched page by page with SCAN. */
 export function useKeyList(db: number, match: string, type: string) {

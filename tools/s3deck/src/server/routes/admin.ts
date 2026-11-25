@@ -19,7 +19,8 @@ const toInfo = (u: UserRecord): UserInfo => ({
 /** User management and the activity log. Admins only. */
 export function adminRoutes(ctx: ServerContext) {
   const usersOrFail = () => {
-    if (!ctx.users) throw new HttpError(400, 'NO_PERSISTENCE', 'This server has no data directory, so users can’t be stored');
+    if (!ctx.users)
+      throw new HttpError(400, 'NO_PERSISTENCE', 'This server has no data directory, so users can’t be stored');
     return ctx.users;
   };
   const userParam = z.object({ username: usernameSchema });
@@ -36,7 +37,11 @@ export function adminRoutes(ctx: ServerContext) {
         throw new HttpError(409, 'EXISTS', 'A user with that name already exists');
       }
       if (!input.password && !input.username.includes('@')) {
-        throw new HttpError(400, 'VALIDATION', 'Without a password, the username must be the email used for single sign-on');
+        throw new HttpError(
+          400,
+          'VALIDATION',
+          'Without a password, the username must be the email used for single sign-on',
+        );
       }
       const record = await users.create(input);
       logActivity(ctx, c, 'user.create', { detail: `${record.username} (${record.role})` });
@@ -48,12 +53,19 @@ export function adminRoutes(ctx: ServerContext) {
       const { username } = c.req.valid('param');
       const patch = c.req.valid('json');
       const me = c.get('session');
-      if (me.user.toLowerCase() === username.toLowerCase() && (patch.disabled || (patch.role && patch.role !== 'admin'))) {
+      if (
+        me.user.toLowerCase() === username.toLowerCase() &&
+        (patch.disabled || (patch.role && patch.role !== 'admin'))
+      ) {
         throw new HttpError(400, 'NOT_ALLOWED', 'You can’t disable yourself or remove your own admin role');
       }
       const record = await users.update(username, patch);
       if (!record) throw new HttpError(404, 'NOT_FOUND', 'User not found');
-      const what = [patch.role && `role ${patch.role}`, patch.disabled !== undefined && (patch.disabled ? 'disabled' : 'enabled'), patch.password && 'password reset']
+      const what = [
+        patch.role && `role ${patch.role}`,
+        patch.disabled !== undefined && (patch.disabled ? 'disabled' : 'enabled'),
+        patch.password && 'password reset',
+      ]
         .filter(Boolean)
         .join(', ');
       logActivity(ctx, c, 'user.update', { detail: `${record.username}: ${what}` });

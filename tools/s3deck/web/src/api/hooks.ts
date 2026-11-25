@@ -50,7 +50,8 @@ export const qk = {
   buckets: () => ['s3', 'buckets'] as const,
   bucket: (b: string) => ['s3', 'bucket', b] as const,
   objects: (b: string, prefix: string, flat: boolean) => ['s3', 'bucket', b, 'objects', prefix, flat] as const,
-  details: (b: string, key: string, versionId?: string | null) => ['s3', 'bucket', b, 'details', key, versionId ?? null] as const,
+  details: (b: string, key: string, versionId?: string | null) =>
+    ['s3', 'bucket', b, 'details', key, versionId ?? null] as const,
   versions: (b: string, key: string) => ['s3', 'bucket', b, 'versions', key] as const,
   tags: (b: string, key: string) => ['s3', 'bucket', b, 'tags', key] as const,
   settings: (b: string) => ['s3', 'bucket', b, 'settings'] as const,
@@ -115,7 +116,8 @@ export function useAddConnection() {
 export function useActivateConnection() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api<ConnectionsResponse>(`connections/${encodeURIComponent(id)}/activate`, { method: 'POST' }),
+    mutationFn: (id: string) =>
+      api<ConnectionsResponse>(`connections/${encodeURIComponent(id)}/activate`, { method: 'POST' }),
     onSuccess: (data) => onConnectionChange(qc, data),
   });
 }
@@ -152,14 +154,22 @@ export function useDeleteBucket() {
 }
 
 export function useBucketSettings(bucket: string) {
-  return useQuery({ queryKey: qk.settings(bucket), queryFn: () => api<BucketSettings>(bucketPath(bucket, '/settings')) });
+  return useQuery({
+    queryKey: qk.settings(bucket),
+    queryFn: () => api<BucketSettings>(bucketPath(bucket, '/settings')),
+  });
 }
 
 export function useSaveSetting(bucket: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ setting, body }: { setting: 'versioning' | 'cors' | 'lifecycle' | 'policy' | 'public-access'; body: unknown }) =>
-      api(bucketPath(bucket, `/settings/${setting}`), { method: 'PUT', body }),
+    mutationFn: ({
+      setting,
+      body,
+    }: {
+      setting: 'versioning' | 'cors' | 'lifecycle' | 'policy' | 'public-access';
+      body: unknown;
+    }) => api(bucketPath(bucket, `/settings/${setting}`), { method: 'PUT', body }),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.settings(bucket) }),
   });
 }
@@ -194,7 +204,10 @@ export function useObjects(bucket: string, prefix: string, flat: boolean) {
 export function useObjectDetails(bucket: string, key: string | null, versionId?: string | null) {
   return useQuery({
     queryKey: qk.details(bucket, key ?? '', versionId),
-    queryFn: () => api<ObjectDetails>(bucketPath(bucket, '/details'), { query: { key: key ?? '', versionId: versionId ?? undefined } }),
+    queryFn: () =>
+      api<ObjectDetails>(bucketPath(bucket, '/details'), {
+        query: { key: key ?? '', versionId: versionId ?? undefined },
+      }),
     enabled: !!key,
   });
 }
@@ -232,13 +245,18 @@ export function useBucketMutation<TInput, TOutput = unknown>(
 }
 
 export const objectApi = {
-  delete: (bucket: string, input: DeleteInput) => api<DeleteResponse>(bucketPath(bucket, '/delete'), { method: 'POST', body: input }),
+  delete: (bucket: string, input: DeleteInput) =>
+    api<DeleteResponse>(bucketPath(bucket, '/delete'), { method: 'POST', body: input }),
   summary: (bucket: string, input: { keys?: string[]; prefixes: string[] }, signal?: AbortSignal) =>
     api<SummaryResponse>(bucketPath(bucket, '/summary'), { method: 'POST', body: input, signal }),
-  copy: (bucket: string, input: CopyInput) => api<CopyResponse>(bucketPath(bucket, '/copy'), { method: 'POST', body: input }),
-  createFolder: (bucket: string, prefix: string) => api(bucketPath(bucket, '/folder'), { method: 'POST', body: { prefix } }),
-  presign: (bucket: string, input: PresignInput) => api<PresignResponse>(bucketPath(bucket, '/presign'), { method: 'POST', body: input }),
-  metadata: (bucket: string, input: MetadataInput) => api(bucketPath(bucket, '/metadata'), { method: 'POST', body: input }),
+  copy: (bucket: string, input: CopyInput) =>
+    api<CopyResponse>(bucketPath(bucket, '/copy'), { method: 'POST', body: input }),
+  createFolder: (bucket: string, prefix: string) =>
+    api(bucketPath(bucket, '/folder'), { method: 'POST', body: { prefix } }),
+  presign: (bucket: string, input: PresignInput) =>
+    api<PresignResponse>(bucketPath(bucket, '/presign'), { method: 'POST', body: input }),
+  metadata: (bucket: string, input: MetadataInput) =>
+    api(bucketPath(bucket, '/metadata'), { method: 'POST', body: input }),
   tags: (bucket: string, input: TagsInput) => api(bucketPath(bucket, '/tags'), { method: 'PUT', body: input }),
   restoreVersion: (bucket: string, key: string, versionId: string) =>
     api(bucketPath(bucket, '/versions/restore'), { method: 'POST', body: { key, versionId } }),
@@ -304,7 +322,10 @@ export function useUserMutations() {
   const qc = useQueryClient();
   const done = () => qc.invalidateQueries({ queryKey: qk.users });
   return {
-    create: useMutation({ mutationFn: (input: CreateUserInput) => api<UserInfo>('admin/users', { method: 'POST', body: input }), onSuccess: done }),
+    create: useMutation({
+      mutationFn: (input: CreateUserInput) => api<UserInfo>('admin/users', { method: 'POST', body: input }),
+      onSuccess: done,
+    }),
     update: useMutation({
       mutationFn: ({ username, patch }: { username: string; patch: UpdateUserInput }) =>
         api<UserInfo>(`admin/users/${encodeURIComponent(username)}`, { method: 'PATCH', body: patch }),
@@ -337,7 +358,8 @@ export function useJobs() {
 }
 
 export const syncApi = {
-  compare: (input: Omit<SyncInput, 'mode'>, signal?: AbortSignal) => api<CompareResult>('sync/compare', { method: 'POST', body: input, signal }),
+  compare: (input: Omit<SyncInput, 'mode'>, signal?: AbortSignal) =>
+    api<CompareResult>('sync/compare', { method: 'POST', body: input, signal }),
   start: (input: SyncInput) => api<JobInfo>('sync', { method: 'POST', body: input }),
   cancel: (id: string) => api(`jobs/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 };

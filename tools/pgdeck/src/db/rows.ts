@@ -1,5 +1,14 @@
 import type pg from 'pg';
-import type { Cell, Filter, FilterMatch, MutationResponse, RowKey, RowsRequest, RowsResponse, TableMeta } from '../shared/types.js';
+import type {
+  Cell,
+  Filter,
+  FilterMatch,
+  MutationResponse,
+  RowKey,
+  RowsRequest,
+  RowsResponse,
+  TableMeta,
+} from '../shared/types.js';
 import { queryRaw, withTransaction, type DbContext } from './client.js';
 import { UserError } from './errors.js';
 import { getTableMeta } from './introspect.js';
@@ -17,11 +26,17 @@ function assertColumns(meta: TableMeta, names: Iterable<string>): void {
 
 function assertWritable(ctx: DbContext, meta: TableMeta): void {
   if (ctx.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
-  if (!meta.editable) throw new UserError(`${meta.schema}.${meta.table} has no primary key or is not a table, so it cannot be edited here`);
+  if (!meta.editable)
+    throw new UserError(
+      `${meta.schema}.${meta.table} has no primary key or is not a table, so it cannot be edited here`,
+    );
 }
 
 function buildWhere(meta: TableMeta, filters: Filter[], match: FilterMatch, values: unknown[]): string {
-  assertColumns(meta, filters.map((f) => f.col));
+  assertColumns(
+    meta,
+    filters.map((f) => f.col),
+  );
   const parts = filters.map((f) => {
     const toSql = FILTER_SQL[f.op];
     if (isUnaryOp(f.op)) return toSql(quoteIdent(f.col), '');
@@ -98,7 +113,12 @@ export async function selectRows(ctx: DbContext, req: RowsRequest): Promise<Rows
   };
 }
 
-export async function insertRow(ctx: DbContext, schema: string, table: string, row: Record<string, Cell>): Promise<MutationResponse> {
+export async function insertRow(
+  ctx: DbContext,
+  schema: string,
+  table: string,
+  row: Record<string, Cell>,
+): Promise<MutationResponse> {
   const meta = await getTableMeta(ctx, schema, table);
   assertWritable(ctx, meta);
   const names = Object.keys(row);
@@ -107,7 +127,10 @@ export async function insertRow(ctx: DbContext, schema: string, table: string, r
   const sql = names.length
     ? `insert into ${rel} (${names.map(quoteIdent).join(', ')}) values (${names.map((_, i) => `$${i + 1}`).join(', ')})`
     : `insert into ${rel} default values`;
-  const result = await ctx.pool.query(sql, names.map((n) => row[n]));
+  const result = await ctx.pool.query(
+    sql,
+    names.map((n) => row[n]),
+  );
   return { rowCount: result.rowCount ?? 0 };
 }
 
@@ -137,7 +160,12 @@ export async function updateRow(
   });
 }
 
-export async function deleteRows(ctx: DbContext, schema: string, table: string, keys: RowKey[]): Promise<MutationResponse> {
+export async function deleteRows(
+  ctx: DbContext,
+  schema: string,
+  table: string,
+  keys: RowKey[],
+): Promise<MutationResponse> {
   const meta = await getTableMeta(ctx, schema, table);
   assertWritable(ctx, meta);
   const rel = qualified(schema, table);

@@ -68,7 +68,8 @@ export async function resolveTables(client: pg.ClientBase, wanted: TableId[]): P
     const keys = new Set(wanted.map((t) => `${t.schema}.${t.table}`));
     tables = rows.filter((t) => keys.has(`${t.schema}.${t.name}`));
     const missing = wanted.filter((w) => !rows.some((t) => t.schema === w.schema && t.name === w.table));
-    if (missing.length) throw new UserError(`Unknown table: ${missing.map((m) => `${m.schema}.${m.table}`).join(', ')}`);
+    if (missing.length)
+      throw new UserError(`Unknown table: ${missing.map((m) => `${m.schema}.${m.table}`).join(', ')}`);
   }
   const fk = await client.query<{ from: number; to: number }>(
     `select conrelid as "from", confrelid as "to" from pg_constraint where contype = 'f' and conrelid <> confrelid`,
@@ -143,11 +144,13 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
     );
     const i = info.rows[0]!;
 
-    yield `--\n-- pgdeck dump of database "${i.db}" (PostgreSQL ${i.version})\n-- Created ${i.now}\n` +
+    yield (
+      `--\n-- pgdeck dump of database "${i.db}" (PostgreSQL ${i.version})\n-- Created ${i.now}\n` +
       `-- ${full ? 'Whole database' : `${tables.length} table(s)`}; ${opts.structure && opts.data ? 'structure and data' : opts.structure ? 'structure only' : 'data only'}\n` +
       `-- Restore with: psql -d <database> -v ON_ERROR_STOP=1 -f <this file>\n--\n\n` +
       `SET statement_timeout = 0;\nSET client_encoding = 'UTF8';\nSET standard_conforming_strings = on;\n` +
-      `SET check_function_bodies = false;\nSET client_min_messages = warning;\n\n`;
+      `SET check_function_bodies = false;\nSET client_min_messages = warning;\n\n`
+    );
 
     // ---------- structure, part 1 ----------
     if (opts.structure) {
@@ -159,7 +162,11 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
         [full, oids],
       );
       if (schemas.rows.length) {
-        yield `-- Schemas\n` + schemas.rows.map((s) => `CREATE SCHEMA IF NOT EXISTS ${quoteIdent(s.name)};\n`).join('') + '\n';
+        yield (
+          `-- Schemas\n` +
+          schemas.rows.map((s) => `CREATE SCHEMA IF NOT EXISTS ${quoteIdent(s.name)};\n`).join('') +
+          '\n'
+        );
       }
 
       if (full) {
@@ -168,8 +175,13 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
            where e.extname <> 'plpgsql' order by 1`,
         );
         if (ext.rows.length) {
-          yield `-- Extensions\n` +
-            ext.rows.map((e) => `CREATE EXTENSION IF NOT EXISTS ${quoteIdent(e.name)} WITH SCHEMA ${quoteIdent(e.schema)};\n`).join('') + '\n';
+          yield (
+            `-- Extensions\n` +
+            ext.rows
+              .map((e) => `CREATE EXTENSION IF NOT EXISTS ${quoteIdent(e.name)} WITH SCHEMA ${quoteIdent(e.schema)};\n`)
+              .join('') +
+            '\n'
+          );
         }
       }
 
@@ -184,11 +196,23 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
         [full, oids],
       );
       if (enums.rows.length) {
-        yield `-- Enum types\n` +
-          enums.rows.map((e) => `CREATE TYPE ${qualified(e.schema, e.name)} AS ENUM (${e.labels.map(lit).join(', ')});\n`).join('') + '\n';
+        yield (
+          `-- Enum types\n` +
+          enums.rows
+            .map((e) => `CREATE TYPE ${qualified(e.schema, e.name)} AS ENUM (${e.labels.map(lit).join(', ')});\n`)
+            .join('') +
+          '\n'
+        );
       }
 
-      const domains = await client.query<{ schema: string; name: string; base: string; notnull: boolean; def: string | null; checks: string[] | null }>(
+      const domains = await client.query<{
+        schema: string;
+        name: string;
+        base: string;
+        notnull: boolean;
+        def: string | null;
+        checks: string[] | null;
+      }>(
         `select n.nspname as schema, t.typname as name, format_type(t.typbasetype, t.typtypmod) as base, t.typnotnull as notnull,
                 t.typdefault as def,
                 (select array_agg(pg_get_constraintdef(c.oid)) from pg_constraint c where c.contypid = t.oid) as checks
@@ -200,17 +224,30 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
         [full, oids],
       );
       if (domains.rows.length) {
-        yield `-- Domains\n` +
+        yield (
+          `-- Domains\n` +
           domains.rows
             .map(
               (d) =>
                 `CREATE DOMAIN ${qualified(d.schema, d.name)} AS ${d.base}${d.def ? ` DEFAULT ${d.def}` : ''}${d.notnull ? ' NOT NULL' : ''}${(d.checks ?? []).map((c) => ` ${c}`).join('')};\n`,
             )
-            .join('') + '\n';
+            .join('') +
+          '\n'
+        );
       }
 
       // Standalone sequences (identity sequences are created by their columns).
-      const seqs = await client.query<{ schema: string; name: string; type: string; start: string; inc: string; min: string; max: string; cache: string; cycle: boolean }>(
+      const seqs = await client.query<{
+        schema: string;
+        name: string;
+        type: string;
+        start: string;
+        inc: string;
+        min: string;
+        max: string;
+        cache: string;
+        cycle: boolean;
+      }>(
         `select s.schemaname as schema, s.sequencename as name, s.data_type::text as type, s.start_value as start,
                 s.increment_by as inc, s.min_value as min, s.max_value as max, s.cache_size as cache, s.cycle
          from pg_sequences s
@@ -222,13 +259,16 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
         [full, oids],
       );
       if (seqs.rows.length) {
-        yield `-- Sequences\n` +
+        yield (
+          `-- Sequences\n` +
           seqs.rows
             .map(
               (s) =>
                 `CREATE SEQUENCE IF NOT EXISTS ${qualified(s.schema, s.name)} AS ${s.type} START WITH ${s.start} INCREMENT BY ${s.inc} MINVALUE ${s.min} MAXVALUE ${s.max} CACHE ${s.cache}${s.cycle ? ' CYCLE' : ''};\n`,
             )
-            .join('') + '\n';
+            .join('') +
+          '\n'
+        );
       }
 
       if (full) {
@@ -254,7 +294,8 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
          where d.deptype = 'a' and d.refobjid = any($1::oid[])`,
         [oids],
       );
-      if (owned.rows.length) yield owned.rows.map((o) => `ALTER SEQUENCE ${o.seq} OWNED BY ${o.tbl}.${o.col};\n`).join('') + '\n';
+      if (owned.rows.length)
+        yield owned.rows.map((o) => `ALTER SEQUENCE ${o.seq} OWNED BY ${o.tbl}.${o.col};\n`).join('') + '\n';
     }
 
     // ---------- data ----------
@@ -282,10 +323,16 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
         [full, oids],
       );
       if (pos.rows.length) {
-        yield `-- Sequence values\n` +
+        yield (
+          `-- Sequence values\n` +
           pos.rows
-            .map((p) => `SELECT pg_catalog.setval(${lit(p.seq)}, ${p.last ?? p.start}, ${p.last === null ? 'false' : 'true'});\n`)
-            .join('') + '\n';
+            .map(
+              (p) =>
+                `SELECT pg_catalog.setval(${lit(p.seq)}, ${p.last ?? p.start}, ${p.last === null ? 'false' : 'true'});\n`,
+            )
+            .join('') +
+          '\n'
+        );
       }
     }
 
@@ -309,9 +356,12 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
       const ok = fks.rows.filter((f) => opts.keepOutsideForeignKeys || included.has(f.ref));
       const skipped = fks.rows.length - ok.length;
       if (ok.length || skipped) {
-        yield `-- Foreign keys\n` +
+        yield (
+          `-- Foreign keys\n` +
           (skipped ? `-- ${skipped} foreign key(s) skipped: they reference tables not in this export.\n` : '') +
-          ok.map((f) => `ALTER TABLE ${f.tbl} ADD CONSTRAINT ${quoteIdent(f.name)} ${f.def};\n`).join('') + '\n';
+          ok.map((f) => `ALTER TABLE ${f.tbl} ADD CONSTRAINT ${quoteIdent(f.name)} ${f.def};\n`).join('') +
+          '\n'
+        );
       }
 
       if (full) {
@@ -323,10 +373,15 @@ export async function* dumpSql(ctx: DbContext, opts: DumpOptions): AsyncGenerato
            order by c.oid`,
         );
         if (views.rows.length) {
-          yield `-- Views\n` +
+          yield (
+            `-- Views\n` +
             views.rows
-              .map((v) => `CREATE ${v.kind === 'm' ? 'MATERIALIZED VIEW' : 'VIEW'} ${qualified(v.schema, v.name)} AS\n${v.def.trimEnd().replace(/;$/, '')};\n\n`)
-              .join('');
+              .map(
+                (v) =>
+                  `CREATE ${v.kind === 'm' ? 'MATERIALIZED VIEW' : 'VIEW'} ${qualified(v.schema, v.name)} AS\n${v.def.trimEnd().replace(/;$/, '')};\n\n`,
+              )
+              .join('')
+          );
         }
       }
 

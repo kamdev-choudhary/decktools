@@ -54,7 +54,16 @@ class ScriptScanner {
   private stmtStart = 0;
   private line = 1;
   private stmtLine = 1;
-  private mode: 'normal' | 'single' | 'escape-single' | 'double' | 'dollar' | 'line-comment' | 'block-comment' | 'copy-eol' | 'copy' = 'normal';
+  private mode:
+    | 'normal'
+    | 'single'
+    | 'escape-single'
+    | 'double'
+    | 'dollar'
+    | 'line-comment'
+    | 'block-comment'
+    | 'copy-eol'
+    | 'copy' = 'normal';
   /** Nothing but whitespace/comments since the last statement ended. */
   private blank = true;
   private dollarTag = '';
@@ -218,7 +227,8 @@ class ScriptScanner {
 
     if (final) {
       const tail = this.buf.slice(this.stmtStart).trim();
-      if (this.mode === 'copy' || this.mode === 'copy-eol') throw new UserError('The dump ended inside a COPY block (missing "\\.").');
+      if (this.mode === 'copy' || this.mode === 'copy-eol')
+        throw new UserError('The dump ended inside a COPY block (missing "\\.").');
       if (tail && this.mode === 'normal') events.push({ type: 'stmt', sql: tail, line: this.stmtLine });
     }
     return this.compact(events);
@@ -245,12 +255,17 @@ function pgRestoreToSql(input: Readable): Readable {
   child.on('error', (e: NodeJS.ErrnoException) =>
     out.destroy(
       e.code === 'ENOENT'
-        ? new UserError('This is a pg_dump custom-format file. Restoring it needs pg_restore installed where pgdeck runs (or dump with --format=plain).')
+        ? new UserError(
+            'This is a pg_dump custom-format file. Restoring it needs pg_restore installed where pgdeck runs (or dump with --format=plain).',
+          )
         : e,
     ),
   );
   child.on('close', (code) => {
-    if (code) out.destroy(new UserError(`pg_restore failed: ${stderr.trim().split('\n').slice(-3).join(' ') || `exit code ${code}`}`));
+    if (code)
+      out.destroy(
+        new UserError(`pg_restore failed: ${stderr.trim().split('\n').slice(-3).join(' ') || `exit code ${code}`}`),
+      );
   });
   input.on('error', (e) => child.stdin.destroy(e));
   input.pipe(child.stdin).on('error', () => {});
@@ -261,7 +276,9 @@ function pgRestoreToSql(input: Readable): Readable {
 function annotate(err: unknown, line: number, sql: string): unknown {
   if (err instanceof pg.DatabaseError) {
     const snippet = sql.trim().replace(/\s+/g, ' ').slice(0, 160);
-    err.where = [err.where, `line ${line} of the dump: ${snippet}${snippet.length >= 160 ? '…' : ''}`].filter(Boolean).join('\n');
+    err.where = [err.where, `line ${line} of the dump: ${snippet}${snippet.length >= 160 ? '…' : ''}`]
+      .filter(Boolean)
+      .join('\n');
   }
   return err;
 }
@@ -346,10 +363,11 @@ export async function restoreScript(ctx: DbContext, body: Readable, opts: Restor
         copySql = ev.sql;
       } else if (ev.type === 'data') {
         const c = copy!;
-        if (!c.write(ev.text)) await new Promise<void>((resolve, reject) => {
-          c.once('drain', resolve);
-          c.once('error', reject);
-        });
+        if (!c.write(ev.text))
+          await new Promise<void>((resolve, reject) => {
+            c.once('drain', resolve);
+            c.once('error', reject);
+          });
       } else {
         const c = copy!;
         try {
@@ -377,7 +395,8 @@ export async function restoreScript(ctx: DbContext, body: Readable, opts: Restor
   } catch (err) {
     if (copy) (copy as ReturnType<typeof copyFrom>).destroy();
     if (opts.singleTransaction) await client.query('rollback').catch(() => {});
-    if ((err as NodeJS.ErrnoException).code === 'ERR_STREAM_PREMATURE_CLOSE') throw new UserError('Upload was cancelled.');
+    if ((err as NodeJS.ErrnoException).code === 'ERR_STREAM_PREMATURE_CLOSE')
+      throw new UserError('Upload was cancelled.');
     if ((err as NodeJS.ErrnoException).code === 'Z_DATA_ERROR') throw new UserError('The file is not valid gzip.');
     throw err;
   } finally {

@@ -63,13 +63,13 @@ any reverse proxy to reach it remotely.
 
 ## Why s3deck?
 
-| | |
-| --- | --- |
-| **Zero setup** | One `npx` command. No Docker image, no desktop app, no bucket CORS changes. |
-| **Any S3 provider** | AWS, R2, MinIO, B2, Spaces, Wasabi and more. Features a provider doesn't support are hidden, not broken. |
-| **Built for big buckets** | Lists millions of objects page by page; uploads and downloads stream, so file size doesn't matter. |
-| **Keys stay on the server** | The browser never sees your access keys. Every request is signed server-side. |
-| **Secure by default** | Generated password, localhost binding, CSRF protection, optional read-only mode. |
+|                             |                                                                                                          |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Zero setup**              | One `npx` command. No Docker image, no desktop app, no bucket CORS changes.                              |
+| **Any S3 provider**         | AWS, R2, MinIO, B2, Spaces, Wasabi and more. Features a provider doesn't support are hidden, not broken. |
+| **Built for big buckets**   | Lists millions of objects page by page; uploads and downloads stream, so file size doesn't matter.       |
+| **Keys stay on the server** | The browser never sees your access keys. Every request is signed server-side.                            |
+| **Secure by default**       | Generated password, localhost binding, CSRF protection, optional read-only mode.                         |
 
 ## Features
 
@@ -158,7 +158,7 @@ any reverse proxy to reach it remotely.
   **admins** also manage buckets, bucket settings, users and the activity log.
 - **Single sign-on.** Let people sign in with Google, Microsoft, Okta, Auth0,
   Keycloak or any OpenID Connect provider (see [Single sign-on](#single-sign-on)).
-- **Remembered connections.** Tick *Remember this connection* when entering
+- **Remembered connections.** Tick _Remember this connection_ when entering
   keys in the browser. They're stored on the server encrypted (AES-256-GCM),
   belong to your user, and are still there after a restart.
 - **Activity log.** Every change (uploads, deletes, moves, settings, sign-ins)
@@ -169,22 +169,22 @@ any reverse proxy to reach it remotely.
 s3deck talks the S3 API, so it works with any compatible service. Features a
 provider doesn't implement (such as versioning on R2) are detected and hidden.
 
-| Provider | Endpoint example | Notes |
-| --- | --- | --- |
-| [AWS S3](https://aws.amazon.com/s3/) | *(none needed)* | Every feature |
-| [Cloudflare R2](https://developers.cloudflare.com/r2/) | `https://<account-id>.r2.cloudflarestorage.com` | Region `auto`. No versioning or object tags |
-| [MinIO](https://min.io) | `http://localhost:9000` | Uses path-style URLs automatically |
-| [Backblaze B2](https://www.backblaze.com/cloud-storage) | `https://s3.us-west-004.backblazeb2.com` | |
-| [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces) | `https://nyc3.digitaloceanspaces.com` | |
-| [Wasabi](https://wasabi.com) | `https://s3.eu-central-1.wasabisys.com` | |
-| [Ceph RGW](https://docs.ceph.com/en/latest/radosgw/), [Garage](https://garagehq.deuxfleurs.fr), [LocalStack](https://www.localstack.cloud) | your gateway URL | Path-style URLs; use `--path-style` if needed |
+| Provider                                                                                                                                   | Endpoint example                                | Notes                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- | --------------------------------------------- |
+| [AWS S3](https://aws.amazon.com/s3/)                                                                                                       | _(none needed)_                                 | Every feature                                 |
+| [Cloudflare R2](https://developers.cloudflare.com/r2/)                                                                                     | `https://<account-id>.r2.cloudflarestorage.com` | Region `auto`. No versioning or object tags   |
+| [MinIO](https://min.io)                                                                                                                    | `http://localhost:9000`                         | Uses path-style URLs automatically            |
+| [Backblaze B2](https://www.backblaze.com/cloud-storage)                                                                                    | `https://s3.us-west-004.backblazeb2.com`        |                                               |
+| [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces)                                                                        | `https://nyc3.digitaloceanspaces.com`           |                                               |
+| [Wasabi](https://wasabi.com)                                                                                                               | `https://s3.eu-central-1.wasabisys.com`         |                                               |
+| [Ceph RGW](https://docs.ceph.com/en/latest/radosgw/), [Garage](https://garagehq.deuxfleurs.fr), [LocalStack](https://www.localstack.cloud) | your gateway URL                                | Path-style URLs; use `--path-style` if needed |
 
 ## Requirements
 
-| | Version |
-| --- | --- |
-| [Node.js](https://nodejs.org) | 20 or newer |
-| Credentials | An access key with permission to list buckets, or `--bucket` to open one bucket directly |
+|                               | Version                                                                                  |
+| ----------------------------- | ---------------------------------------------------------------------------------------- |
+| [Node.js](https://nodejs.org) | 20 or newer                                                                              |
+| Credentials                   | An access key with permission to list buckets, or `--bucket` to open one bucket directly |
 
 ## Usage
 
@@ -211,43 +211,43 @@ connections and switch between them from the sidebar. Disable this with
 
 ### Options
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `-p, --port <port>` | `47715` (or `$PORT`) | Port for the web UI |
-| `-H, --host <host>` | `127.0.0.1` | Interface to bind. Use `0.0.0.0` in containers or to expose on a LAN |
-| `-u, --user <name>` | `admin` | Login username |
-| `-P, --password <password>` | random | Login password (or `$S3DECK_PASSWORD`). A new random one is printed on each start if not set |
-| `--no-auth` | | Disable the login page. Only on a trusted machine |
-| `--region <region>` | from config, else `us-east-1` | Region to sign requests for (or `$AWS_REGION`) |
-| `--profile <name>` | | AWS profile to use (or `$AWS_PROFILE`) |
-| `--access-key <id>` | | Access key ID. Prefer the environment variable, so it stays out of shell history |
-| `--secret-key <secret>` | | Secret access key. Same advice |
-| `--session-token <token>` | | Session token for temporary credentials (or `$AWS_SESSION_TOKEN`) |
-| `--path-style` | auto | Use path-style URLs (`host/bucket/key`) instead of virtual-hosted style |
-| `--bucket <name>` | | Open this bucket directly. Use it when the key may not list buckets. Repeat for several |
-| `--readonly` | | Disable uploads, edits and deletes in the UI and the API |
-| `--base-path <path>` | | Serve under a path prefix such as `/s3` (see [reverse proxy](#behind-a-reverse-proxy)) |
-| `--open` | | Open the UI in your browser |
-| `--data-dir <dir>` | `~/.config/s3deck` | Where users, remembered connections and the activity log are kept (or `$S3DECK_DATA_DIR`) |
-| `--no-persist` | | Write nothing to disk: no extra users, remembered connections or activity file |
-| `--public-url <url>` | from the request | Public URL of s3deck, for single sign-on redirects (or `$S3DECK_PUBLIC_URL`) |
-| `--no-browser-connections` | | Don't let users enter credentials in the browser |
-| `-v, --version` | | Print the version |
-| `-h, --help` | | Show help |
+| Option                      | Default                       | Description                                                                                  |
+| --------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------- |
+| `-p, --port <port>`         | `47715` (or `$PORT`)          | Port for the web UI                                                                          |
+| `-H, --host <host>`         | `127.0.0.1`                   | Interface to bind. Use `0.0.0.0` in containers or to expose on a LAN                         |
+| `-u, --user <name>`         | `admin`                       | Login username                                                                               |
+| `-P, --password <password>` | random                        | Login password (or `$S3DECK_PASSWORD`). A new random one is printed on each start if not set |
+| `--no-auth`                 |                               | Disable the login page. Only on a trusted machine                                            |
+| `--region <region>`         | from config, else `us-east-1` | Region to sign requests for (or `$AWS_REGION`)                                               |
+| `--profile <name>`          |                               | AWS profile to use (or `$AWS_PROFILE`)                                                       |
+| `--access-key <id>`         |                               | Access key ID. Prefer the environment variable, so it stays out of shell history             |
+| `--secret-key <secret>`     |                               | Secret access key. Same advice                                                               |
+| `--session-token <token>`   |                               | Session token for temporary credentials (or `$AWS_SESSION_TOKEN`)                            |
+| `--path-style`              | auto                          | Use path-style URLs (`host/bucket/key`) instead of virtual-hosted style                      |
+| `--bucket <name>`           |                               | Open this bucket directly. Use it when the key may not list buckets. Repeat for several      |
+| `--readonly`                |                               | Disable uploads, edits and deletes in the UI and the API                                     |
+| `--base-path <path>`        |                               | Serve under a path prefix such as `/s3` (see [reverse proxy](#behind-a-reverse-proxy))       |
+| `--open`                    |                               | Open the UI in your browser                                                                  |
+| `--data-dir <dir>`          | `~/.config/s3deck`            | Where users, remembered connections and the activity log are kept (or `$S3DECK_DATA_DIR`)    |
+| `--no-persist`              |                               | Write nothing to disk: no extra users, remembered connections or activity file               |
+| `--public-url <url>`        | from the request              | Public URL of s3deck, for single sign-on redirects (or `$S3DECK_PUBLIC_URL`)                 |
+| `--no-browser-connections`  |                               | Don't let users enter credentials in the browser                                             |
+| `-v, --version`             |                               | Print the version                                                                            |
+| `-h, --help`                |                               | Show help                                                                                    |
 
 ### Environment variables
 
-| Variable | Used for |
-| --- | --- |
-| `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` | Credentials |
-| `AWS_PROFILE`, `AWS_REGION` | Profile and region (same as `--profile`, `--region`) |
-| `AWS_ENDPOINT_URL_S3`, `AWS_ENDPOINT_URL` | Endpoint when none is passed as an argument |
-| `S3DECK_PASSWORD` | Login password (same as `--password`) |
-| `PORT` | Web UI port (same as `--port`) |
-| `S3DECK_DATA_DIR` | Data directory (same as `--data-dir`) |
-| `S3DECK_SECRET` | Passphrase that encrypts remembered connections. If unset, a random key is created in the data directory |
-| `S3DECK_PUBLIC_URL` | Public URL (same as `--public-url`) |
-| `S3DECK_OIDC_*` | Single sign-on, see below |
+| Variable                                                          | Used for                                                                                                 |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` | Credentials                                                                                              |
+| `AWS_PROFILE`, `AWS_REGION`                                       | Profile and region (same as `--profile`, `--region`)                                                     |
+| `AWS_ENDPOINT_URL_S3`, `AWS_ENDPOINT_URL`                         | Endpoint when none is passed as an argument                                                              |
+| `S3DECK_PASSWORD`                                                 | Login password (same as `--password`)                                                                    |
+| `PORT`                                                            | Web UI port (same as `--port`)                                                                           |
+| `S3DECK_DATA_DIR`                                                 | Data directory (same as `--data-dir`)                                                                    |
+| `S3DECK_SECRET`                                                   | Passphrase that encrypts remembered connections. If unset, a random key is created in the data directory |
+| `S3DECK_PUBLIC_URL`                                               | Public URL (same as `--public-url`)                                                                      |
+| `S3DECK_OIDC_*`                                                   | Single sign-on, see below                                                                                |
 
 ### Examples
 
@@ -270,18 +270,18 @@ npx s3deck http://minio:9000 --host 0.0.0.0 --password "$SECRET"
 
 ### Keyboard shortcuts
 
-| Shortcut | Action |
-| --- | --- |
-| <kbd>⌘</kbd> <kbd>K</kbd> | Switch bucket / command menu |
-| <kbd>⌘</kbd> <kbd>U</kbd> | Upload files |
-| <kbd>Space</kbd> | Preview the selected file |
-| <kbd>Enter</kbd> | Open a folder |
-| <kbd>⌫</kbd> | Go up one folder |
-| <kbd>⌘</kbd> <kbd>A</kbd> | Select everything in the folder |
-| <kbd>⌘</kbd> <kbd>V</kbd> | Upload pasted files or screenshots |
-| <kbd>/</kbd> | Filter the folder |
-| <kbd>↑</kbd> <kbd>↓</kbd> | Move between rows |
-| <kbd>Esc</kbd> | Close the preview, or clear the selection |
+| Shortcut                  | Action                                    |
+| ------------------------- | ----------------------------------------- |
+| <kbd>⌘</kbd> <kbd>K</kbd> | Switch bucket / command menu              |
+| <kbd>⌘</kbd> <kbd>U</kbd> | Upload files                              |
+| <kbd>Space</kbd>          | Preview the selected file                 |
+| <kbd>Enter</kbd>          | Open a folder                             |
+| <kbd>⌫</kbd>              | Go up one folder                          |
+| <kbd>⌘</kbd> <kbd>A</kbd> | Select everything in the folder           |
+| <kbd>⌘</kbd> <kbd>V</kbd> | Upload pasted files or screenshots        |
+| <kbd>/</kbd>              | Filter the folder                         |
+| <kbd>↑</kbd> <kbd>↓</kbd> | Move between rows                         |
+| <kbd>Esc</kbd>            | Close the preview, or clear the selection |
 
 <sub>On Windows and Linux, use <kbd>Ctrl</kbd> in place of <kbd>⌘</kbd>.</sub>
 
@@ -291,12 +291,12 @@ The login printed at startup is always an **admin**. Admins add more people on
 the **Users** page. Users, remembered connections and the activity log live in
 the data directory (`~/.config/s3deck` by default, mode `0700`):
 
-| File | Contents |
-| --- | --- |
-| `users.json` | Users, roles and scrypt password hashes |
+| File              | Contents                                           |
+| ----------------- | -------------------------------------------------- |
+| `users.json`      | Users, roles and scrypt password hashes            |
 | `connections.enc` | Remembered connections, encrypted with AES-256-GCM |
-| `secret.key` | The encryption key, unless `S3DECK_SECRET` is set |
-| `activity.jsonl` | The activity log (rotated at 10 MB) |
+| `secret.key`      | The encryption key, unless `S3DECK_SECRET` is set  |
+| `activity.jsonl`  | The activity log (rotated at 10 MB)                |
 
 Back up the data directory together with its key: without `secret.key` (or the
 same `S3DECK_SECRET`), remembered connections can't be decrypted.
@@ -316,13 +316,13 @@ S3DECK_PUBLIC_URL=https://files.example.com \
 npx s3deck
 ```
 
-| Variable | Meaning |
-| --- | --- |
-| `S3DECK_OIDC_ISSUER` | Issuer URL (discovery is automatic) |
-| `S3DECK_OIDC_CLIENT_ID`, `S3DECK_OIDC_CLIENT_SECRET` | Client credentials |
-| `S3DECK_OIDC_LABEL` | Button text on the login page |
-| `S3DECK_OIDC_ALLOW` | Emails or `@domains` allowed in. People added on the Users page (by email) are always allowed, with their own role |
-| `S3DECK_OIDC_DEFAULT_ROLE` | Role for allowed people who aren't on the Users page (`viewer` by default) |
+| Variable                                             | Meaning                                                                                                            |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `S3DECK_OIDC_ISSUER`                                 | Issuer URL (discovery is automatic)                                                                                |
+| `S3DECK_OIDC_CLIENT_ID`, `S3DECK_OIDC_CLIENT_SECRET` | Client credentials                                                                                                 |
+| `S3DECK_OIDC_LABEL`                                  | Button text on the login page                                                                                      |
+| `S3DECK_OIDC_ALLOW`                                  | Emails or `@domains` allowed in. People added on the Users page (by email) are always allowed, with their own role |
+| `S3DECK_OIDC_DEFAULT_ROLE`                           | Role for allowed people who aren't on the Users page (`viewer` by default)                                         |
 
 Sign-in uses the authorization code flow with PKCE, and only accepts verified
 email addresses.
@@ -419,14 +419,14 @@ rather than a public issue.
 
 ## Troubleshooting
 
-| Symptom | Likely cause and fix |
-| --- | --- |
-| `AccessDenied` when listing buckets | The key can't call `ListBuckets`. Pass the buckets it can reach with `--bucket <name>` (repeat for several). |
-| `SignatureDoesNotMatch` or `AuthorizationHeaderMalformed` | Wrong region. Set `--region` (R2 uses `auto`). |
-| Bucket not found / DNS errors on self-hosted storage | The server needs path-style URLs. Add `--path-style`. |
-| Uploads fail or stall behind a proxy | The proxy is limiting or buffering bodies. See [Behind a reverse proxy](#behind-a-reverse-proxy). |
-| Logged out after restarting | Expected: sessions live in memory. Set `--password` / `S3DECK_PASSWORD` to keep the same login. |
-| Remembered connections are gone | The data directory or its `secret.key` changed. Keep `S3DECK_SECRET` or the key file with the data directory. |
+| Symptom                                                   | Likely cause and fix                                                                                          |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `AccessDenied` when listing buckets                       | The key can't call `ListBuckets`. Pass the buckets it can reach with `--bucket <name>` (repeat for several).  |
+| `SignatureDoesNotMatch` or `AuthorizationHeaderMalformed` | Wrong region. Set `--region` (R2 uses `auto`).                                                                |
+| Bucket not found / DNS errors on self-hosted storage      | The server needs path-style URLs. Add `--path-style`.                                                         |
+| Uploads fail or stall behind a proxy                      | The proxy is limiting or buffering bodies. See [Behind a reverse proxy](#behind-a-reverse-proxy).             |
+| Logged out after restarting                               | Expected: sessions live in memory. Set `--password` / `S3DECK_PASSWORD` to keep the same login.               |
+| Remembered connections are gone                           | The data directory or its `secret.key` changed. Keep `S3DECK_SECRET` or the key file with the data directory. |
 
 ## Development
 
@@ -449,16 +449,16 @@ AWS_ENDPOINT_URL=http://localhost:9000 pnpm dev
 
 Open <http://localhost:47716>.
 
-| Script | What it does |
-| --- | --- |
-| `pnpm dev` | API with auto-restart and the UI with hot reload |
-| `pnpm build` | Build the UI (Vite) and the CLI (tsdown) into `dist/` |
-| `pnpm start` | Run the built CLI |
-| `pnpm typecheck` | Type-check the server, the UI and the tests |
-| `pnpm lint` | Lint with oxlint |
-| `pnpm test` | Unit and API tests (Vitest). Add `S3DECK_TEST_ENDPOINT` to also run the S3 integration tests |
-| `pnpm test:integration` | Integration tests against `http://localhost:9000` (or `$S3DECK_TEST_ENDPOINT`) |
-| `pnpm pack:check` | Build and list exactly what would be published |
+| Script                  | What it does                                                                                 |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| `pnpm dev`              | API with auto-restart and the UI with hot reload                                             |
+| `pnpm build`            | Build the UI (Vite) and the CLI (tsdown) into `dist/`                                        |
+| `pnpm start`            | Run the built CLI                                                                            |
+| `pnpm typecheck`        | Type-check the server, the UI and the tests                                                  |
+| `pnpm lint`             | Lint with oxlint                                                                             |
+| `pnpm test`             | Unit and API tests (Vitest). Add `S3DECK_TEST_ENDPOINT` to also run the S3 integration tests |
+| `pnpm test:integration` | Integration tests against `http://localhost:9000` (or `$S3DECK_TEST_ENDPOINT`)               |
+| `pnpm pack:check`       | Build and list exactly what would be published                                               |
 
 ### Project layout
 

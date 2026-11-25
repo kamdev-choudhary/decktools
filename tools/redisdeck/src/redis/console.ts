@@ -60,17 +60,56 @@ export function splitArgs(line: string): Buffer[] {
 
 /** Commands that need a connection to themselves; the console shares one per database. */
 const STATEFUL = new Set([
-  'subscribe', 'psubscribe', 'ssubscribe', 'unsubscribe', 'punsubscribe', 'sunsubscribe',
-  'monitor', 'select', 'swapdb', 'multi', 'exec', 'discard', 'watch', 'unwatch',
-  'quit', 'reset', 'hello', 'auth', 'sync', 'psync', 'replconf',
+  'subscribe',
+  'psubscribe',
+  'ssubscribe',
+  'unsubscribe',
+  'punsubscribe',
+  'sunsubscribe',
+  'monitor',
+  'select',
+  'swapdb',
+  'multi',
+  'exec',
+  'discard',
+  'watch',
+  'unwatch',
+  'quit',
+  'reset',
+  'hello',
+  'auth',
+  'sync',
+  'psync',
+  'replconf',
 ]);
 
 /** Admin commands that only read, still allowed in --readonly mode. */
 const READONLY_ADMIN = new Set([
-  'config|get', 'slowlog|get', 'slowlog|len', 'client|list', 'client|info', 'client|getname', 'client|id',
-  'acl|whoami', 'acl|list', 'acl|users', 'acl|getuser', 'acl|cat', 'acl|log',
-  'latency|latest', 'latency|history', 'latency|doctor', 'memory|stats', 'memory|doctor',
-  'module|list', 'command|count', 'command|info', 'command|docs', 'command|list', 'lastsave', 'role',
+  'config|get',
+  'slowlog|get',
+  'slowlog|len',
+  'client|list',
+  'client|info',
+  'client|getname',
+  'client|id',
+  'acl|whoami',
+  'acl|list',
+  'acl|users',
+  'acl|getuser',
+  'acl|cat',
+  'acl|log',
+  'latency|latest',
+  'latency|history',
+  'latency|doctor',
+  'memory|stats',
+  'memory|doctor',
+  'module|list',
+  'command|count',
+  'command|info',
+  'command|docs',
+  'command|list',
+  'lastsave',
+  'role',
 ]);
 
 type CommandInfo = [name: string, arity: number, flags: string[], ...rest: unknown[]] | null;
@@ -84,11 +123,12 @@ export function refusal(name: string, sub: string | null, flags: string[] | null
   }
   if (name === 'client' && sub === 'reply') return 'CLIENT REPLY would break the console connection.';
   if (!flags) return null; // unknown to COMMAND INFO: let Redis answer
-  if (flags.includes('blocking')) return 'Blocking commands can\'t run from the console.';
+  if (flags.includes('blocking')) return "Blocking commands can't run from the console.";
   if (!readonly) return null;
   const full = sub ? `${name}|${sub}` : name;
   if (flags.includes('write') || flags.includes('may_replicate') || flags.includes('pubsub')) return READONLY_ERROR;
-  if (flags.includes('script_runner') && !flags.includes('readonly')) return `${READONLY_ERROR} (use EVAL_RO / FCALL_RO)`;
+  if (flags.includes('script_runner') && !flags.includes('readonly'))
+    return `${READONLY_ERROR} (use EVAL_RO / FCALL_RO)`;
   if (flags.includes('admin') && !READONLY_ADMIN.has(full) && !READONLY_ADMIN.has(name)) return READONLY_ERROR;
   return null;
 }
@@ -105,7 +145,8 @@ export function toReply(v: unknown): Reply {
   if (v === null || v === undefined) return { kind: 'nil' };
   if (Buffer.isBuffer(v)) return { kind: 'string', value: toRText(v) };
   // The console connection uses stringNumbers, so integers arrive as exact strings.
-  if (typeof v === 'string' || typeof v === 'number' || typeof v === 'bigint') return { kind: 'integer', value: String(v) };
+  if (typeof v === 'string' || typeof v === 'number' || typeof v === 'bigint')
+    return { kind: 'integer', value: String(v) };
   if (Array.isArray(v)) return { kind: 'array', items: v.map(toReply) };
   if (v instanceof Error) return { kind: 'error', value: v.message };
   return { kind: 'status', value: String(v) };
@@ -126,7 +167,8 @@ export async function runCommand(client: Redis, line: string, readonly: boolean)
     const raw = await client.callBuffer(args[0]!.toString('utf8'), args.slice(1));
     return { reply: toReply(raw), ms: performance.now() - started };
   } catch (err) {
-    if (err instanceof ReplyError) return { reply: { kind: 'error', value: (err as Error).message }, ms: performance.now() - started };
+    if (err instanceof ReplyError)
+      return { reply: { kind: 'error', value: (err as Error).message }, ms: performance.now() - started };
     throw err;
   }
 }

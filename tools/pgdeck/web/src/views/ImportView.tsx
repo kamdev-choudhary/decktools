@@ -1,5 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowRight, CheckCircle2, ChevronDown, Database, FileUp, Loader2, Upload, X, XCircle } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  ChevronDown,
+  Database,
+  FileUp,
+  Loader2,
+  Upload,
+  X,
+  XCircle,
+} from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { ImportResponse, RestoreResponse } from '@shared/export';
@@ -88,29 +99,31 @@ export function ImportView({ db }: { db: string }) {
     () =>
       (tables.data ?? [])
         .filter((t) => t.kind === 'r' || t.kind === 'p')
-        .map((t) => ({ value: `${t.schema}.${t.name}`, label: t.schema === 'public' ? t.name : `${t.schema}.${t.name}` })),
+        .map((t) => ({
+          value: `${t.schema}.${t.name}`,
+          label: t.schema === 'public' ? t.name : `${t.schema}.${t.name}`,
+        })),
     [tables.data],
   );
 
-  const update = (id: number, patch: Partial<Item>) => setItems((list) => list.map((it) => (it.id === id ? { ...it, ...patch } : it)));
+  const update = (id: number, patch: Partial<Item>) =>
+    setItems((list) => list.map((it) => (it.id === id ? { ...it, ...patch } : it)));
 
   const addFiles = (files: FileList | File[] | null) => {
     if (!files?.length) return;
-    const added = [...files].map(
-      (file): Item => ({
-        id: nextId++,
-        file,
-        kind: null,
-        gzip: false,
-        restore: { single: true, skipOwnership: true },
-        target: null,
-        matched: false,
-        plan: null,
-        problem: null,
-        open: false,
-        status: 'ready',
-      }),
-    );
+    const added = [...files].map((file): Item => ({
+      id: nextId++,
+      file,
+      kind: null,
+      gzip: false,
+      restore: { single: true, skipOwnership: true },
+      target: null,
+      matched: false,
+      plan: null,
+      problem: null,
+      open: false,
+      status: 'ready',
+    }));
     setItems((list) => [...list, ...added]);
     // Inspect contents: dumps often have no telling extension.
     for (const it of added) {
@@ -141,7 +154,8 @@ export function ImportView({ db }: { db: string }) {
       if (stopRef.current) break;
       if (it.status === 'done') continue;
       const startedAt = performance.now();
-      const onProgress = (loaded: number, total: number) => update(it.id, { progress: { loaded, total, startedAt, at: performance.now() } });
+      const onProgress = (loaded: number, total: number) =>
+        update(it.id, { progress: { loaded, total, startedAt, at: performance.now() } });
       let job: { promise: Promise<ImportResponse | RestoreResponse>; abort: () => void };
       if (isDump(it)) {
         const params = new URLSearchParams({
@@ -155,7 +169,11 @@ export function ImportView({ db }: { db: string }) {
         job = uploadFile<ImportResponse>(db, 'import', it.file, it.plan.params, onProgress);
       } else continue;
 
-      update(it.id, { status: 'uploading', progress: { loaded: 0, total: it.file.size, startedAt, at: startedAt }, error: undefined });
+      update(it.id, {
+        status: 'uploading',
+        progress: { loaded: 0, total: it.file.size, startedAt, at: startedAt },
+        error: undefined,
+      });
       abortRef.current = job.abort;
       try {
         const r = await job.promise;
@@ -177,7 +195,10 @@ export function ImportView({ db }: { db: string }) {
     setRunning(false);
     void qc.invalidateQueries({ queryKey: keys.db(db) });
     if (ok) toast.success(`Imported ${formatNumber(rows)} rows from ${ok} file${ok > 1 ? 's' : ''}`);
-    if (failed) toast.error(`${failed} file${failed > 1 ? 's' : ''} failed. Nothing from ${failed > 1 ? 'those files' : 'that file'} was imported.`);
+    if (failed)
+      toast.error(
+        `${failed} file${failed > 1 ? 's' : ''} failed. Nothing from ${failed > 1 ? 'those files' : 'that file'} was imported.`,
+      );
   };
 
   const stop = () => {
@@ -193,8 +214,9 @@ export function ImportView({ db }: { db: string }) {
             <div className="space-y-1">
               <h1 className="text-2xl font-semibold tracking-tight">Import data</h1>
               <p className="text-sm text-muted-foreground">
-                Drop table files (<span className="font-mono text-foreground">users.csv</span> → <span className="font-mono text-foreground">users</span>) or a whole
-                database backup from <span className="font-mono text-foreground">pg_dump</span>.
+                Drop table files (<span className="font-mono text-foreground">users.csv</span> →{' '}
+                <span className="font-mono text-foreground">users</span>) or a whole database backup from{' '}
+                <span className="font-mono text-foreground">pg_dump</span>.
               </p>
             </div>
             {items.length > 0 && (
@@ -211,7 +233,12 @@ export function ImportView({ db }: { db: string }) {
             )}
           </div>
 
-          {readonly && <ErrorAlert error={new Error('pgdeck is running with --readonly, so importing is disabled.')} title="Read-only" />}
+          {readonly && (
+            <ErrorAlert
+              error={new Error('pgdeck is running with --readonly, so importing is disabled.')}
+              title="Read-only"
+            />
+          )}
 
           <input
             ref={inputRef}
@@ -242,14 +269,20 @@ export function ImportView({ db }: { db: string }) {
                 }}
                 className={cn(
                   'flex w-full items-center rounded-lg border border-dashed transition-colors hover:bg-muted/40 disabled:pointer-events-none disabled:opacity-50',
-                  items.length ? 'gap-3 px-4 py-4 text-left' : 'min-h-72 flex-col justify-center gap-3 px-6 py-16 text-center',
+                  items.length
+                    ? 'gap-3 px-4 py-4 text-left'
+                    : 'min-h-72 flex-col justify-center gap-3 px-6 py-16 text-center',
                   dragging && 'border-foreground bg-muted/60',
                 )}
               >
                 <FileUp className={cn('shrink-0 text-muted-foreground', items.length ? 'size-5' : 'size-8')} />
                 <div>
-                  <div className="text-sm font-medium">{items.length ? 'Add more files' : 'Drop files here, or click to browse'}</div>
-                  <div className="mt-0.5 text-xs text-muted-foreground">CSV, TSV, JSON Lines or database backups (.sql, .dump), optionally .gz. Any size.</div>
+                  <div className="text-sm font-medium">
+                    {items.length ? 'Add more files' : 'Drop files here, or click to browse'}
+                  </div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">
+                    CSV, TSV, JSON Lines or database backups (.sql, .dump), optionally .gz. Any size.
+                  </div>
                 </div>
               </button>
 
@@ -278,7 +311,9 @@ export function ImportView({ db }: { db: string }) {
                         item={it}
                         tableOptions={tableOptions}
                         busy={running}
-                        onTarget={(t) => update(it.id, { target: t, matched: false, plan: null, problem: null, open: true })}
+                        onTarget={(t) =>
+                          update(it.id, { target: t, matched: false, plan: null, problem: null, open: true })
+                        }
                         onPlan={(plan, problem) => update(it.id, { plan, problem })}
                         onToggle={() => update(it.id, { open: !it.open })}
                         onRemove={() => setItems((list) => list.filter((x) => x.id !== it.id))}
@@ -296,21 +331,25 @@ export function ImportView({ db }: { db: string }) {
                     <b className="font-medium text-foreground">CSV / TSV / JSON Lines</b>: data for one table each
                   </li>
                   <li>
-                    <b className="font-medium text-foreground">Database backups</b>: <span className="font-mono">pg_dump</span> plain SQL (.sql) or custom format
-                    (.dump), restoring all their tables at once
+                    <b className="font-medium text-foreground">Database backups</b>:{' '}
+                    <span className="font-mono">pg_dump</span> plain SQL (.sql) or custom format (.dump), restoring all
+                    their tables at once
                   </li>
                   <li>
-                    Any of them gzipped (<span className="font-mono">.gz</span>). Files are recognised by their content, not only their name.
+                    Any of them gzipped (<span className="font-mono">.gz</span>). Files are recognised by their content,
+                    not only their name.
                   </li>
                 </ul>
               </InfoCard>
               <InfoCard title="How table files are matched">
                 <ul className="space-y-1.5">
                   <li>
-                    <span className="font-mono text-foreground">orders.csv</span> → <span className="font-mono text-foreground">orders</span>
+                    <span className="font-mono text-foreground">orders.csv</span> →{' '}
+                    <span className="font-mono text-foreground">orders</span>
                   </li>
                   <li>
-                    <span className="font-mono text-foreground">sales.orders.csv.gz</span> → <span className="font-mono text-foreground">sales.orders</span>
+                    <span className="font-mono text-foreground">sales.orders.csv.gz</span> →{' '}
+                    <span className="font-mono text-foreground">sales.orders</span>
                   </li>
                   <li>Case, spaces and dashes are ignored. Columns are matched by name; review them with ⌄.</li>
                 </ul>
@@ -320,7 +359,8 @@ export function ImportView({ db }: { db: string }) {
                   <li>Each file is one transaction: an error rolls that file back and tells you the line.</li>
                   <li>Backups create their tables, so restore into an empty database (or one without those tables).</li>
                   <li>
-                    Custom-format backups need <span className="font-mono">pg_restore</span> installed where pgdeck runs.
+                    Custom-format backups need <span className="font-mono">pg_restore</span> installed where pgdeck
+                    runs.
                   </li>
                   <li>Files run top to bottom. Put referenced tables first (e.g. users before orders).</li>
                 </ul>
@@ -468,10 +508,21 @@ function DumpCard({ db, item, busy, onOptions, onToggle, onRemove }: DumpCardPro
         </Badge>
         <StatusBadge item={item} />
         <div className="flex shrink-0 items-center">
-          <Button variant="ghost" size="icon-sm" onClick={onToggle} aria-label={item.open ? 'Hide options' : 'Review options'}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onToggle}
+            aria-label={item.open ? 'Hide options' : 'Review options'}
+          >
             <ChevronDown className={cn('transition-transform', item.open && 'rotate-180')} />
           </Button>
-          <Button variant="ghost" size="icon-sm" onClick={onRemove} aria-label="Remove file" disabled={item.status === 'uploading'}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onRemove}
+            aria-label="Remove file"
+            disabled={item.status === 'uploading'}
+          >
             <X />
           </Button>
         </div>
@@ -484,7 +535,12 @@ function DumpCard({ db, item, busy, onOptions, onToggle, onRemove }: DumpCardPro
       <div className={cn('space-y-4 border-t bg-muted/20 px-4 py-4', !item.open && 'hidden')}>
         <div className="flex flex-wrap gap-x-8 gap-y-3">
           <label className="flex cursor-pointer items-start gap-2 text-sm">
-            <Checkbox className="mt-0.5" checked={item.restore.single} disabled={locked} onCheckedChange={(v) => onOptions({ ...item.restore, single: v === true })} />
+            <Checkbox
+              className="mt-0.5"
+              checked={item.restore.single}
+              disabled={locked}
+              onCheckedChange={(v) => onOptions({ ...item.restore, single: v === true })}
+            />
             <span>
               Single transaction
               <span className="block text-xs text-muted-foreground">Any error rolls back the whole restore.</span>
@@ -499,13 +555,17 @@ function DumpCard({ db, item, busy, onOptions, onToggle, onRemove }: DumpCardPro
             />
             <span>
               Skip ownership and privileges
-              <span className="block text-xs text-muted-foreground">Ignore OWNER TO / GRANT for roles that may not exist here.</span>
+              <span className="block text-xs text-muted-foreground">
+                Ignore OWNER TO / GRANT for roles that may not exist here.
+              </span>
             </span>
           </label>
         </div>
         {shown.length > 0 && (
           <div className="space-y-1.5">
-            <div className="text-xs text-muted-foreground">Tables found{d?.partial ? ' in the first part of the file' : ''}:</div>
+            <div className="text-xs text-muted-foreground">
+              Tables found{d?.partial ? ' in the first part of the file' : ''}:
+            </div>
             <div className="flex flex-wrap gap-1">
               {shown.map((t) => (
                 <span key={t} className="rounded border bg-background px-1.5 py-0.5 font-mono text-[11px]">
@@ -513,7 +573,9 @@ function DumpCard({ db, item, busy, onOptions, onToggle, onRemove }: DumpCardPro
                 </span>
               ))}
               {(d?.tables.length ?? 0) > shown.length && (
-                <span className="px-1 py-0.5 text-[11px] text-muted-foreground">+{d!.tables.length - shown.length} more</span>
+                <span className="px-1 py-0.5 text-[11px] text-muted-foreground">
+                  +{d!.tables.length - shown.length} more
+                </span>
               )}
             </div>
           </div>
@@ -578,10 +640,22 @@ function FileCard({ db, item, tableOptions, busy, onTarget, onPlan, onToggle, on
         </div>
         <StatusBadge item={item} />
         <div className="flex shrink-0 items-center">
-          <Button variant="ghost" size="icon-sm" onClick={onToggle} aria-label={item.open ? 'Hide options' : 'Review options'} disabled={!t}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onToggle}
+            aria-label={item.open ? 'Hide options' : 'Review options'}
+            disabled={!t}
+          >
             <ChevronDown className={cn('transition-transform', item.open && 'rotate-180')} />
           </Button>
-          <Button variant="ghost" size="icon-sm" onClick={onRemove} aria-label="Remove file" disabled={item.status === 'uploading'}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onRemove}
+            aria-label="Remove file"
+            disabled={item.status === 'uploading'}
+          >
             <X />
           </Button>
         </div>
@@ -595,7 +669,9 @@ function FileCard({ db, item, tableOptions, busy, onTarget, onPlan, onToggle, on
           </a>
         </p>
       )}
-      {!t && item.status === 'ready' && <p className="-mt-1 px-4 pb-3 pl-11 text-xs text-warning">No table matches this file name. Choose one.</p>}
+      {!t && item.status === 'ready' && (
+        <p className="-mt-1 px-4 pb-3 pl-11 text-xs text-warning">No table matches this file name. Choose one.</p>
+      )}
 
       {/* Settings stay mounted while collapsed so the plan keeps updating. */}
       {t && (
@@ -628,6 +704,7 @@ function TargetSettings({
       </div>
     );
   if (meta.isError) return <ErrorAlert error={meta.error} />;
-  if (!(meta.data.kind === 'r' || meta.data.kind === 'p')) return <p className="text-sm text-destructive">Only tables can be imported into.</p>;
+  if (!(meta.data.kind === 'r' || meta.data.kind === 'p'))
+    return <p className="text-sm text-destructive">Only tables can be imported into.</p>;
   return <ImportSettings file={file} meta={meta.data} disabled={disabled} onPlan={onPlan} />;
 }

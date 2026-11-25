@@ -11,7 +11,14 @@ import { z } from 'zod';
 import { errorText } from '@/api/client';
 import { objectApi, useBucketMutation, useBuckets, useObjectDetails, useTags } from '@/api/hooks';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldError, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -63,8 +70,16 @@ const folderNameSchema = z.object({
     .refine((v) => !v.startsWith('/') && !v.includes('//'), 'No leading or double slashes'),
 });
 
-export function NewFolderDialog({ bucket, prefix, onClose, onCreated }: DialogProps & { prefix: string; onCreated: (p: string) => void }) {
-  const form = useForm<z.infer<typeof folderNameSchema>>({ resolver: zodResolver(folderNameSchema), defaultValues: { name: '' } });
+export function NewFolderDialog({
+  bucket,
+  prefix,
+  onClose,
+  onCreated,
+}: DialogProps & { prefix: string; onCreated: (p: string) => void }) {
+  const form = useForm<z.infer<typeof folderNameSchema>>({
+    resolver: zodResolver(folderNameSchema),
+    defaultValues: { name: '' },
+  });
   const create = useBucketMutation(bucket, (p: string) => objectApi.createFolder(bucket, p));
   const { errors } = form.formState;
 
@@ -82,10 +97,18 @@ export function NewFolderDialog({ bucket, prefix, onClose, onCreated }: DialogPr
           <DialogHeader>
             <DialogTitle>New folder</DialogTitle>
             <DialogDescription>
-              In <span className="font-mono">{bucket}/{prefix}</span>
+              In{' '}
+              <span className="font-mono">
+                {bucket}/{prefix}
+              </span>
             </DialogDescription>
           </DialogHeader>
-          <FormField label="Folder name" htmlFor="folder-name" error={errors.name?.message} description='Use "/" to create nested folders'>
+          <FormField
+            label="Folder name"
+            htmlFor="folder-name"
+            error={errors.name?.message}
+            description='Use "/" to create nested folders'
+          >
             <Input id="folder-name" autoFocus {...form.register('name')} aria-invalid={!!errors.name} />
           </FormField>
           {create.isError && <ErrorAlert error={create.error} />}
@@ -108,7 +131,12 @@ export function NewFolderDialog({ bucket, prefix, onClose, onCreated }: DialogPr
 /* Delete                                                              */
 /* ------------------------------------------------------------------ */
 
-export function DeleteDialog({ bucket, entries, onClose, onDeleted }: DialogProps & { entries: Entry[]; onDeleted: () => void }) {
+export function DeleteDialog({
+  bucket,
+  entries,
+  onClose,
+  onDeleted,
+}: DialogProps & { entries: Entry[]; onDeleted: () => void }) {
   const keys = entries.filter((e): e is ObjectEntry => e.type === 'object');
   const prefixes = entries.filter((e) => e.type === 'folder').map((e) => e.key);
   const knownBytes = keys.reduce((a, k) => a + k.size, 0);
@@ -130,8 +158,7 @@ export function DeleteDialog({ bucket, entries, onClose, onDeleted }: DialogProp
 
   const del = useBucketMutation(bucket, () => objectApi.delete(bucket, { keys: keys.map((k) => k.key), prefixes }));
 
-  const title =
-    entries.length === 1 ? `Delete “${entries[0]!.name}”?` : `Delete ${entries.length} items?`;
+  const title = entries.length === 1 ? `Delete “${entries[0]!.name}”?` : `Delete ${entries.length} items?`;
 
   return (
     <Dialog open onOpenChange={(o) => !o && !del.isPending && onClose()}>
@@ -146,8 +173,8 @@ export function DeleteDialog({ bucket, entries, onClose, onDeleted }: DialogProp
         <div className="rounded-md border bg-muted/40 px-3 py-2 text-sm">
           {total ? (
             <>
-              <span className="font-medium">{formatNumber(total.objects)}</span> object{total.objects === 1 ? '' : 's'} ·{' '}
-              <span className="font-medium">{formatBytes(total.bytes)}</span>
+              <span className="font-medium">{formatNumber(total.objects)}</span> object{total.objects === 1 ? '' : 's'}{' '}
+              · <span className="font-medium">{formatBytes(total.bytes)}</span>
             </>
           ) : summary.isError ? (
             <span className="text-destructive">Couldn’t count objects: {errorText(summary.error)}</span>
@@ -168,7 +195,10 @@ export function DeleteDialog({ bucket, entries, onClose, onDeleted }: DialogProp
             onClick={() =>
               del.mutate(undefined, {
                 onSuccess: (r) => {
-                  if (r.errors.length) toast.error(`${r.errors.length} objects could not be deleted`, { description: r.errors[0]?.message });
+                  if (r.errors.length)
+                    toast.error(`${r.errors.length} objects could not be deleted`, {
+                      description: r.errors[0]?.message,
+                    });
                   else toast.success(`Deleted ${formatNumber(r.deleted)} object${r.deleted === 1 ? '' : 's'}`);
                   onDeleted();
                   onClose();
@@ -300,7 +330,9 @@ export function CopyMoveDialog({
       { destinationBucket: destBucket, move: mode === 'move', items },
       {
         onSuccess: (r) => {
-          toast.success(`${mode === 'move' ? 'Moved' : 'Copied'} ${formatNumber(r.copied)} object${r.copied === 1 ? '' : 's'}`);
+          toast.success(
+            `${mode === 'move' ? 'Moved' : 'Copied'} ${formatNumber(r.copied)} object${r.copied === 1 ? '' : 's'}`,
+          );
           onClose();
         },
       },
@@ -346,8 +378,19 @@ export function CopyMoveDialog({
               </SelectContent>
             </Select>
           </FormField>
-          <FormField label="Destination folder" htmlFor="dest-prefix" description="Empty for the bucket root" error={error ?? undefined}>
-            <Input id="dest-prefix" value={destPrefix} placeholder="path/to/folder/" onChange={(e) => (setDestPrefix(e.target.value), setError(null))} className="font-mono" />
+          <FormField
+            label="Destination folder"
+            htmlFor="dest-prefix"
+            description="Empty for the bucket root"
+            error={error ?? undefined}
+          >
+            <Input
+              id="dest-prefix"
+              value={destPrefix}
+              placeholder="path/to/folder/"
+              onChange={(e) => (setDestPrefix(e.target.value), setError(null))}
+              className="font-mono"
+            />
           </FormField>
           {run.isError && <ErrorAlert error={run.error} />}
           <DialogFooter>
@@ -378,7 +421,12 @@ const EXPIRY = [
   { label: '7 days', s: MAX_PRESIGN_SECONDS },
 ];
 
-export function ShareDialog({ bucket, objectKey, versionId, onClose }: DialogProps & { objectKey: string; versionId?: string | null }) {
+export function ShareDialog({
+  bucket,
+  objectKey,
+  versionId,
+  onClose,
+}: DialogProps & { objectKey: string; versionId?: string | null }) {
   const { readonly } = useApp();
   const details = useObjectDetails(bucket, objectKey, versionId);
   const [expiresIn, setExpiresIn] = useState(3600);
@@ -470,13 +518,19 @@ export function ShareDialog({ bucket, objectKey, versionId, onClose }: DialogPro
           ))}
           <TabsContent value="public" className="grid gap-3 pt-4">
             <p className="text-sm text-muted-foreground">
-              Works only if the bucket or object is public. Set a public URL base on the connection to use your own domain.
+              Works only if the bucket or object is public. Set a public URL base on the connection to use your own
+              domain.
             </p>
             {details.data && !details.data.publicUrl ? (
               <p className="rounded-md border border-dashed p-3 text-sm">{NO_PUBLIC_URL_HINT}</p>
             ) : details.data?.publicUrl ? (
               <>
-                <Input readOnly value={details.data.publicUrl} className="font-mono text-xs" onFocus={(e) => e.target.select()} />
+                <Input
+                  readOnly
+                  value={details.data.publicUrl}
+                  className="font-mono text-xs"
+                  onFocus={(e) => e.target.select()}
+                />
                 <div className="flex justify-end">
                   <CopyButton text={details.data.publicUrl} label="Copy URL" />
                 </div>
@@ -502,7 +556,9 @@ const metaFormSchema = z.object({
   contentEncoding: metadataSchema.shape.contentEncoding.unwrap(),
   replaceMetadata: z.boolean(),
   meta: z
-    .array(z.object({ key: z.string().regex(/^[a-zA-Z0-9-_]*$/, 'Letters, digits, - and _'), value: z.string().max(2048) }))
+    .array(
+      z.object({ key: z.string().regex(/^[a-zA-Z0-9-_]*$/, 'Letters, digits, - and _'), value: z.string().max(2048) }),
+    )
     .refine((rows) => {
       const keys = rows.map((r) => r.key.toLowerCase()).filter(Boolean);
       return new Set(keys).size === keys.length;
@@ -516,7 +572,14 @@ export function MetadataDialog({ bucket, keys, onClose }: DialogProps & { keys: 
   const save = useBucketMutation(bucket, (input: z.infer<typeof metadataSchema>) => objectApi.metadata(bucket, input));
   const form = useForm<MetaForm>({
     resolver: zodResolver(metaFormSchema),
-    defaultValues: { contentType: '', cacheControl: '', contentDisposition: '', contentEncoding: '', replaceMetadata: single, meta: [] },
+    defaultValues: {
+      contentType: '',
+      cacheControl: '',
+      contentDisposition: '',
+      contentEncoding: '',
+      replaceMetadata: single,
+      meta: [],
+    },
   });
   const rows = useFieldArray({ control: form.control, name: 'meta' });
   const { errors } = form.formState;
@@ -544,7 +607,9 @@ export function MetadataDialog({ bucket, keys, onClose }: DialogProps & { keys: 
       cacheControl: field(v.cacheControl, dirty.cacheControl),
       contentDisposition: field(v.contentDisposition, dirty.contentDisposition),
       contentEncoding: field(v.contentEncoding, dirty.contentEncoding),
-      metadata: v.replaceMetadata ? Object.fromEntries(v.meta.filter((r) => r.key).map((r) => [r.key, r.value])) : undefined,
+      metadata: v.replaceMetadata
+        ? Object.fromEntries(v.meta.filter((r) => r.key).map((r) => [r.key, r.value]))
+        : undefined,
     };
     const parsed = metadataSchema.safeParse(input);
     if (!parsed.success) return form.setError('root', { message: parsed.error.issues[0]?.message });
@@ -563,7 +628,11 @@ export function MetadataDialog({ bucket, keys, onClose }: DialogProps & { keys: 
           <DialogHeader>
             <DialogTitle>Edit metadata</DialogTitle>
             <DialogDescription>
-              {single ? <span className="break-all font-mono text-xs">{keys[0]}</span> : `${keys.length} objects. Only fields you change are applied.`}
+              {single ? (
+                <span className="break-all font-mono text-xs">{keys[0]}</span>
+              ) : (
+                `${keys.length} objects. Only fields you change are applied.`
+              )}
             </DialogDescription>
           </DialogHeader>
           {single && details.isPending ? (
@@ -595,7 +664,11 @@ export function MetadataDialog({ bucket, keys, onClose }: DialogProps & { keys: 
                         control={form.control}
                         name="replaceMetadata"
                         render={({ field }) => (
-                          <Checkbox id="replace-meta" checked={field.value} onCheckedChange={(v) => field.onChange(v === true)} />
+                          <Checkbox
+                            id="replace-meta"
+                            checked={field.value}
+                            onCheckedChange={(v) => field.onChange(v === true)}
+                          />
                         )}
                       />
                       <FieldLabel htmlFor="replace-meta" className="text-xs font-normal">
@@ -606,14 +679,24 @@ export function MetadataDialog({ bucket, keys, onClose }: DialogProps & { keys: 
                 </div>
                 {rows.fields.map((f, i) => (
                   <div key={f.id} className="flex gap-2">
-                    <Input placeholder="key" className="font-mono text-xs" {...form.register(`meta.${i}.key`)} aria-invalid={!!errors.meta?.[i]?.key} />
+                    <Input
+                      placeholder="key"
+                      className="font-mono text-xs"
+                      {...form.register(`meta.${i}.key`)}
+                      aria-invalid={!!errors.meta?.[i]?.key}
+                    />
                     <Input placeholder="value" className="font-mono text-xs" {...form.register(`meta.${i}.value`)} />
                     <Button variant="ghost" size="icon" onClick={() => rows.remove(i)} aria-label="Remove field">
                       <Trash2 />
                     </Button>
                   </div>
                 ))}
-                <Button variant="outline" size="sm" className="justify-self-start" onClick={() => rows.append({ key: '', value: '' })}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="justify-self-start"
+                  onClick={() => rows.append({ key: '', value: '' })}
+                >
                   <Plus /> Add field
                 </Button>
                 <FieldError>{errors.meta?.root?.message ?? errors.meta?.message}</FieldError>
@@ -676,12 +759,24 @@ export function TagsEditor({ bucket, keys, onDone }: { bucket: string; keys: str
         }),
       )}
     >
-      {!single && <p className="text-sm text-muted-foreground">These tags replace the tags on all {keys.length} objects.</p>}
+      {!single && (
+        <p className="text-sm text-muted-foreground">These tags replace the tags on all {keys.length} objects.</p>
+      )}
       {rows.fields.length === 0 && <p className="text-sm text-muted-foreground">No tags.</p>}
       {rows.fields.map((f, i) => (
         <div key={f.id} className="flex gap-2">
-          <Input placeholder="Key" className="text-xs" {...form.register(`tags.${i}.Key`)} aria-invalid={!!errors.tags?.[i]?.Key} />
-          <Input placeholder="Value" className="text-xs" {...form.register(`tags.${i}.Value`)} aria-invalid={!!errors.tags?.[i]?.Value} />
+          <Input
+            placeholder="Key"
+            className="text-xs"
+            {...form.register(`tags.${i}.Key`)}
+            aria-invalid={!!errors.tags?.[i]?.Key}
+          />
+          <Input
+            placeholder="Value"
+            className="text-xs"
+            {...form.register(`tags.${i}.Value`)}
+            aria-invalid={!!errors.tags?.[i]?.Value}
+          />
           <Button variant="ghost" size="icon" onClick={() => rows.remove(i)} aria-label="Remove tag">
             <Trash2 />
           </Button>
@@ -690,7 +785,12 @@ export function TagsEditor({ bucket, keys, onDone }: { bucket: string; keys: str
       <FieldError>{errors.tags?.root?.message ?? errors.tags?.message}</FieldError>
       {save.isError && <ErrorAlert error={save.error} />}
       <div className="flex justify-between gap-2 pt-1">
-        <Button variant="outline" size="sm" disabled={rows.fields.length >= MAX_TAGS} onClick={() => rows.append({ Key: '', Value: '' })}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={rows.fields.length >= MAX_TAGS}
+          onClick={() => rows.append({ Key: '', Value: '' })}
+        >
           <Plus /> Add tag
         </Button>
         <Button type="submit" size="sm" disabled={save.isPending}>
@@ -708,7 +808,13 @@ export function TagsDialog({ bucket, keys, onClose }: DialogProps & { keys: stri
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit tags</DialogTitle>
-          <DialogDescription>{keys.length === 1 ? <span className="break-all font-mono text-xs">{keys[0]}</span> : `${keys.length} objects`}</DialogDescription>
+          <DialogDescription>
+            {keys.length === 1 ? (
+              <span className="break-all font-mono text-xs">{keys[0]}</span>
+            ) : (
+              `${keys.length} objects`
+            )}
+          </DialogDescription>
         </DialogHeader>
         <TagsEditor bucket={bucket} keys={keys} onDone={onClose} />
       </DialogContent>

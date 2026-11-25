@@ -5,7 +5,14 @@ import { toast } from 'sonner';
 import type { TableMeta } from '@shared/types';
 import { keys } from '@/api/hooks';
 import { Button } from '@deck/ui/components/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@deck/ui/components/dialog';
 import { formatBytes, formatNumber } from '@/lib/format';
 import { uploadImport, UploadCancelled } from '@/lib/import-upload';
 import { cn } from '@deck/ui/lib/utils';
@@ -44,7 +51,9 @@ export function ImportDialog({ db, meta, onClose }: ImportDialogProps) {
     const startedAt = performance.now();
     setProgress({ loaded: 0, total: file.size, startedAt, at: startedAt });
     setError(null);
-    const job = uploadImport(db, file, plan.params, (loaded, total) => setProgress({ loaded, total, startedAt, at: performance.now() }));
+    const job = uploadImport(db, file, plan.params, (loaded, total) =>
+      setProgress({ loaded, total, startedAt, at: performance.now() }),
+    );
     abortRef.current = job.abort;
     try {
       const r = await job.promise;
@@ -108,7 +117,9 @@ export function ImportDialog({ db, meta, onClose }: ImportDialogProps) {
               <FileUp className="size-8 text-muted-foreground" />
               <div>
                 <div className="text-sm font-medium">Drop a file here, or click to browse</div>
-                <div className="mt-1 text-xs text-muted-foreground">CSV, TSV or JSON Lines, optionally gzipped (.gz). Any size: it streams straight into Postgres.</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  CSV, TSV or JSON Lines, optionally gzipped (.gz). Any size: it streams straight into Postgres.
+                </div>
               </div>
             </button>
           ) : (
@@ -156,7 +167,11 @@ export function ImportDialog({ db, meta, onClose }: ImportDialogProps) {
                   'Cancel'
                 )}
               </Button>
-              <Button onClick={() => void start()} disabled={!file || !plan || uploading} variant={plan?.truncate ? 'destructive' : 'default'}>
+              <Button
+                onClick={() => void start()}
+                disabled={!file || !plan || uploading}
+                variant={plan?.truncate ? 'destructive' : 'default'}
+              >
                 {uploading ? <Spinner className="text-current" /> : <Upload />}
                 {plan?.truncate ? 'Replace data' : 'Import'}
               </Button>

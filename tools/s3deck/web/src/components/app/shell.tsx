@@ -50,13 +50,20 @@ export function Shell({ me, connections }: { me: MeResponse; connections: Connec
           onClick={() => setNavOpen(false)}
           aria-hidden="true"
         />
-        <Sidebar className={cn('fixed inset-y-0 left-0 z-40 transition-transform md:static md:translate-x-0', navOpen ? 'translate-x-0' : '-translate-x-full')} />
+        <Sidebar
+          className={cn(
+            'fixed inset-y-0 left-0 z-40 transition-transform md:static md:translate-x-0',
+            navOpen ? 'translate-x-0' : '-translate-x-full',
+          )}
+        />
         <main className="flex min-w-0 flex-1 flex-col">
           <div className="flex items-center gap-2 border-b px-3 py-2 md:hidden">
             <IconButton label="Open navigation" onClick={() => setNavOpen(true)}>
               <Menu />
             </IconButton>
-            <span className="truncate text-sm font-medium">{route.bucket ?? (route.view !== 'browse' ? route.view : 's3deck')}</span>
+            <span className="truncate text-sm font-medium">
+              {route.bucket ?? (route.view !== 'browse' ? route.view : 's3deck')}
+            </span>
           </div>
           {route.view === 'sync' ? (
             <SyncView />

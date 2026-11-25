@@ -65,16 +65,30 @@ export function ServerView() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatTile label="Operations / s" icon={Activity} value={latest ? formatNumber(latest.opsPerSec) : undefined} detail={`${formatCompact(s.totalCommands)} commands since start`} />
+          <StatTile
+            label="Operations / s"
+            icon={Activity}
+            value={latest ? formatNumber(latest.opsPerSec) : undefined}
+            detail={`${formatCompact(s.totalCommands)} commands since start`}
+          />
           <StatTile
             label="Memory"
             icon={MemoryStick}
             value={formatBytes(memory)}
             meter={s.maxMemory ? memory / s.maxMemory : undefined}
             meterTone={s.maxMemory && memory / s.maxMemory > 0.9 ? 'warning' : 'neutral'}
-            detail={s.maxMemory ? `of ${formatBytes(s.maxMemory)} · ${s.maxMemoryPolicy}` : `peak ${formatBytes(s.peakMemory)} · no maxmemory set`}
+            detail={
+              s.maxMemory
+                ? `of ${formatBytes(s.maxMemory)} · ${s.maxMemoryPolicy}`
+                : `peak ${formatBytes(s.peakMemory)} · no maxmemory set`
+            }
           />
-          <StatTile label="Clients" icon={Users} value={formatNumber(latest?.clients ?? s.connectedClients)} detail={`${s.connectedReplicas} replica${s.connectedReplicas === 1 ? '' : 's'} connected`} />
+          <StatTile
+            label="Clients"
+            icon={Users}
+            value={formatNumber(latest?.clients ?? s.connectedClients)}
+            detail={`${s.connectedReplicas} replica${s.connectedReplicas === 1 ? '' : 's'} connected`}
+          />
           <StatTile
             label="Cache hit ratio"
             icon={Gauge}
@@ -87,30 +101,30 @@ export function ServerView() {
 
         <div className="grid gap-3 lg:grid-cols-2">
           <LiveChart
-              title="Operations per second"
-              times={times}
-              slots={STATS_WINDOW}
-              series={[{ name: 'ops/s', color: 'var(--chart-data)', values: live.samples.map((x) => x.opsPerSec) }]}
-              format={(v) => formatCompact(v)}
-            />
+            title="Operations per second"
+            times={times}
+            slots={STATS_WINDOW}
+            series={[{ name: 'ops/s', color: 'var(--chart-data)', values: live.samples.map((x) => x.opsPerSec) }]}
+            format={(v) => formatCompact(v)}
+          />
           <LiveChart
-              title="Network (kB/s)"
-              times={times}
-              slots={STATS_WINDOW}
-              series={[
-                { name: 'in', color: 'var(--chart-data)', values: live.samples.map((x) => x.inputKbps) },
-                { name: 'out', color: 'var(--chart-index)', values: live.samples.map((x) => x.outputKbps) },
-              ]}
-              format={(v) => formatCompact(v)}
-            />
+            title="Network (kB/s)"
+            times={times}
+            slots={STATS_WINDOW}
+            series={[
+              { name: 'in', color: 'var(--chart-data)', values: live.samples.map((x) => x.inputKbps) },
+              { name: 'out', color: 'var(--chart-index)', values: live.samples.map((x) => x.outputKbps) },
+            ]}
+            format={(v) => formatCompact(v)}
+          />
           <LiveChart
-              className="lg:col-span-2"
-              title="Memory used"
-              times={times}
-              slots={STATS_WINDOW}
-              series={[{ name: 'memory', color: 'var(--chart-data)', values: live.samples.map((x) => x.usedMemory) }]}
-              format={formatBytes}
-            />
+            className="lg:col-span-2"
+            title="Memory used"
+            times={times}
+            slots={STATS_WINDOW}
+            series={[{ name: 'memory', color: 'var(--chart-data)', values: live.samples.map((x) => x.usedMemory) }]}
+            format={formatBytes}
+          />
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2">
@@ -140,7 +154,9 @@ export function ServerView() {
                         </a>
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{formatNumber(d.keys)}</TableCell>
-                      <TableCell className="text-right text-muted-foreground tabular-nums">{formatNumber(d.expires)}</TableCell>
+                      <TableCell className="text-right text-muted-foreground tabular-nums">
+                        {formatNumber(d.expires)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -189,11 +205,15 @@ export function ServerView() {
                 {slow.data?.map((e) => (
                   <TableRow key={e.id}>
                     <TableCell className="text-muted-foreground">{formatRelative(e.at)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{e.micros >= 1000 ? `${(e.micros / 1000).toFixed(1)} ms` : `${e.micros} µs`}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {e.micros >= 1000 ? `${(e.micros / 1000).toFixed(1)} ms` : `${e.micros} µs`}
+                    </TableCell>
                     <TableCell className="max-w-0 truncate font-mono text-[12.5px]" title={e.command}>
                       {e.command}
                     </TableCell>
-                    <TableCell className="hidden truncate font-mono text-xs text-muted-foreground md:table-cell">{e.client}</TableCell>
+                    <TableCell className="hidden truncate font-mono text-xs text-muted-foreground md:table-cell">
+                      {e.client}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

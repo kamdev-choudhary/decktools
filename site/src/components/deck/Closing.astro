@@ -1,9 +1,19 @@
 ---
-import { REPO_URL } from '../../../lib/meta';
-import { DOCS_URL, NPM_URL } from '../meta';
-import Corners from '../../../components/Corners.astro';
-import CopyCommand from '../../../components/CopyCommand.astro';
-import Logo from '../../../components/Logo.astro';
+import { REPO_URL } from '../../lib/meta';
+import Corners from '../Corners.astro';
+import CopyCommand from '../CopyCommand.astro';
+import Logo from '../Logo.astro';
+
+/** Final call to action and the page footer. */
+interface Props {
+  name: string;
+  title: string;
+  lede: string;
+  command: string;
+  docsUrl: string;
+  npmUrl: string;
+}
+const { name, title, lede, command, docsUrl, npmUrl } = Astro.props;
 ---
 
 <section class="section relative isolate overflow-hidden">
@@ -11,10 +21,10 @@ import Logo from '../../../components/Logo.astro';
   <div class="grid-bg pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_55%_80%_at_50%_100%,#000_20%,transparent_75%)]" aria-hidden="true"></div>
   <div class="cta-glow pointer-events-none absolute -bottom-40 left-1/2 -z-10 h-80 w-[min(56rem,120vw)] -translate-x-1/2" aria-hidden="true"></div>
   <div class="pad py-24 text-center md:py-32">
-    <h2 class="display mx-auto max-w-[15ch] text-[clamp(2.5rem,1.3rem+4.6vw,4.75rem)]">Point it at a database and press Enter.</h2>
-    <p class="lede mx-auto mt-6">It prints a link and a password. Open the link. That’s the setup.</p>
+    <h2 class="display mx-auto max-w-[15ch] text-[clamp(2.5rem,1.3rem+4.6vw,4.75rem)]">{title}</h2>
+    <p class="lede mx-auto mt-6">{lede}</p>
     <div class="mx-auto mt-10 flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center">
-      <CopyCommand command="npx pgdeck postgres://localhost:5432" class="flex-1 text-left" />
+      <CopyCommand command={command} class="flex-1 text-left" />
       <a href={REPO_URL} class="btn btn-primary h-[3.1rem] shrink-0">Star on GitHub</a>
     </div>
   </div>
@@ -23,12 +33,12 @@ import Logo from '../../../components/Logo.astro';
 <footer class="section">
   <Corners />
   <div class="pad flex flex-col gap-5 py-10 text-sm text-faint md:flex-row md:items-center">
-    <span class="flex items-center gap-2 font-medium text-fg"><Logo class="size-5" /> pgdeck</span>
+    <span class="flex items-center gap-2 font-medium text-fg"><Logo class="size-5" /> {name}</span>
     <span>Open source under the MIT license.</span>
     <nav class="flex flex-wrap gap-x-6 gap-y-2 md:ml-auto" aria-label="Footer">
-      <a href={DOCS_URL} class="hover:text-fg">Docs</a>
+      <a href={docsUrl} class="hover:text-fg">Docs</a>
       <a href={REPO_URL} class="hover:text-fg">GitHub</a>
-      <a href={NPM_URL} class="hover:text-fg">npm</a>
+      <a href={npmUrl} class="hover:text-fg">npm</a>
       <a href={`${REPO_URL}/releases`} class="hover:text-fg">Releases</a>
       <a href={`${REPO_URL}/issues`} class="hover:text-fg">Report an issue</a>
     </nav>

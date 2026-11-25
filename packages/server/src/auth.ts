@@ -23,7 +23,8 @@ function clientKey(c: Context): string {
   }
 }
 
-const isHttps = (c: Context) => c.req.header('x-forwarded-proto') === 'https' || new URL(c.req.url).protocol === 'https:';
+const isHttps = (c: Context) =>
+  c.req.header('x-forwarded-proto') === 'https' || new URL(c.req.url).protocol === 'https:';
 
 export interface AuthOptions {
   /** Credentials, or null for --no-auth (every request is let through). */

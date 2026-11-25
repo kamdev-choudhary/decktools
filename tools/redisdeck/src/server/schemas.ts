@@ -53,4 +53,9 @@ export const createBody = z.discriminatedUnion('type', [
   z.object({ type: z.literal('ReJSON-RL'), name: text.min(1), json: text, ttl }),
 ]);
 
-export const commandBody = z.object({ command: z.string().min(1).max(1024 * 1024) });
+export const commandBody = z.object({
+  command: z
+    .string()
+    .min(1)
+    .max(1024 * 1024),
+});

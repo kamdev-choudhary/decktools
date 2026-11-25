@@ -45,5 +45,9 @@ export function uploadFile<T>(
 }
 
 /** Table import (COPY into one table). */
-export const uploadImport = (db: string, file: File, params: URLSearchParams, onProgress: (loaded: number, total: number) => void) =>
-  uploadFile<ImportResponse>(db, 'import', file, params, onProgress);
+export const uploadImport = (
+  db: string,
+  file: File,
+  params: URLSearchParams,
+  onProgress: (loaded: number, total: number) => void,
+) => uploadFile<ImportResponse>(db, 'import', file, params, onProgress);

@@ -87,8 +87,12 @@ describe('operations', () => {
 
   it('users: password length and valid roles', () => {
     expect(createUserSchema.safeParse({ username: 'ann', password: 'short', role: 'viewer' }).success).toBe(false);
-    expect(createUserSchema.safeParse({ username: 'ann', password: 'long-enough-1', role: 'owner' }).success).toBe(false);
-    expect(createUserSchema.safeParse({ username: 'ann', password: 'long-enough-1', role: 'editor' }).success).toBe(true);
+    expect(createUserSchema.safeParse({ username: 'ann', password: 'long-enough-1', role: 'owner' }).success).toBe(
+      false,
+    );
+    expect(createUserSchema.safeParse({ username: 'ann', password: 'long-enough-1', role: 'editor' }).success).toBe(
+      true,
+    );
   });
 });
 

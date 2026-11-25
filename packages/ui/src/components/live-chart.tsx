@@ -56,7 +56,8 @@ export function LiveChart({ title, series, times, slots, format, height = 140, c
   const x = (i: number) => PAD.left + ((i + offset) / Math.max(slots - 1, 1)) * innerW;
   const y = (v: number) => PAD.top + innerH - (v / max) * innerH;
 
-  const path = (values: number[]) => values.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+  const path = (values: number[]) =>
+    values.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
   const area = (values: number[]) =>
     values.length ? `${path(values)}L${x(values.length - 1).toFixed(1)},${y(0)}L${x(0).toFixed(1)},${y(0)}Z` : '';
 
@@ -105,23 +106,62 @@ export function LiveChart({ title, series, times, slots, format, height = 140, c
           >
             {[0, 0.5, 1].map((f) => (
               <g key={f}>
-                <line x1={PAD.left} x2={width - PAD.right} y1={y(max * f)} y2={y(max * f)} stroke="var(--border)" strokeWidth={1} />
-                <text x={PAD.left - 8} y={y(max * f)} dy="0.32em" textAnchor="end" className="fill-muted-foreground text-[10px] tabular-nums">
+                <line
+                  x1={PAD.left}
+                  x2={width - PAD.right}
+                  y1={y(max * f)}
+                  y2={y(max * f)}
+                  stroke="var(--border)"
+                  strokeWidth={1}
+                />
+                <text
+                  x={PAD.left - 8}
+                  y={y(max * f)}
+                  dy="0.32em"
+                  textAnchor="end"
+                  className="fill-muted-foreground text-[10px] tabular-nums"
+                >
                   {format(max * f)}
                 </text>
               </g>
             ))}
 
-            {series.length === 1 && n > 1 && <path d={area(series[0]!.values)} fill={series[0]!.color} opacity={0.08} />}
+            {series.length === 1 && n > 1 && (
+              <path d={area(series[0]!.values)} fill={series[0]!.color} opacity={0.08} />
+            )}
             {series.map((s) => (
-              <path key={s.name} d={path(s.values)} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+              <path
+                key={s.name}
+                d={path(s.values)}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={2}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
             ))}
 
             {hi !== null && (
               <g>
-                <line x1={x(hi)} x2={x(hi)} y1={PAD.top} y2={PAD.top + innerH} stroke="var(--muted-foreground)" strokeWidth={1} strokeDasharray="3 3" />
+                <line
+                  x1={x(hi)}
+                  x2={x(hi)}
+                  y1={PAD.top}
+                  y2={PAD.top + innerH}
+                  stroke="var(--muted-foreground)"
+                  strokeWidth={1}
+                  strokeDasharray="3 3"
+                />
                 {series.map((s) => (
-                  <circle key={s.name} cx={x(hi)} cy={y(s.values[hi] ?? 0)} r={4} fill={s.color} stroke="var(--card)" strokeWidth={2} />
+                  <circle
+                    key={s.name}
+                    cx={x(hi)}
+                    cy={y(s.values[hi] ?? 0)}
+                    r={4}
+                    fill={s.color}
+                    stroke="var(--card)"
+                    strokeWidth={2}
+                  />
                 ))}
               </g>
             )}
@@ -145,7 +185,11 @@ export function LiveChart({ title, series, times, slots, format, height = 140, c
             ))}
           </div>
         )}
-        {!n && <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">Waiting for data…</div>}
+        {!n && (
+          <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
+            Waiting for data…
+          </div>
+        )}
       </div>
     </div>
   );

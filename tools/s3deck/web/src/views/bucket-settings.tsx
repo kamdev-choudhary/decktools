@@ -45,7 +45,14 @@ import { cn } from '@/lib/utils';
 type SectionId = 'general' | 'versioning' | 'cors' | 'lifecycle' | 'policy' | 'public' | 'uploads' | 'usage';
 
 const EXAMPLES = {
-  cors: [{ AllowedOrigins: ['https://example.com'], AllowedMethods: ['GET', 'HEAD'], AllowedHeaders: ['*'], MaxAgeSeconds: 3600 }],
+  cors: [
+    {
+      AllowedOrigins: ['https://example.com'],
+      AllowedMethods: ['GET', 'HEAD'],
+      AllowedHeaders: ['*'],
+      MaxAgeSeconds: 3600,
+    },
+  ],
   lifecycle: [
     {
       ID: 'expire-tmp',
@@ -57,7 +64,15 @@ const EXAMPLES = {
   ],
   policy: (bucket: string) => ({
     Version: '2012-10-17',
-    Statement: [{ Sid: 'PublicRead', Effect: 'Allow', Principal: '*', Action: 's3:GetObject', Resource: `arn:aws:s3:::${bucket}/*` }],
+    Statement: [
+      {
+        Sid: 'PublicRead',
+        Effect: 'Allow',
+        Principal: '*',
+        Action: 's3:GetObject',
+        Resource: `arn:aws:s3:::${bucket}/*`,
+      },
+    ],
   }),
 };
 
@@ -75,7 +90,15 @@ const READ_PERMISSION: Record<string, string> = {
 /* Building blocks                                                     */
 /* ------------------------------------------------------------------ */
 
-function SectionHeader({ title, description, children }: { title: string; description: React.ReactNode; children?: React.ReactNode }) {
+function SectionHeader({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: React.ReactNode;
+  children?: React.ReactNode;
+}) {
   return (
     <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b pb-5">
       <div className="min-w-0">
@@ -102,7 +125,8 @@ function ReadError({ what, section, error }: { what: string; section: SectionId;
               {READ_PERMISSION[section] && (
                 <>
                   {' '}
-                  (needs <code className="rounded bg-destructive/10 px-1 font-mono text-xs">{READ_PERMISSION[section]}</code>)
+                  (needs{' '}
+                  <code className="rounded bg-destructive/10 px-1 font-mono text-xs">{READ_PERMISSION[section]}</code>)
                 </>
               )}
               .
@@ -208,7 +232,13 @@ function JsonEditor<T>({
       />
       {!locked && (
         <div className="flex min-h-12 flex-wrap items-center gap-3 border-t bg-muted/40 px-3 py-2">
-          <p className={cn('min-w-0 flex-1 text-xs', result.state === 'invalid' ? 'text-destructive' : 'text-muted-foreground')} role={result.state === 'invalid' ? 'alert' : undefined}>
+          <p
+            className={cn(
+              'min-w-0 flex-1 text-xs',
+              result.state === 'invalid' ? 'text-destructive' : 'text-muted-foreground',
+            )}
+            role={result.state === 'invalid' ? 'alert' : undefined}
+          >
             {result.state === 'invalid'
               ? result.message
               : result.state === 'empty' && initial
@@ -218,7 +248,11 @@ function JsonEditor<T>({
           <Button variant="outline" size="sm" disabled={!dirty || saving} onClick={() => setText(initial)}>
             Discard
           </Button>
-          <Button size="sm" disabled={!canSave} onClick={() => result.state !== 'invalid' && onSave(result.state === 'valid' ? result.value : null)}>
+          <Button
+            size="sm"
+            disabled={!canSave}
+            onClick={() => result.state !== 'invalid' && onSave(result.state === 'valid' ? result.value : null)}
+          >
             {saving && <Spinner />}
             Save changes
           </Button>
@@ -229,7 +263,17 @@ function JsonEditor<T>({
 }
 
 /** A bordered row with a title/description on the left and a control on the right. */
-function SettingRow({ id, title, description, children }: { id: string; title: string; description: React.ReactNode; children: React.ReactNode }) {
+function SettingRow({
+  id,
+  title,
+  description,
+  children,
+}: {
+  id: string;
+  title: string;
+  description: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <FieldLabel htmlFor={id} className="rounded-none border-0">
       <Field orientation="horizontal" className="px-4 py-3.5">
@@ -253,7 +297,15 @@ function summarize<T>(s: Setting<T>, fmt: (v: T) => string): { text: string; ton
   return { text: fmt(s.value), tone: 'normal' };
 }
 
-function General({ bucket, settings, onOpen }: { bucket: string; settings: BucketSettings; onOpen: (id: SectionId) => void }) {
+function General({
+  bucket,
+  settings,
+  onOpen,
+}: {
+  bucket: string;
+  settings: BucketSettings;
+  onOpen: (id: SectionId) => void;
+}) {
   const { connection, isAdmin, me } = useApp();
   const readonly = !isAdmin || me.readonly;
   const [deleting, setDeleting] = useState(false);
@@ -263,7 +315,11 @@ function General({ bucket, settings, onOpen }: { bucket: string; settings: Bucke
   const plural = (n: number, w: string) => (n === 0 ? `No ${w}s` : `${formatNumber(n)} ${w}${n === 1 ? '' : 's'}`);
 
   const rows: { id: SectionId; label: string; summary: ReturnType<typeof summarize> }[] = [
-    { id: 'versioning', label: 'Versioning', summary: summarize(settings.versioning, (v) => (v === 'Off' ? 'Never enabled' : v)) },
+    {
+      id: 'versioning',
+      label: 'Versioning',
+      summary: summarize(settings.versioning, (v) => (v === 'Off' ? 'Never enabled' : v)),
+    },
     { id: 'cors', label: 'CORS', summary: summarize(settings.cors, (v) => plural(v.length, 'rule')) },
     { id: 'lifecycle', label: 'Lifecycle', summary: summarize(settings.lifecycle, (v) => plural(v.length, 'rule')) },
     { id: 'policy', label: 'Bucket policy', summary: summarize(settings.policy, (v) => (v ? 'Configured' : 'None')) },
@@ -271,14 +327,21 @@ function General({ bucket, settings, onOpen }: { bucket: string; settings: Bucke
       id: 'public',
       label: 'Public access',
       summary: summarize(settings.publicAccessBlock, () =>
-        pab && Object.values(pab).every(Boolean) ? 'All public access blocked' : pab && Object.values(pab).some(Boolean) ? 'Partially blocked' : 'Not blocked',
+        pab && Object.values(pab).every(Boolean)
+          ? 'All public access blocked'
+          : pab && Object.values(pab).some(Boolean)
+            ? 'Partially blocked'
+            : 'Not blocked',
       ),
     },
   ];
 
   return (
     <>
-      <SectionHeader title="General" description="Where the bucket lives and how it’s configured. Select a row to change it." />
+      <SectionHeader
+        title="General"
+        description="Where the bucket lives and how it’s configured. Select a row to change it."
+      />
       <dl className="divide-y rounded-lg border">
         <div className="flex items-center gap-4 px-4 py-3 text-sm">
           <dt className="w-36 shrink-0 text-muted-foreground">Name</dt>
@@ -301,7 +364,9 @@ function General({ bucket, settings, onOpen }: { bucket: string; settings: Bucke
               ) : enc.value ? (
                 <>
                   {enc.value.algorithm}
-                  {enc.value.kmsKeyId && <span className="block truncate font-mono text-xs text-muted-foreground">{enc.value.kmsKeyId}</span>}
+                  {enc.value.kmsKeyId && (
+                    <span className="block truncate font-mono text-xs text-muted-foreground">{enc.value.kmsKeyId}</span>
+                  )}
                 </>
               ) : (
                 'None configured'
@@ -343,7 +408,9 @@ function General({ bucket, settings, onOpen }: { bucket: string; settings: Bucke
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-destructive/40 px-4 py-3.5">
             <div>
               <p className="text-sm font-medium">Delete this bucket</p>
-              <p className="text-sm text-muted-foreground">Permanently delete the bucket, optionally emptying it first.</p>
+              <p className="text-sm text-muted-foreground">
+                Permanently delete the bucket, optionally emptying it first.
+              </p>
             </div>
             <Button variant="destructive" size="sm" onClick={() => setDeleting(true)}>
               <Trash2 /> Delete bucket
@@ -379,7 +446,12 @@ function Usage({ bucket }: { bucket: string }) {
           <InputGroupAddon>
             <span className="font-mono text-xs">{bucket}/</span>
           </InputGroupAddon>
-          <InputGroupInput value={prefix} onChange={(e) => setPrefix(e.target.value)} placeholder="folder/ (empty for the whole bucket)" className="font-mono text-xs" />
+          <InputGroupInput
+            value={prefix}
+            onChange={(e) => setPrefix(e.target.value)}
+            placeholder="folder/ (empty for the whole bucket)"
+            className="font-mono text-xs"
+          />
         </InputGroup>
         <Button type="submit" disabled={usage.isFetching}>
           {usage.isFetching ? <Spinner /> : <ChartColumn />}
@@ -421,10 +493,16 @@ function Usage({ bucket }: { bucket: string }) {
               <h3 className="mb-2 text-sm font-medium">{g.title}</h3>
               <div className="divide-y rounded-lg border">
                 {g.rows.slice(0, 100).map((r) => (
-                  <div key={r.name} className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] items-center gap-4 px-4 py-2.5 text-sm">
+                  <div
+                    key={r.name}
+                    className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] items-center gap-4 px-4 py-2.5 text-sm"
+                  >
                     <div className="min-w-0">
                       <p className="truncate font-mono text-xs">{r.name}</p>
-                      <Progress value={data.bytes ? Math.max(1, (r.bytes / data.bytes) * 100) : 0} className="mt-1.5 h-1" />
+                      <Progress
+                        value={data.bytes ? Math.max(1, (r.bytes / data.bytes) * 100) : 0}
+                        className="mt-1.5 h-1"
+                      />
                     </div>
                     <span className="text-right tabular-nums">{formatBytes(r.bytes)}</span>
                     <span className="text-right text-muted-foreground tabular-nums">{formatNumber(r.objects)}</span>
@@ -480,7 +558,9 @@ function IncompleteUploads({ bucket }: { bucket: string }) {
       ) : uploads.isPending ? (
         <Skeleton className="h-32 w-full rounded-lg" />
       ) : list.length === 0 ? (
-        <div className="rounded-lg border px-4 py-8 text-center text-sm text-muted-foreground">No incomplete uploads. Nothing to clean up.</div>
+        <div className="rounded-lg border px-4 py-8 text-center text-sm text-muted-foreground">
+          No incomplete uploads. Nothing to clean up.
+        </div>
       ) : (
         <div className="divide-y rounded-lg border">
           {list.map((u) => (
@@ -489,7 +569,9 @@ function IncompleteUploads({ bucket }: { bucket: string }) {
                 <p className="truncate font-mono text-xs" title={u.key}>
                   {u.key}
                 </p>
-                <p className="text-xs text-muted-foreground">Started {u.initiated ? formatRelative(u.initiated) : 'at an unknown time'}</p>
+                <p className="text-xs text-muted-foreground">
+                  Started {u.initiated ? formatRelative(u.initiated) : 'at an unknown time'}
+                </p>
               </div>
               {!readonly && (
                 <Button variant="ghost" size="sm" disabled={!!busy} onClick={() => void abort([u])}>
@@ -508,13 +590,32 @@ const PAB_FIELDS = [
   ['BlockPublicAcls', 'Block new public ACLs', 'Reject requests that add public ACLs to the bucket or its objects.'],
   ['IgnorePublicAcls', 'Ignore existing public ACLs', 'Treat any existing public ACLs as private.'],
   ['BlockPublicPolicy', 'Block new public bucket policies', 'Reject bucket policies that grant public access.'],
-  ['RestrictPublicBuckets', 'Restrict public bucket policies', 'Only the bucket owner and AWS services can use a public policy.'],
+  [
+    'RestrictPublicBuckets',
+    'Restrict public bucket policies',
+    'Only the bucket owner and AWS services can use a public policy.',
+  ],
 ] as const;
 
 type Pab = NonNullable<BucketSettings['publicAccessBlock']['value']>;
 
-function PublicAccess({ value, locked, saving, onSave }: { value: Pab | null; locked: boolean; saving: boolean; onSave: (v: Pab) => void }) {
-  const initial: Pab = value ?? { BlockPublicAcls: false, IgnorePublicAcls: false, BlockPublicPolicy: false, RestrictPublicBuckets: false };
+function PublicAccess({
+  value,
+  locked,
+  saving,
+  onSave,
+}: {
+  value: Pab | null;
+  locked: boolean;
+  saving: boolean;
+  onSave: (v: Pab) => void;
+}) {
+  const initial: Pab = value ?? {
+    BlockPublicAcls: false,
+    IgnorePublicAcls: false,
+    BlockPublicPolicy: false,
+    RestrictPublicBuckets: false,
+  };
   const [draft, setDraft] = useState(initial);
   // A saved or refreshed value replaces the draft.
   const [draftFor, setDraftFor] = useState(value);
@@ -529,7 +630,12 @@ function PublicAccess({ value, locked, saving, onSave }: { value: Pab | null; lo
       <div className="divide-y">
         {PAB_FIELDS.map(([k, label, desc]) => (
           <SettingRow key={k} id={`pab-${k}`} title={label} description={desc}>
-            <Switch id={`pab-${k}`} checked={draft[k]} disabled={locked} onCheckedChange={(v) => setDraft((d) => ({ ...d, [k]: v }))} />
+            <Switch
+              id={`pab-${k}`}
+              checked={draft[k]}
+              disabled={locked}
+              onCheckedChange={(v) => setDraft((d) => ({ ...d, [k]: v }))}
+            />
           </SettingRow>
         ))}
       </div>
@@ -611,7 +717,12 @@ export function BucketSettingsView({ bucket }: { bucket: string }) {
         <h1 className="truncate font-semibold">{bucket}</h1>
         <span className="text-sm text-muted-foreground">/ Settings</span>
         {readonly && <Badge variant="secondary">read-only</Badge>}
-        <IconButton label="Reload settings" className="ml-auto" onClick={() => void settings.refetch()} disabled={settings.isFetching}>
+        <IconButton
+          label="Reload settings"
+          className="ml-auto"
+          onClick={() => void settings.refetch()}
+          disabled={settings.isFetching}
+        >
           <RefreshCw className={settings.isFetching ? 'animate-spin' : undefined} />
         </IconButton>
       </header>
@@ -655,8 +766,13 @@ export function BucketSettingsView({ bucket }: { bucket: string }) {
               </TabsContent>
 
               <TabsContent value="versioning">
-                <SectionHeader title="Versioning" description="Keep every version of every object, so overwritten and deleted files can be restored." />
-                {settings.data.versioning.error && <ReadError what="versioning" section="versioning" error={settings.data.versioning.error} />}
+                <SectionHeader
+                  title="Versioning"
+                  description="Keep every version of every object, so overwritten and deleted files can be restored."
+                />
+                {settings.data.versioning.error && (
+                  <ReadError what="versioning" section="versioning" error={settings.data.versioning.error} />
+                )}
                 <div className="overflow-hidden rounded-lg border">
                   <SettingRow
                     id="versioning"
@@ -684,7 +800,9 @@ export function BucketSettingsView({ bucket }: { bucket: string }) {
                   title="CORS"
                   description="Lets other web apps call this bucket directly from a browser. s3deck itself doesn’t need any CORS rules."
                 />
-                {settings.data.cors.error && <ReadError what="CORS rules" section="cors" error={settings.data.cors.error} />}
+                {settings.data.cors.error && (
+                  <ReadError what="CORS rules" section="cors" error={settings.data.cors.error} />
+                )}
                 <JsonEditor
                   fileName="cors-rules.json"
                   value={settings.data.cors.value}
@@ -699,8 +817,13 @@ export function BucketSettingsView({ bucket }: { bucket: string }) {
               </TabsContent>
 
               <TabsContent value="lifecycle">
-                <SectionHeader title="Lifecycle" description="Expire objects or move them to cheaper storage automatically, and clean up abandoned multipart uploads." />
-                {settings.data.lifecycle.error && <ReadError what="lifecycle rules" section="lifecycle" error={settings.data.lifecycle.error} />}
+                <SectionHeader
+                  title="Lifecycle"
+                  description="Expire objects or move them to cheaper storage automatically, and clean up abandoned multipart uploads."
+                />
+                {settings.data.lifecycle.error && (
+                  <ReadError what="lifecycle rules" section="lifecycle" error={settings.data.lifecycle.error} />
+                )}
                 <JsonEditor
                   fileName="lifecycle-rules.json"
                   value={settings.data.lifecycle.value}
@@ -715,8 +838,13 @@ export function BucketSettingsView({ bucket }: { bucket: string }) {
               </TabsContent>
 
               <TabsContent value="policy">
-                <SectionHeader title="Bucket policy" description="An IAM-style JSON document that grants or denies access to the bucket and its objects." />
-                {settings.data.policy.error && <ReadError what="the bucket policy" section="policy" error={settings.data.policy.error} />}
+                <SectionHeader
+                  title="Bucket policy"
+                  description="An IAM-style JSON document that grants or denies access to the bucket and its objects."
+                />
+                {settings.data.policy.error && (
+                  <ReadError what="the bucket policy" section="policy" error={settings.data.policy.error} />
+                )}
                 <JsonEditor
                   fileName="bucket-policy.json"
                   value={settings.data.policy.value}
@@ -730,9 +858,16 @@ export function BucketSettingsView({ bucket }: { bucket: string }) {
               </TabsContent>
 
               <TabsContent value="public">
-                <SectionHeader title="Public access" description="Guard rails that override ACLs and policies, so objects can’t be made public by accident." />
+                <SectionHeader
+                  title="Public access"
+                  description="Guard rails that override ACLs and policies, so objects can’t be made public by accident."
+                />
                 {settings.data.publicAccessBlock.error && (
-                  <ReadError what="public access settings" section="public" error={settings.data.publicAccessBlock.error} />
+                  <ReadError
+                    what="public access settings"
+                    section="public"
+                    error={settings.data.publicAccessBlock.error}
+                  />
                 )}
                 <PublicAccess
                   value={settings.data.publicAccessBlock.value}
@@ -753,7 +888,8 @@ export function BucketSettingsView({ bucket }: { bucket: string }) {
           )}
           {readonly && !['general', 'usage', 'uploads'].includes(section) && (
             <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-              <Info className="size-3.5" /> {me.readonly ? 's3deck is running in read-only mode.' : 'Only admins can change bucket settings.'}
+              <Info className="size-3.5" />{' '}
+              {me.readonly ? 's3deck is running in read-only mode.' : 'Only admins can change bucket settings.'}
             </p>
           )}
         </div>

@@ -34,7 +34,13 @@ function nextPage(v: KeyValue, loaded: number, length: number): { cursor?: strin
 }
 
 const count = (v: KeyValue) =>
-  v.type === 'hash' || v.type === 'stream' ? v.entries.length : v.type === 'list' ? v.items.length : v.type === 'set' || v.type === 'zset' ? v.members.length : 0;
+  v.type === 'hash' || v.type === 'stream'
+    ? v.entries.length
+    : v.type === 'list'
+      ? v.items.length
+      : v.type === 'set' || v.type === 'zset'
+        ? v.members.length
+        : 0;
 
 /** The first page comes with the key; "Load more" appends the following ones. */
 function usePages(db: number, detail: KeyDetail) {
@@ -83,17 +89,33 @@ function useRun(db: number) {
 
 function Value({ v, className }: { v: RText; className?: string }) {
   return (
-    <span className={cn('block truncate', v.binary && 'text-muted-foreground italic', className)} title={v.text.length > 60 ? v.text.slice(0, 4000) : undefined}>
+    <span
+      className={cn('block truncate', v.binary && 'text-muted-foreground italic', className)}
+      title={v.text.length > 60 ? v.text.slice(0, 4000) : undefined}
+    >
       {v.text === '' ? <span className="text-null italic">(empty)</span> : v.text}
     </span>
   );
 }
 
-function RowActions({ onEdit, onDelete, disabled, binary }: { onEdit?: () => void; onDelete: () => void; disabled: boolean; binary?: boolean }) {
+function RowActions({
+  onEdit,
+  onDelete,
+  disabled,
+  binary,
+}: {
+  onEdit?: () => void;
+  onDelete: () => void;
+  disabled: boolean;
+  binary?: boolean;
+}) {
   if (disabled) return null;
   if (binary)
     return (
-      <span className="text-[11px] text-muted-foreground" title="Binary data can't be edited in the browser; use the console">
+      <span
+        className="text-[11px] text-muted-foreground"
+        title="Binary data can't be edited in the browser; use the console"
+      >
         binary
       </span>
     );
@@ -112,14 +134,28 @@ function RowActions({ onEdit, onDelete, disabled, binary }: { onEdit?: () => voi
 }
 
 /** A grid in the same style as pgdeck's data grid: sticky header, mono cells, hover rows. */
-function Grid({ columns, children, footer }: { columns: { label: string; className?: string }[]; children: ReactNode; footer?: ReactNode }) {
+function Grid({
+  columns,
+  children,
+  footer,
+}: {
+  columns: { label: string; className?: string }[];
+  children: ReactNode;
+  footer?: ReactNode;
+}) {
   return (
     <div className="min-h-0 flex-1 overflow-auto">
       <table className="w-full table-fixed border-separate border-spacing-0 text-sm">
         <thead className="sticky top-0 z-10">
           <tr>
             {columns.map((c, i) => (
-              <th key={i} className={cn('border-b bg-grid-header px-3 py-2 text-left text-xs font-medium text-muted-foreground', c.className)}>
+              <th
+                key={i}
+                className={cn(
+                  'border-b bg-grid-header px-3 py-2 text-left text-xs font-medium text-muted-foreground',
+                  c.className,
+                )}
+              >
                 {c.label}
               </th>
             ))}
@@ -153,7 +189,12 @@ function Toolbar({ children }: { children: ReactNode }) {
   return <div className="flex shrink-0 flex-wrap items-center gap-2 border-b px-4 py-2">{children}</div>;
 }
 
-type DialogState = { title: string; fields: Field[]; submit: string; onSubmit: (v: Record<string, string>) => KeyAction } | null;
+type DialogState = {
+  title: string;
+  fields: Field[];
+  submit: string;
+  onSubmit: (v: Record<string, string>) => KeyAction;
+} | null;
 
 /** One dialog per editor, configured per use (add / edit). */
 function useEditDialog(db: number) {
@@ -207,10 +248,37 @@ export function StringEditor({ db, detail, readonly }: EditorProps) {
   if (detail.value.type !== 'string') return null;
   const v = detail.value;
   const locked = readonly || v.truncated || !!v.value.binary;
-  return <StringBody key={`${detail.id}:${v.value.text.length}:${v.value.text.slice(0, 64)}`} db={db} id={detail.id} initial={v.value.text} locked={locked} note={v.truncated ? `Showing the first 256 kB of ${formatNumber(detail.length)} bytes. Large values are read-only here.` : v.value.binary ? 'Binary value, shown escaped (\\xHH). Edit it from the console.' : null} />;
+  return (
+    <StringBody
+      key={`${detail.id}:${v.value.text.length}:${v.value.text.slice(0, 64)}`}
+      db={db}
+      id={detail.id}
+      initial={v.value.text}
+      locked={locked}
+      note={
+        v.truncated
+          ? `Showing the first 256 kB of ${formatNumber(detail.length)} bytes. Large values are read-only here.`
+          : v.value.binary
+            ? 'Binary value, shown escaped (\\xHH). Edit it from the console.'
+            : null
+      }
+    />
+  );
 }
 
-function StringBody({ db, id, initial, locked, note }: { db: number; id: string; initial: string; locked: boolean; note: string | null }) {
+function StringBody({
+  db,
+  id,
+  initial,
+  locked,
+  note,
+}: {
+  db: number;
+  id: string;
+  initial: string;
+  locked: boolean;
+  note: string | null;
+}) {
   const [text, setText] = useState(initial);
   const { run, action } = useRun(db);
   const dirty = text !== initial;
@@ -231,7 +299,11 @@ function StringBody({ db, id, initial, locked, note }: { db: number; id: string;
             <Button variant="ghost" size="sm" onClick={() => setText(initial)} disabled={!dirty}>
               <Undo2 /> Revert
             </Button>
-            <Button size="sm" onClick={() => run({ op: 'string.set', id, value: text })} disabled={!dirty || action.isPending}>
+            <Button
+              size="sm"
+              onClick={() => run({ op: 'string.set', id, value: text })}
+              disabled={!dirty || action.isPending}
+            >
               {action.isPending ? <Spinner className="text-current" /> : <Save />} Save
             </Button>
           </>
@@ -263,7 +335,9 @@ export function HashEditor({ db, detail, readonly }: EditorProps) {
   const pages = usePages(db, detail);
   const { open, dialog, run } = useEditDialog(db);
   const seen = new Set<string>();
-  const entries = pages.pages.flatMap((p) => (p.type === 'hash' ? p.entries : [])).filter((e) => !seen.has(e.field.text) && !!seen.add(e.field.text));
+  const entries = pages.pages
+    .flatMap((p) => (p.type === 'hash' ? p.entries : []))
+    .filter((e) => !seen.has(e.field.text) && !!seen.add(e.field.text));
   const id = detail.id;
 
   const edit = (field?: string, value?: string) =>
@@ -286,7 +360,10 @@ export function HashEditor({ db, detail, readonly }: EditorProps) {
           </Button>
         </Toolbar>
       )}
-      <Grid columns={[{ label: 'Field', className: 'w-[35%]' }, { label: 'Value' }, { label: '', className: 'w-20' }]} footer={<LoadMore pages={pages} total={detail.length} />}>
+      <Grid
+        columns={[{ label: 'Field', className: 'w-[35%]' }, { label: 'Value' }, { label: '', className: 'w-20' }]}
+        footer={<LoadMore pages={pages} total={detail.length} />}
+      >
         {entries.map((e) => (
           <tr key={e.field.text} className="group">
             <td className={cn(cell, 'font-medium')}>
@@ -341,7 +418,14 @@ export function ListEditor({ db, detail, readonly }: EditorProps) {
           </Button>
         </Toolbar>
       )}
-      <Grid columns={[{ label: 'Index', className: 'w-20 text-right' }, { label: 'Value' }, { label: '', className: 'w-20' }]} footer={<LoadMore pages={pages} total={detail.length} />}>
+      <Grid
+        columns={[
+          { label: 'Index', className: 'w-20 text-right' },
+          { label: 'Value' },
+          { label: '', className: 'w-20' },
+        ]}
+        footer={<LoadMore pages={pages} total={detail.length} />}
+      >
         {items.map((item) => (
           <tr key={item.index} className="group">
             <td className={cn(cell, 'text-right text-muted-foreground tabular-nums')}>{item.index}</td>
@@ -379,7 +463,9 @@ export function SetEditor({ db, detail, readonly }: EditorProps) {
   const pages = usePages(db, detail);
   const { open, dialog, run } = useEditDialog(db);
   const seen = new Set<string>();
-  const members = pages.pages.flatMap((p) => (p.type === 'set' ? p.members : [])).filter((m) => !seen.has(m.text) && !!seen.add(m.text));
+  const members = pages.pages
+    .flatMap((p) => (p.type === 'set' ? p.members : []))
+    .filter((m) => !seen.has(m.text) && !!seen.add(m.text));
   const id = detail.id;
 
   const edit = (previous?: string) =>
@@ -399,14 +485,22 @@ export function SetEditor({ db, detail, readonly }: EditorProps) {
           </Button>
         </Toolbar>
       )}
-      <Grid columns={[{ label: 'Member' }, { label: '', className: 'w-20' }]} footer={<LoadMore pages={pages} total={detail.length} />}>
+      <Grid
+        columns={[{ label: 'Member' }, { label: '', className: 'w-20' }]}
+        footer={<LoadMore pages={pages} total={detail.length} />}
+      >
         {members.map((m) => (
           <tr key={m.text} className="group">
             <td className={cell}>
               <Value v={m} />
             </td>
             <td className={cell}>
-              <RowActions disabled={readonly} binary={m.binary} onEdit={() => edit(m.text)} onDelete={() => run({ op: 'set.delete', id, members: [m.text] })} />
+              <RowActions
+                disabled={readonly}
+                binary={m.binary}
+                onEdit={() => edit(m.text)}
+                onDelete={() => run({ op: 'set.delete', id, members: [m.text] })}
+              />
             </td>
           </tr>
         ))}
@@ -423,7 +517,9 @@ export function SetEditor({ db, detail, readonly }: EditorProps) {
 export function ZSetEditor({ db, detail, readonly }: EditorProps) {
   const pages = usePages(db, detail);
   const { open, dialog, run } = useEditDialog(db);
-  const members = pages.pages.flatMap((p) => (p.type === 'zset' ? p.members.map((m, i) => ({ ...m, rank: p.offset + i })) : []));
+  const members = pages.pages.flatMap((p) =>
+    p.type === 'zset' ? p.members.map((m, i) => ({ ...m, rank: p.offset + i })) : [],
+  );
   const id = detail.id;
 
   const edit = (previous?: string, score?: string) =>
@@ -451,7 +547,12 @@ export function ZSetEditor({ db, detail, readonly }: EditorProps) {
         </Toolbar>
       )}
       <Grid
-        columns={[{ label: 'Rank', className: 'w-16 text-right' }, { label: 'Score', className: 'w-36 text-right' }, { label: 'Member' }, { label: '', className: 'w-20' }]}
+        columns={[
+          { label: 'Rank', className: 'w-16 text-right' },
+          { label: 'Score', className: 'w-36 text-right' },
+          { label: 'Member' },
+          { label: '', className: 'w-20' },
+        ]}
         footer={<LoadMore pages={pages} total={detail.length} />}
       >
         {members.map((m) => (
@@ -462,7 +563,12 @@ export function ZSetEditor({ db, detail, readonly }: EditorProps) {
               <Value v={m.member} />
             </td>
             <td className={cell}>
-              <RowActions disabled={readonly} binary={m.member.binary} onEdit={() => edit(m.member.text, m.score)} onDelete={() => run({ op: 'zset.delete', id, members: [m.member.text] })} />
+              <RowActions
+                disabled={readonly}
+                binary={m.member.binary}
+                onEdit={() => edit(m.member.text, m.score)}
+                onDelete={() => run({ op: 'zset.delete', id, members: [m.member.text] })}
+              />
             </td>
           </tr>
         ))}
@@ -508,7 +614,15 @@ export function StreamEditor({ db, detail, readonly }: EditorProps) {
             onClick={() =>
               open({
                 title: 'Add entry',
-                fields: [{ name: 'fields', label: 'Fields', multiline: true, placeholder: 'event signup\nuser 42', hint: 'One "field value" per line. The entry gets an automatic id (*).' }],
+                fields: [
+                  {
+                    name: 'fields',
+                    label: 'Fields',
+                    multiline: true,
+                    placeholder: 'event signup\nuser 42',
+                    hint: 'One "field value" per line. The entry gets an automatic id (*).',
+                  },
+                ],
                 submit: 'Add entry',
                 onSubmit: (v) => ({ op: 'stream.add', id, fields: parseFields(v.fields!) }),
               })
@@ -518,7 +632,10 @@ export function StreamEditor({ db, detail, readonly }: EditorProps) {
           </Button>
         )}
       </Toolbar>
-      <Grid columns={[{ label: 'Entry id', className: 'w-48' }, { label: 'Fields' }, { label: '', className: 'w-14' }]} footer={<LoadMore pages={pages} total={detail.length} />}>
+      <Grid
+        columns={[{ label: 'Entry id', className: 'w-48' }, { label: 'Fields' }, { label: '', className: 'w-14' }]}
+        footer={<LoadMore pages={pages} total={detail.length} />}
+      >
         {entries.map((e) => (
           <tr key={e.id} className="group">
             <td className={cn(cell, 'text-muted-foreground tabular-nums')}>
@@ -532,7 +649,10 @@ export function StreamEditor({ db, detail, readonly }: EditorProps) {
             <td className={cell}>
               <div className="flex flex-wrap gap-1.5">
                 {e.fields.map((f, i) => (
-                  <span key={i} className="inline-flex max-w-full items-center overflow-hidden rounded border bg-muted/40">
+                  <span
+                    key={i}
+                    className="inline-flex max-w-full items-center overflow-hidden rounded border bg-muted/40"
+                  >
                     <span className="border-r px-1.5 py-0.5 text-muted-foreground">{f.field.text}</span>
                     <span className="truncate px-1.5 py-0.5" title={f.value.text}>
                       {f.value.text}
@@ -577,14 +697,20 @@ function JsonBody({ db, id, initial, readonly }: { db: number; id: string; initi
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Toolbar>
-        <span className={cn('text-xs', valid ? 'text-muted-foreground' : 'text-destructive')}>{valid ? 'Valid JSON.' : 'Not valid JSON yet.'}</span>
+        <span className={cn('text-xs', valid ? 'text-muted-foreground' : 'text-destructive')}>
+          {valid ? 'Valid JSON.' : 'Not valid JSON yet.'}
+        </span>
         <div className="flex-1" />
         {!readonly && (
           <>
             <Button variant="ghost" size="sm" onClick={() => setText(initial)} disabled={!dirty}>
               <Undo2 /> Revert
             </Button>
-            <Button size="sm" onClick={() => run({ op: 'json.set', id, json: text })} disabled={!dirty || !valid || action.isPending}>
+            <Button
+              size="sm"
+              onClick={() => run({ op: 'json.set', id, json: text })}
+              disabled={!dirty || !valid || action.isPending}
+            >
               {action.isPending ? <Spinner className="text-current" /> : <Save />} Save
             </Button>
           </>

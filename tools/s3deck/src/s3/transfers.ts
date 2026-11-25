@@ -69,7 +69,13 @@ export async function uploadStream(
 
 type ReplaceHeaders = Pick<
   CopyObjectCommandInput,
-  'ContentType' | 'CacheControl' | 'ContentDisposition' | 'ContentEncoding' | 'ContentLanguage' | 'Metadata' | 'StorageClass'
+  | 'ContentType'
+  | 'CacheControl'
+  | 'ContentDisposition'
+  | 'ContentEncoding'
+  | 'ContentLanguage'
+  | 'Metadata'
+  | 'StorageClass'
 >;
 
 const COPY_PART_SIZE = 512 * 1024 * 1024;
@@ -204,7 +210,9 @@ export async function copyItems(
     const result = await deleteKeys(client, sourceBucket, toDelete);
     deleted = result.deleted;
     if (result.errors.length) {
-      throw new Error(`Copied ${copied} objects, but ${result.errors.length} originals could not be deleted: ${result.errors[0]?.message}`);
+      throw new Error(
+        `Copied ${copied} objects, but ${result.errors.length} originals could not be deleted: ${result.errors[0]?.message}`,
+      );
     }
   }
   return { copied, deleted };

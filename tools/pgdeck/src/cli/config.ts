@@ -17,14 +17,20 @@ export interface AppConfig extends ServerConfig {
 }
 
 /** Locate the built UI: next to the bundled CLI in dist/, or dist/web when run from source. */
-const resolveWebRoot = () => firstExistingDir([new URL('./web', import.meta.url), new URL('../../dist/web', import.meta.url)]);
+const resolveWebRoot = () =>
+  firstExistingDir([new URL('./web', import.meta.url), new URL('../../dist/web', import.meta.url)]);
 
 export function resolveConfig(connectionArg: string | undefined, opts: CliOptions): AppConfig {
   return {
     connectionString: connectionArg ?? process.env.DATABASE_URL ?? '',
     port: opts.port,
     host: opts.host,
-    auth: resolveAuth({ enabled: opts.auth, username: opts.user, password: opts.password, passwordEnv: 'PGDECK_PASSWORD' }),
+    auth: resolveAuth({
+      enabled: opts.auth,
+      username: opts.user,
+      password: opts.password,
+      passwordEnv: 'PGDECK_PASSWORD',
+    }),
     readonly: opts.readonly,
     ssl: opts.ssl,
     basePath: normalizeBasePath(opts.basePath),

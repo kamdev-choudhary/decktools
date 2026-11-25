@@ -3,7 +3,14 @@ import { colors as pc, symbols } from '@deck/logger';
 import type { ServerInfo } from '../shared/types.js';
 import type { AppConfig } from './config.js';
 
-export function printBanner(version: string, config: AppConfig, info: ServerInfo, address: string, url: string, port: number): void {
+export function printBanner(
+  version: string,
+  config: AppConfig,
+  info: ServerInfo,
+  address: string,
+  url: string,
+  port: number,
+): void {
   const keys = info.keyspace.reduce((n, d) => n + d.keys, 0);
   const used = info.keyspace.length;
   printDeckBanner({

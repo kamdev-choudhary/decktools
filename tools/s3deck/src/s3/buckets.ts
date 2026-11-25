@@ -79,7 +79,10 @@ export async function emptyBucket(client: S3Client, bucket: string, versioned: b
       .map((v) => ({ Key: v.Key as string, VersionId: v.VersionId }));
     for (let i = 0; i < objects.length; i += MAX_DELETE_BATCH) {
       await client.send(
-        new DeleteObjectsCommand({ Bucket: bucket, Delete: { Objects: objects.slice(i, i + MAX_DELETE_BATCH), Quiet: true } }),
+        new DeleteObjectsCommand({
+          Bucket: bucket,
+          Delete: { Objects: objects.slice(i, i + MAX_DELETE_BATCH), Quiet: true },
+        }),
       );
     }
     keyMarker = out.IsTruncated ? out.NextKeyMarker : undefined;
@@ -89,7 +92,11 @@ export async function emptyBucket(client: S3Client, bucket: string, versioned: b
 
 async function deleteItemsUnderRoot(client: S3Client, bucket: string) {
   for await (const page of walkObjects(client, bucket, '')) {
-    await deleteKeys(client, bucket, page.map((o) => o.Key as string));
+    await deleteKeys(
+      client,
+      bucket,
+      page.map((o) => o.Key as string),
+    );
   }
 }
 
@@ -169,7 +176,12 @@ export async function getBucketSettings(client: S3Client, bucket: string, caps: 
       const c = o.ObjectLockConfiguration;
       if (!c) return null;
       const r = c.Rule?.DefaultRetention;
-      return { enabled: c.ObjectLockEnabled === 'Enabled', mode: r?.Mode ?? null, days: r?.Days ?? null, years: r?.Years ?? null };
+      return {
+        enabled: c.ObjectLockEnabled === 'Enabled',
+        mode: r?.Mode ?? null,
+        days: r?.Days ?? null,
+        years: r?.Years ?? null,
+      };
     }),
   ]);
   return { region, versioning, cors, lifecycle, policy, publicAccessBlock, encryption, objectLock };
@@ -192,7 +204,9 @@ export async function setCors(client: S3Client, bucket: string, rules: unknown[]
   await client.send(
     new PutBucketCorsCommand({
       Bucket: bucket,
-      CORSConfiguration: { CORSRules: rules as NonNullable<PutBucketCorsCommandInput['CORSConfiguration']>['CORSRules'] },
+      CORSConfiguration: {
+        CORSRules: rules as NonNullable<PutBucketCorsCommandInput['CORSConfiguration']>['CORSRules'],
+      },
     }),
   );
 }

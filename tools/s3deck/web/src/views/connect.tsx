@@ -38,7 +38,8 @@ export function ConnectView() {
               <CircleAlert />
               <AlertTitle>No storage credentials</AlertTitle>
               <AlertDescription>
-                Entering credentials in the browser is disabled on this server. Restart s3deck with credentials (see s3deck --help).
+                Entering credentials in the browser is disabled on this server. Restart s3deck with credentials (see
+                s3deck --help).
               </AlertDescription>
             </Alert>
           )}

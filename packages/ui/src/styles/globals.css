@@ -148,7 +148,9 @@
   body {
     /* No `antialiased`: on macOS it drops the stroke thickening and makes small text look faint. */
     @apply bg-background text-foreground font-sans;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
   ::selection {
     @apply bg-link/25;
@@ -226,7 +228,12 @@
 @layer base {
   /* Inter: open 4, 6 and 9, easier to tell apart in tables of numbers. */
   :root[data-font-sans='inter'] body {
-    font-feature-settings: 'rlig' 1, 'calt' 1, 'cv02' 1, 'cv03' 1, 'cv04' 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1,
+      'cv02' 1,
+      'cv03' 1,
+      'cv04' 1;
   }
   /* No code ligatures: in SQL and data, != must stay != rather than become ≠. */
   .font-mono,
@@ -235,7 +242,9 @@
   kbd,
   .cm-editor {
     font-variant-ligatures: none;
-    font-feature-settings: 'liga' 0, 'calt' 0;
+    font-feature-settings:
+      'liga' 0,
+      'calt' 0;
   }
 }
 

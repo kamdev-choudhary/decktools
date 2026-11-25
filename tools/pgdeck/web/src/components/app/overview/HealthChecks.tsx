@@ -87,23 +87,51 @@ function findings(stats: DbStats): Finding[] {
   return out;
 }
 
-function FixButton({ db, action, tables }: { db: string; action: 'analyze' | 'vacuum'; tables: { schema: string; name: string }[] }) {
+function FixButton({
+  db,
+  action,
+  tables,
+}: {
+  db: string;
+  action: 'analyze' | 'vacuum';
+  tables: { schema: string; name: string }[];
+}) {
   const qc = useQueryClient();
   const run = useMutation({
-    mutationFn: () => api.maintenance(db, action, tables.map((t) => ({ schema: t.schema, table: t.name }))),
+    mutationFn: () =>
+      api.maintenance(
+        db,
+        action,
+        tables.map((t) => ({ schema: t.schema, table: t.name })),
+      ),
     onSuccess: (res) => {
-      if (res.failed.length) toast.warning(res.message, { description: res.failed.slice(0, 3).map((f) => `${f.table}: ${f.error}`).join('\n') });
+      if (res.failed.length)
+        toast.warning(res.message, {
+          description: res.failed
+            .slice(0, 3)
+            .map((f) => `${f.table}: ${f.error}`)
+            .join('\n'),
+        });
       else toast.success(res.message);
       void qc.invalidateQueries({ queryKey: keys.stats(db) });
     },
-    onError: (e) => toast.error(`${action === 'vacuum' ? 'Vacuum' : 'Analyze'} failed`, { description: errorMessage(e) }),
+    onError: (e) =>
+      toast.error(`${action === 'vacuum' ? 'Vacuum' : 'Analyze'} failed`, { description: errorMessage(e) }),
   });
   const Icon = action === 'vacuum' ? Sparkles : Activity;
   const n = tables.length;
   return (
-    <Button variant="outline" size="sm" className="mt-1.5 h-7 text-xs" disabled={run.isPending} onClick={() => run.mutate()}>
+    <Button
+      variant="outline"
+      size="sm"
+      className="mt-1.5 h-7 text-xs"
+      disabled={run.isPending}
+      onClick={() => run.mutate()}
+    >
       {run.isPending ? <Spinner /> : <Icon />}
-      {run.isPending ? `${action === 'vacuum' ? 'Vacuuming' : 'Analyzing'} ${n} table${n === 1 ? '' : 's'}…` : `${action === 'vacuum' ? 'Vacuum' : 'Analyze'} ${n === 1 ? 'it' : n === 2 ? 'both' : `all ${n}`}`}
+      {run.isPending
+        ? `${action === 'vacuum' ? 'Vacuuming' : 'Analyzing'} ${n} table${n === 1 ? '' : 's'}…`
+        : `${action === 'vacuum' ? 'Vacuum' : 'Analyze'} ${n === 1 ? 'it' : n === 2 ? 'both' : `all ${n}`}`}
     </Button>
   );
 }
@@ -123,7 +151,11 @@ function TableChips({ db, tables }: { db: string; tables: { schema: string; name
         </a>
       ))}
       {tables.length > 5 && (
-        <button type="button" onClick={() => setAll((v) => !v)} className="px-1 py-0.5 text-[11px] text-muted-foreground hover:text-foreground hover:underline">
+        <button
+          type="button"
+          onClick={() => setAll((v) => !v)}
+          className="px-1 py-0.5 text-[11px] text-muted-foreground hover:text-foreground hover:underline"
+        >
           {all ? 'Show less' : `+${tables.length - 5} more`}
         </button>
       )}

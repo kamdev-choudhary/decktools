@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it, mock } from 'node:test';
-import { contentSecurityPolicy, generatePassword, LoginLimiter, redactCredentials, safeEqual, SessionStore } from '../src/index.js';
+import {
+  contentSecurityPolicy,
+  generatePassword,
+  LoginLimiter,
+  redactCredentials,
+  safeEqual,
+  SessionStore,
+} from '../src/index.js';
 
 describe('SessionStore', () => {
   it('creates, touches and revokes sessions', () => {

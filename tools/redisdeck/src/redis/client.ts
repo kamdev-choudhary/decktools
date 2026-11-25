@@ -84,7 +84,10 @@ export class RedisManager {
     } catch (err) {
       probe.disconnect();
       const reason = cause ?? (err as Error);
-      throw new Error(reason.message || (reason as AggregateError).errors?.map((e: Error) => e.message).join(', ') || String(reason), { cause: err });
+      throw new Error(
+        reason.message || (reason as AggregateError).errors?.map((e: Error) => e.message).join(', ') || String(reason),
+        { cause: err },
+      );
     }
     probe.disconnect();
     const client = await this.get(this.defaultDb);
@@ -101,7 +104,10 @@ export class RedisManager {
   /** The connection for a database, opened on first use. */
   async get(db: number, kind: 'data' | 'console' = 'data'): Promise<Redis> {
     if (!Number.isInteger(db) || db < 0 || db >= this.dbCount) {
-      throw new UserError(`Database ${db} doesn't exist (this server has ${this.dbCount}: 0 to ${this.dbCount - 1})`, 404);
+      throw new UserError(
+        `Database ${db} doesn't exist (this server has ${this.dbCount}: 0 to ${this.dbCount - 1})`,
+        404,
+      );
     }
     const id = `${kind}:${db}`;
     let client = this.clients.get(id);

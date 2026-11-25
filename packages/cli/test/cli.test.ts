@@ -26,12 +26,40 @@ describe('serverOptions', () => {
   };
 
   it('has safe defaults', () => {
-    assert.deepEqual(parse([]), { port: Number(process.env.PORT) || 40000, host: '127.0.0.1', user: 'admin', auth: true, basePath: '', open: false });
+    assert.deepEqual(parse([]), {
+      port: Number(process.env.PORT) || 40000,
+      host: '127.0.0.1',
+      user: 'admin',
+      auth: true,
+      basePath: '',
+      open: false,
+    });
   });
 
   it('parses the standard flags', () => {
-    const opts = parse(['-p', '8080', '-H', '0.0.0.0', '-u', 'me', '-P', 'pw', '--no-auth', '--base-path', '/x', '--open']);
-    assert.deepEqual(opts, { port: 8080, host: '0.0.0.0', user: 'me', password: 'pw', auth: false, basePath: '/x', open: true });
+    const opts = parse([
+      '-p',
+      '8080',
+      '-H',
+      '0.0.0.0',
+      '-u',
+      'me',
+      '-P',
+      'pw',
+      '--no-auth',
+      '--base-path',
+      '/x',
+      '--open',
+    ]);
+    assert.deepEqual(opts, {
+      port: 8080,
+      host: '0.0.0.0',
+      user: 'me',
+      password: 'pw',
+      auth: false,
+      basePath: '/x',
+      open: true,
+    });
   });
 });
 
@@ -57,7 +85,9 @@ describe('formatBanner', () => {
   });
 
   it('warns when auth is off on a network interface', () => {
-    const out = plain(formatBanner({ ...base, server: { host: '0.0.0.0', basePath: '', auth: null }, resource: 'bucket' }));
+    const out = plain(
+      formatBanner({ ...base, server: { host: '0.0.0.0', basePath: '', auth: null }, resource: 'bucket' }),
+    );
     assert.match(out, /from the network on all interfaces/);
     assert.match(out, /Auth is off and 0\.0\.0\.0 is reachable/);
     assert.match(out, /read and modify the bucket\./);

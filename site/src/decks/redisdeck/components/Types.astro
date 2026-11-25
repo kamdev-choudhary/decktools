@@ -1,0 +1,33 @@
+---
+/** Every Redis type redisdeck edits, each with a sample of what its editor shows. */
+const types = [
+  { badge: 'STR', name: 'String', tone: 'text-blue', rows: [['', '"v2.4.1"']] },
+  { badge: 'HASH', name: 'Hash', tone: 'text-pink', rows: [['name', 'Sofia'], ['plan', 'pro']] },
+  { badge: 'LIST', name: 'List', tone: 'text-green', rows: [['0', 'welcome'], ['1', 'receipt']] },
+  { badge: 'SET', name: 'Set', tone: 'text-amber', rows: [['', 'sale · linen']] },
+  { badge: 'ZSET', name: 'Sorted set', tone: 'text-pink', rows: [['9821', 'kai_90'], ['9772', 'ava_49']] },
+  { badge: 'STREAM', name: 'Stream', tone: 'text-green', rows: [['-5', 'shipped']] },
+  { badge: 'JSON', name: 'RedisJSON', tone: 'text-blue', rows: [['$.price', '42.5']] },
+];
+---
+
+<ul class="reveal mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7" aria-label="Data types with their own editor">
+  {
+    types.map((t) => (
+      <li class="elevate flex flex-col rounded-xl border border-line-strong bg-surface p-3.5">
+        <div class="flex items-center gap-2">
+          <span class:list={['rounded border border-current/30 px-1.5 py-px font-mono text-[0.62rem] font-semibold', t.tone]}>{t.badge}</span>
+        </div>
+        <div class="mt-2.5 text-sm font-medium">{t.name}</div>
+        <div class="mt-3 space-y-1 font-mono text-[0.68rem]" aria-hidden="true">
+          {t.rows.map(([a, b]) => (
+            <div class="flex gap-2 truncate rounded-md border border-line bg-bg px-2 py-1">
+              {a && <span class="shrink-0 text-faint">{a}</span>}
+              <span class="truncate text-muted">{b}</span>
+            </div>
+          ))}
+        </div>
+      </li>
+    ))
+  }
+</ul>

@@ -10,7 +10,8 @@ import { generateUuid, preferredUuidVersion } from '@/lib/uuid';
 import { DateTimeField } from './DateTimeField';
 import { FkField, type FkTarget } from './ForeignKey';
 
-export type FieldKind = 'boolean' | 'enum' | 'date' | 'datetime' | 'time' | 'uuid' | 'number' | 'json' | 'line' | 'text';
+export type FieldKind =
+  'boolean' | 'enum' | 'date' | 'datetime' | 'time' | 'uuid' | 'number' | 'json' | 'line' | 'text';
 
 const NUMERIC_TEXT = /^(int2|int4|int8|float4|float8|numeric|money|oid)$/;
 
@@ -26,7 +27,16 @@ export function fieldKind(col: Column): FieldKind {
   if (t === 'uuid') return 'uuid';
   if (t === 'json' || t === 'jsonb') return 'json';
   if (col.category === 'N' || NUMERIC_TEXT.test(t)) return 'number';
-  if (t === 'varchar' || t === 'bpchar' || t === 'name' || t === 'citext' || t === 'inet' || t === 'cidr' || t === 'macaddr') return 'line';
+  if (
+    t === 'varchar' ||
+    t === 'bpchar' ||
+    t === 'name' ||
+    t === 'citext' ||
+    t === 'inet' ||
+    t === 'cidr' ||
+    t === 'macaddr'
+  )
+    return 'line';
   return 'text';
 }
 
@@ -111,7 +121,9 @@ export function FieldInput({ id, column, db, fk, value, disabled, placeholder, c
               {v === 't' ? 'true' : 'false'}
             </button>
           ))}
-          {current === null && placeholder && <span className="self-center px-3 text-xs text-muted-foreground">{placeholder}</span>}
+          {current === null && placeholder && (
+            <span className="self-center px-3 text-xs text-muted-foreground">{placeholder}</span>
+          )}
         </div>
       );
     }
@@ -158,7 +170,12 @@ export function FieldInput({ id, column, db, fk, value, disabled, placeholder, c
             onChange={(e) => onChange(e.target.value)}
             className={cn('font-mono text-[13px]', ring)}
           />
-          <Button type="button" variant="outline" size="sm" className="h-9 shrink-0" disabled={disabled}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 shrink-0"
+            disabled={disabled}
             title={`Generate a new UUIDv${uuidVer}`}
             onClick={() => onChange(generateUuid(uuidVer))}
           >
@@ -175,7 +192,9 @@ export function FieldInput({ id, column, db, fk, value, disabled, placeholder, c
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
-          aria-invalid={value !== '' && !/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$|^[-+]?(Infinity|NaN)$/.test(value.trim())}
+          aria-invalid={
+            value !== '' && !/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$|^[-+]?(Infinity|NaN)$/.test(value.trim())
+          }
           className={cn('w-full font-mono text-[13px] tabular-nums', ring)}
         />
       );
@@ -193,7 +212,9 @@ export function FieldInput({ id, column, db, fk, value, disabled, placeholder, c
             className={cn('max-h-80 min-h-24 font-mono text-[12.5px]', ring)}
           />
           <div className="flex items-center justify-between gap-2 text-xs">
-            <span className={err ? 'text-destructive' : 'text-muted-foreground'}>{err ? `Invalid JSON: ${err}` : value.trim() ? 'Valid JSON' : ''}</span>
+            <span className={err ? 'text-destructive' : 'text-muted-foreground'}>
+              {err ? `Invalid JSON: ${err}` : value.trim() ? 'Valid JSON' : ''}
+            </span>
             <Button
               type="button"
               variant="ghost"

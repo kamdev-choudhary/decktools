@@ -22,14 +22,18 @@ export async function explainQuery(ctx: DbContext, sql: string, analyze: boolean
     const version = v[0]!.v;
     // Normalized queries (e.g. from pg_stat_statements) have $1 placeholders: PG16+ can plan them generically.
     const hasParams = /\$\d/.test(text);
-    if (hasParams && analyze) throw new UserError('This query has $1-style parameters. Replace them with real values to run EXPLAIN ANALYZE.');
+    if (hasParams && analyze)
+      throw new UserError('This query has $1-style parameters. Replace them with real values to run EXPLAIN ANALYZE.');
     if (hasParams && version < 160000) {
-      throw new UserError('This query has $1-style parameters. Replace them with real values (PostgreSQL 16+ can plan them as-is).');
+      throw new UserError(
+        'This query has $1-style parameters. Replace them with real values (PostgreSQL 16+ can plan them as-is).',
+      );
     }
     const generic = hasParams;
     // Parameters can't go through the extended protocol unbound, so a generic plan uses the simple
     // protocol; make sure it is exactly one statement first so nothing else can run.
-    if (generic && splitStatements(text).length !== 1) throw new UserError('Explain one statement at a time: select it in the editor first.');
+    if (generic && splitStatements(text).length !== 1)
+      throw new UserError('Explain one statement at a time: select it in the editor first.');
     const options = analyze ? 'ANALYZE, BUFFERS, FORMAT JSON' : `FORMAT JSON${generic ? ', GENERIC_PLAN' : ''}`;
 
     await client.query('begin');
@@ -41,7 +45,8 @@ export async function explainQuery(ctx: DbContext, sql: string, analyze: boolean
         : await client.query({ text: `EXPLAIN (${options}) ${text}`, queryMode: 'extended' } as never));
     } catch (e) {
       const err = e as Error & { code?: string };
-      if (/multiple commands/i.test(err.message)) throw new UserError('Explain one statement at a time: select it in the editor first.');
+      if (/multiple commands/i.test(err.message))
+        throw new UserError('Explain one statement at a time: select it in the editor first.');
       throw e;
     } finally {
       await client.query('rollback').catch(() => {});
@@ -78,7 +83,12 @@ const SORT_SQL: Record<StatementSort, string> = { total: 'total_ms', mean: 'mean
 /** The most expensive statements recorded by pg_stat_statements for this database. */
 export async function listStatements(ctx: DbContext, sort: StatementSort, limit: number): Promise<StatementsResponse> {
   const st = await statementsState(ctx);
-  if (!st.installed) return { status: st.preloaded ? 'not-created' : st.available ? 'not-preloaded' : 'unavailable', statements: [], totalMs: 0 };
+  if (!st.installed)
+    return {
+      status: st.preloaded ? 'not-created' : st.available ? 'not-preloaded' : 'unavailable',
+      statements: [],
+      totalMs: 0,
+    };
 
   const view = `${quoteIdent(st.schema ?? 'public')}.pg_stat_statements`;
   const total = st.version >= 130000 ? 'total_exec_time' : 'total_time';
@@ -110,7 +120,8 @@ export async function listStatements(ctx: DbContext, sort: StatementSort, limit:
       })),
     };
   } catch (e) {
-    if (/shared_preload_libraries/i.test((e as Error).message)) return { status: 'not-preloaded', statements: [], totalMs: 0 };
+    if (/shared_preload_libraries/i.test((e as Error).message))
+      return { status: 'not-preloaded', statements: [], totalMs: 0 };
     throw e;
   }
 }
@@ -130,7 +141,11 @@ export async function resetStatements(ctx: DbContext): Promise<{ ok: true; messa
 }
 
 /** Cancel a session's running query, or terminate the session, if it belongs to this database. */
-export async function signalSession(ctx: DbContext, pid: number, terminate: boolean): Promise<{ ok: true; message: string }> {
+export async function signalSession(
+  ctx: DbContext,
+  pid: number,
+  terminate: boolean,
+): Promise<{ ok: true; message: string }> {
   if (ctx.readonly) throw new UserError('pgdeck is running in --readonly mode', 403);
   const fn = terminate ? 'pg_terminate_backend' : 'pg_cancel_backend';
   const { rows } = await ctx.pool.query<{ ok: boolean }>(

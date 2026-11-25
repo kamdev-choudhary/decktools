@@ -21,7 +21,6 @@ import type { NewTable } from '../shared/create-table.js';
 import { relationDdl, runMaintenance, runTableAction, type TableAction } from './table-actions.js';
 import { deleteRows, insertRow, selectRows, updateRow } from './rows.js';
 
-
 /** Operations against one database, backed by its own pool. */
 export function createDatabase(config: DbConfig) {
   const ctx: DbContext = {
@@ -47,7 +46,8 @@ export function createDatabase(config: DbConfig) {
     /** Truncate / drop / rename / duplicate / vacuum / analyze / refresh. */
     tableAction: (schema: string, table: string, action: TableAction) => runTableAction(ctx, schema, table, action),
     ddl: (schema: string, table: string) => relationDdl(ctx, schema, table),
-    maintenance: (action: 'analyze' | 'vacuum', tables: { schema: string; table: string }[]) => runMaintenance(ctx, action, tables),
+    maintenance: (action: 'analyze' | 'vacuum', tables: { schema: string; table: string }[]) =>
+      runMaintenance(ctx, action, tables),
     createTable: (spec: NewTable) => createTable(ctx, spec),
     catalog: () => getCatalog(ctx),
     /** Tables, columns and foreign keys for the ER diagram. */
@@ -57,7 +57,8 @@ export function createDatabase(config: DbConfig) {
     role: (name: string) => getRole(ctx, name),
     roleAction: (a: RoleAction) => runRoleAction(ctx, a),
     grants: (role: string, changes: GrantChange[]) => applyGrants(ctx, role, changes),
-    grantPreset: (role: string, schema: string, preset: SchemaPreset, future: boolean) => applySchemaPreset(ctx, role, schema, preset, future),
+    grantPreset: (role: string, schema: string, preset: SchemaPreset, future: boolean) =>
+      applySchemaPreset(ctx, role, schema, preset, future),
     objects: () => listObjects(ctx),
     object: (kind: ObjectKind, oid: number) => getObject(ctx, kind, oid),
     availableExtensions: () => availableExtensions(ctx),

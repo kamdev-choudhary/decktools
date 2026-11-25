@@ -1,47 +1,46 @@
 ---
-import { REPO_URL } from '../../../lib/meta';
-import { DOCS_URL, getPgdeckVersion } from '../meta';
-import Corners from '../../../components/Corners.astro';
-import CopyCommand from '../../../components/CopyCommand.astro';
-import Cross from '../../../components/Cross.astro';
-import Shot from '../../../components/Shot.astro';
+import { REPO_URL } from '../../lib/meta';
+import Corners from '../Corners.astro';
+import CopyCommand from '../CopyCommand.astro';
+import Cross from '../Cross.astro';
+import Shot from '../Shot.astro';
+import type { HeroContent } from './types';
 
-const version = await getPgdeckVersion();
-const command = 'npx pgdeck postgres://localhost:5432/shop';
-const stats = [
-  ['1M rows', 'imported from CSV in about 3 s'],
-  ['1 command', 'no install, no config, no account'],
-  ['7 formats', 'to export, plus SQL backups'],
-  ['PostgreSQL 12+', 'local, in Docker or managed'],
-] as const;
+/**
+ * A deck page's opening: headline and install command, then the one
+ * orchestrated moment: the command is typed, the CLI answers, the app opens.
+ */
+interface Props {
+  deck: string;
+  version: string;
+  docsUrl: string;
+  content: HeroContent;
+}
+const { deck, version, docsUrl, content: c } = Astro.props;
 ---
 
 <section id="top" class="relative isolate overflow-hidden">
   <div class="grid-bg pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
 
   <div class="pad pt-20 text-center md:pt-28">
-    <a href={`${REPO_URL}/releases`} class="intro inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface py-1 pr-3 pl-1 text-[0.8rem] text-muted transition-colors hover:text-fg" style="--d:0">
-      <span class="rounded-full bg-[image:var(--brand)] px-2 py-0.5 font-medium text-white">v{version}</span>
-      Tables, columns and indexes, right in the UI
-      <svg viewBox="0 0 16 16" class="size-3" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 3 5 5-5 5"></path></svg>
+    <a href={`${REPO_URL}/releases`} class="intro inline-flex max-w-full items-center gap-2 rounded-full border border-line-strong bg-surface py-1 pr-3 pl-1 text-[0.8rem] text-muted transition-colors hover:text-fg" style="--d:0">
+      <span class="shrink-0 rounded-full bg-[image:var(--brand)] px-2 py-0.5 font-medium text-white">v{version}</span>
+      <span class="truncate">{c.release}</span>
+      <svg viewBox="0 0 16 16" class="size-3 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 3 5 5-5 5"></path></svg>
     </a>
 
     <h1 class="intro display mx-auto mt-8 max-w-[14ch] text-[clamp(2.9rem,1.2rem+6.6vw,6.5rem)]" style="--d:1">
-      The Postgres admin that starts with one command.
+      {c.title}
     </h1>
-    <p class="intro lede mx-auto mt-7 md:text-[1.2rem]" style="--d:2">
-      Browse and edit rows, run SQL, change tables and watch live activity on every database on your server. pgdeck runs
-      wherever Node does and opens in any browser.
-    </p>
+    <p class="intro lede mx-auto mt-7 md:text-[1.2rem]" style="--d:2">{c.lede}</p>
 
     <div id="get-started" class="intro mx-auto mt-10 flex max-w-2xl flex-col items-stretch gap-3 sm:flex-row sm:items-center" style="--d:3">
-      <CopyCommand command="npx pgdeck postgres://user:pass@host:5432/db" class="flex-1 text-left" />
-      <a href={DOCS_URL} class="btn btn-ghost h-[3.1rem] shrink-0">Read the docs</a>
+      <CopyCommand command={c.command} class="flex-1 text-left" />
+      <a href={docsUrl} class="btn btn-ghost h-[3.1rem] shrink-0">Read the docs</a>
     </div>
-    <p class="intro mt-4 text-[0.82rem] text-faint" style="--d:4">Free and open source, MIT licensed. Needs Node.js 20 or newer.</p>
+    <p class="intro mt-4 text-[0.82rem] text-faint" style="--d:4">{c.footnote}</p>
   </div>
 
-  <!-- The one orchestrated moment: the command runs, pgdeck answers, the app opens. -->
   <div class="pad relative mt-16 pb-20 md:mt-20 md:pb-28">
     <div class="glow-bg pointer-events-none absolute inset-x-[8%] top-[12%] -z-10 h-[70%]" aria-hidden="true"></div>
     <div class="relative">
@@ -51,31 +50,22 @@ const stats = [
             <div class="dots"><i></i><i></i><i></i></div>
             <div class="mx-auto flex h-6 w-full max-w-xs items-center justify-center gap-1.5 rounded-md border border-line bg-bg px-3 font-mono text-[0.7rem] text-faint">
               <svg viewBox="0 0 24 24" class="size-3" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
-              db.example.com
+              {c.host}
             </div>
             <div class="w-[46px]"></div>
           </div>
-          <Shot
-            name="overview"
-            alt="The pgdeck overview: connections, transactions and cache stats, live charts of transactions and rows per second, and the active sessions on the shop database."
-            eager
-            sizes="(min-width: 1200px) 1100px, 94vw"
-          />
+          <Shot deck={deck} name={c.shot.name} alt={c.shot.alt} eager sizes="(min-width: 1200px) 1100px, 94vw" />
         </div>
       </div>
 
       <div class="term elevate relative z-20 mt-4 w-full rounded-2xl border border-line-strong bg-surface/90 p-5 text-left backdrop-blur-md md:absolute md:-bottom-12 md:-left-8 md:mt-0 md:w-[27rem]">
         <div class="mb-4 flex items-center" aria-hidden="true">
           <div class="dots"><i></i><i></i><i></i></div>
-          <span class="ml-auto font-mono text-[0.68rem] text-faint">~/shop</span>
+          <span class="ml-auto font-mono text-[0.68rem] text-faint">{c.terminalCwd}</span>
         </div>
-        <div class="code overflow-x-auto whitespace-pre text-fg [scrollbar-width:none]" role="img" aria-label={`Terminal running ${command}, then pgdeck printing its web address and login`}>
-          <div><span class="text-faint">$ </span><span class="type inline-block overflow-hidden align-bottom" style={`--n:${command.length}`}>{command}</span></div>
-          <div class="out mt-3" style="--i:0">  <span class="font-semibold text-blue">pgdeck</span> <span class="text-faint">v{version}</span></div>
-          <div class="out mt-3" style="--i:1">  <span class="text-green">✓ Connected</span>   shop as postgres <span class="text-faint">(PostgreSQL 18)</span></div>
-          <div class="out" style="--i:2">    <span class="text-faint">Databases</span>   35 available</div>
-          <div class="out" style="--i:3">  <span class="text-blue">➜ Web UI      http://127.0.0.1:47615/</span></div>
-          <div class="out" style="--i:4">    <span class="text-faint">Login</span>       admin / <span class="text-amber">7Qm2xLpR9vKe</span></div>
+        <div class="code overflow-x-auto whitespace-pre text-fg [scrollbar-width:none]" role="img" aria-label={`Terminal running ${c.terminalCommand}, then ${deck} printing its web address and login`}>
+          <div><span class="text-faint">$ </span><span class="type inline-block overflow-hidden align-bottom" style={`--n:${c.terminalCommand.length}`}>{c.terminalCommand}</span></div>
+          {c.terminal.map((line, i) => <div class:list={['out', line.gap && 'mt-3']} style={`--i:${i}`} set:html={line.html} />)}
         </div>
       </div>
     </div>
@@ -84,7 +74,7 @@ const stats = [
   <dl class="section grid grid-cols-2 lg:grid-cols-4">
     <Corners />
     {
-      stats.map(([n, label], i) => (
+      c.stats.map(([n, label], i) => (
         <div class:list={['relative px-5 py-7 md:px-8 md:py-9', i % 2 === 1 && 'border-l border-line', i === 2 && 'lg:border-l', i >= 2 && 'border-t border-line lg:border-t-0']}>
           {i > 0 && i < 4 && <Cross class="-top-[7px] -left-[7px] hidden lg:block" />}
           <dt class="text-[clamp(1.35rem,1rem+1.2vw,1.85rem)] font-semibold tracking-[-0.04em]">{n}</dt>

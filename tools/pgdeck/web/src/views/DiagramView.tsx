@@ -29,9 +29,23 @@ import { keys } from '@/api/hooks';
 import { Combobox } from '@deck/ui/components/combobox';
 import { CenteredSpinner, ErrorAlert, errorMessage } from '@/components/app/feedback';
 import { Button } from '@deck/ui/components/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@deck/ui/components/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@deck/ui/components/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@deck/ui/components/select';
-import { findHubs, HEADER_H, layoutDiagram, neighbourhood, ROW_H, tableId, type ColumnMode, type TableBox } from '@/lib/er-layout';
+import {
+  findHubs,
+  HEADER_H,
+  layoutDiagram,
+  neighbourhood,
+  ROW_H,
+  tableId,
+  type ColumnMode,
+  type TableBox,
+} from '@/lib/er-layout';
 import { diagramHref, navigate, tableHref } from '@/lib/router';
 import { storage } from '@deck/ui/lib/storage';
 import { useTheme } from '@deck/ui/components/theme-provider';
@@ -40,7 +54,8 @@ import { cn } from '@deck/ui/lib/utils';
 type TableNodeData = { box: TableBox; state: 'normal' | 'active' | 'related' | 'dim'; db: string; hot: Set<string> };
 type TableNode = Node<TableNodeData, 'table'>;
 
-const compact = (n: number) => (n < 0 ? '' : n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1)}k` : String(Math.round(n)));
+const compact = (n: number) =>
+  n < 0 ? '' : n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1)}k` : String(Math.round(n));
 
 /** One table: header plus its (key) columns, with a handle on each side of every column. */
 const TableCard = memo(function TableCard({ data }: NodeProps<TableNode>) {
@@ -78,16 +93,43 @@ const TableCard = memo(function TableCard({ data }: NodeProps<TableNode>) {
       </div>
       <div className="py-0.5">
         {box.columns.map((c) => (
-          <div key={c.name} className={cn('relative flex items-center gap-1.5 px-3 text-xs', hot.has(c.name) && 'bg-chart-data/12 text-foreground')} style={{ height: ROW_H }}>
-            <Handle type="target" position={Position.Left} id={`t:${c.name}`} className="!size-1.5 !min-h-0 !min-w-0 !border-0 !bg-transparent" />
+          <div
+            key={c.name}
+            className={cn(
+              'relative flex items-center gap-1.5 px-3 text-xs',
+              hot.has(c.name) && 'bg-chart-data/12 text-foreground',
+            )}
+            style={{ height: ROW_H }}
+          >
+            <Handle
+              type="target"
+              position={Position.Left}
+              id={`t:${c.name}`}
+              className="!size-1.5 !min-h-0 !min-w-0 !border-0 !bg-transparent"
+            />
             <span className="flex w-3.5 shrink-0 justify-center">
-              {c.pk ? <KeyRound className="size-3 text-warning" aria-label="Primary key" /> : c.fk ? <Link2 className="size-3 text-chart-data" aria-label="Foreign key" /> : null}
+              {c.pk ? (
+                <KeyRound className="size-3 text-warning" aria-label="Primary key" />
+              ) : c.fk ? (
+                <Link2 className="size-3 text-chart-data" aria-label="Foreign key" />
+              ) : null}
             </span>
-            <span className={cn('min-w-0 flex-1 truncate font-mono', (c.pk || hot.has(c.name)) && 'font-medium', hot.has(c.name) && 'text-chart-data')}>{c.name}</span>
-            <span className="max-w-[45%] shrink-0 truncate font-mono text-[10px] text-muted-foreground">
-              {c.type}
+            <span
+              className={cn(
+                'min-w-0 flex-1 truncate font-mono',
+                (c.pk || hot.has(c.name)) && 'font-medium',
+                hot.has(c.name) && 'text-chart-data',
+              )}
+            >
+              {c.name}
             </span>
-            <Handle type="source" position={Position.Right} id={`s:${c.name}`} className="!size-1.5 !min-h-0 !min-w-0 !border-0 !bg-transparent" />
+            <span className="max-w-[45%] shrink-0 truncate font-mono text-[10px] text-muted-foreground">{c.type}</span>
+            <Handle
+              type="source"
+              position={Position.Right}
+              id={`s:${c.name}`}
+              className="!size-1.5 !min-h-0 !min-w-0 !border-0 !bg-transparent"
+            />
           </div>
         ))}
         {box.hidden > 0 && (
@@ -146,8 +188,14 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
   // Links to hubs are left out of the layout unless asked for (or the hub is the focus).
   // Selecting a hub draws its links on top without moving anything.
   const hubs = useMemo(() => (g ? findHubs(g, visible) : new Map<string, number>()), [g, visible]);
-  const hidden = useMemo(() => (showHubs ? new Set<string>() : new Set([...hubs.keys()].filter((h) => h !== focus))), [showHubs, hubs, focus]);
-  const laid = useMemo(() => (g ? layoutDiagram(g, visible, columnMode, hidden) : null), [g, visible, columnMode, hidden]);
+  const hidden = useMemo(
+    () => (showHubs ? new Set<string>() : new Set([...hubs.keys()].filter((h) => h !== focus))),
+    [showHubs, hubs, focus],
+  );
+  const laid = useMemo(
+    () => (g ? layoutDiagram(g, visible, columnMode, hidden) : null),
+    [g, visible, columnMode, hidden],
+  );
 
   // Cards the user dragged, remembered per database and view so a refresh keeps the arrangement.
   const posKey = `pgdeck.diagram.${db}.${focus ? `focus:${focus}:${depth}` : `schema:${schema}`}.${columnMode}.${showHubs ? 'hubs' : 'nohubs'}`;
@@ -201,13 +249,24 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
       for (const f of g.foreignKeys) {
         const child = tableId(f.schema, f.table);
         if (tableId(f.refSchema, f.refTable) !== selected || child === selected || !visible.has(child)) continue;
-        links.push({ id: `${child}:${f.name}`, fk: f, source: selected, sourceColumn: f.refColumns[0]!, target: child, targetColumn: f.columns[0]! });
+        links.push({
+          id: `${child}:${f.name}`,
+          fk: f,
+          source: selected,
+          sourceColumn: f.refColumns[0]!,
+          target: child,
+          targetColumn: f.columns[0]!,
+        });
       }
     }
     return links;
   }, [laid, g, selected, hidden, visible]);
 
-  const isHot = useCallback((l: { id: string; source: string; target: string }) => l.id === hoverEdge || (!!selected && (l.source === selected || l.target === selected)), [hoverEdge, selected]);
+  const isHot = useCallback(
+    (l: { id: string; source: string; target: string }) =>
+      l.id === hoverEdge || (!!selected && (l.source === selected || l.target === selected)),
+    [hoverEdge, selected],
+  );
 
   // Columns at either end of highlighted links, per table.
   const hot = useMemo(() => {
@@ -301,7 +360,11 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
         width,
         height,
         pixelRatio: kind === 'png' ? 2 : 1,
-        style: { width: `${width}px`, height: `${height}px`, transform: `translate(${vp.x}px, ${vp.y}px) scale(${vp.zoom})` },
+        style: {
+          width: `${width}px`,
+          height: `${height}px`,
+          transform: `translate(${vp.x}px, ${vp.y}px) scale(${vp.zoom})`,
+        },
       };
       try {
         const url = kind === 'png' ? await toPng(el, opts) : await toSvg(el, opts);
@@ -317,10 +380,18 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
   if (graph.isPending) return <CenteredSpinner label="Reading the schema…" />;
   if (graph.isError) return <ErrorAlert error={graph.error} className="m-6 w-auto" />;
   if (!g!.tables.length) {
-    return <div className="flex flex-1 items-center justify-center p-10 text-sm text-muted-foreground">This database has no tables yet.</div>;
+    return (
+      <div className="flex flex-1 items-center justify-center p-10 text-sm text-muted-foreground">
+        This database has no tables yet.
+      </div>
+    );
   }
 
-  const tableOptions = g!.tables.map((t) => ({ value: tableId(t.schema, t.name), label: t.schema === 'public' ? t.name : `${t.schema}.${t.name}`, hint: t.schema === 'public' ? undefined : t.schema }));
+  const tableOptions = g!.tables.map((t) => ({
+    value: tableId(t.schema, t.name),
+    label: t.schema === 'public' ? t.name : `${t.schema}.${t.name}`,
+    hint: t.schema === 'public' ? undefined : t.schema,
+  }));
 
   return (
     <div className="pgdeck-flow relative min-h-0 flex-1">
@@ -351,7 +422,10 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
         <Controls showInteractive={false} position="bottom-left" />
         <MiniMap pannable zoomable position="bottom-right" nodeBorderRadius={6} className="!hidden md:!block" />
 
-        <Panel position="top-left" className="!m-3 flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-2 rounded-lg border bg-background/95 p-2 backdrop-blur">
+        <Panel
+          position="top-left"
+          className="!m-3 flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-2 rounded-lg border bg-background/95 p-2 backdrop-blur"
+        >
           <Combobox
             value={focus ?? undefined}
             onChange={(v) => navigate(diagramHref(db, v))}
@@ -369,9 +443,15 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1" className="text-xs">Direct relations</SelectItem>
-                  <SelectItem value="2" className="text-xs">2 hops</SelectItem>
-                  <SelectItem value="3" className="text-xs">3 hops</SelectItem>
+                  <SelectItem value="1" className="text-xs">
+                    Direct relations
+                  </SelectItem>
+                  <SelectItem value="2" className="text-xs">
+                    2 hops
+                  </SelectItem>
+                  <SelectItem value="3" className="text-xs">
+                    3 hops
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => navigate(diagramHref(db))}>
@@ -385,7 +465,9 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="*" className="text-xs">All schemas</SelectItem>
+                  <SelectItem value="*" className="text-xs">
+                    All schemas
+                  </SelectItem>
                   {schemas.map((s) => (
                     <SelectItem key={s} value={s} className="font-mono text-xs">
                       {s}
@@ -395,25 +477,47 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
               </Select>
             )
           )}
-          <div className="inline-flex h-8 overflow-hidden rounded-md border text-xs" role="group" aria-label="Columns to show">
+          <div
+            className="inline-flex h-8 overflow-hidden rounded-md border text-xs"
+            role="group"
+            aria-label="Columns to show"
+          >
             {(['keys', 'all'] as const).map((m) => (
               <button
                 key={m}
                 type="button"
                 aria-pressed={columnMode === m}
                 onClick={() => setMode(m)}
-                className={cn('px-2.5 transition-colors', columnMode === m ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
+                className={cn(
+                  'px-2.5 transition-colors',
+                  columnMode === m
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                )}
               >
                 {m === 'keys' ? 'Key columns' : 'All columns'}
               </button>
             ))}
           </div>
           {Object.keys(moved).length > 0 && (
-            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => saveMoved({})} title="Put every table back where the automatic layout placed it">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => saveMoved({})}
+              title="Put every table back where the automatic layout placed it"
+            >
               <RotateCcw /> Reset layout
             </Button>
           )}
-          <Button variant="outline" size="icon-sm" className="size-8" aria-label="Fit to screen" title="Fit to screen" onClick={() => void flow.fitView({ padding: 0.08, duration: 300 })}>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            className="size-8"
+            aria-label="Fit to screen"
+            title="Fit to screen"
+            onClick={() => void flow.fitView({ padding: 0.08, duration: 300 })}
+          >
             <Maximize />
           </Button>
           <DropdownMenu>
@@ -429,7 +533,10 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
           </DropdownMenu>
         </Panel>
 
-        <Panel position="bottom-center" className="!mb-3 hidden items-center gap-4 rounded-lg border bg-background/95 px-3 py-1.5 text-[11px] whitespace-nowrap text-muted-foreground backdrop-blur xl:flex">
+        <Panel
+          position="bottom-center"
+          className="!mb-3 hidden items-center gap-4 rounded-lg border bg-background/95 px-3 py-1.5 text-[11px] whitespace-nowrap text-muted-foreground backdrop-blur xl:flex"
+        >
           <span className="flex items-center gap-1.5">
             <KeyRound className="size-3 text-warning" /> primary key
           </span>
@@ -449,20 +556,29 @@ function Diagram({ db, focus }: { db: string; focus: string | null }) {
         <Panel position="top-right" className="!m-3 hidden max-w-sm flex-col items-end gap-1.5 lg:flex">
           <div className="flex items-center gap-1.5 rounded-lg border bg-background/95 px-3 py-2 text-xs text-muted-foreground backdrop-blur">
             <Network className="size-3.5" />
-            {laid!.boxes.length} table{laid!.boxes.length === 1 ? '' : 's'} · {laid!.links.length} relation{laid!.links.length === 1 ? '' : 's'} shown
+            {laid!.boxes.length} table{laid!.boxes.length === 1 ? '' : 's'} · {laid!.links.length} relation
+            {laid!.links.length === 1 ? '' : 's'} shown
           </div>
           {(laid!.hiddenLinks > 0 || showHubs) && hubs.size > 0 && (
             <div className="rounded-lg border bg-background/95 px-3 py-2 text-xs text-muted-foreground backdrop-blur">
               {showHubs ? (
-                <>Showing every link, including to {[...hubs.keys()].map((h) => h.replace(/^public\./, '')).join(', ')}.</>
+                <>
+                  Showing every link, including to {[...hubs.keys()].map((h) => h.replace(/^public\./, '')).join(', ')}.
+                </>
               ) : (
                 <>
                   Hiding {laid!.hiddenLinks} links to{' '}
-                  <span className="font-mono text-foreground">{[...hidden].map((h) => h.replace(/^public\./, '')).join(', ')}</span>, which almost every table references. Click
-                  one to see its links.
+                  <span className="font-mono text-foreground">
+                    {[...hidden].map((h) => h.replace(/^public\./, '')).join(', ')}
+                  </span>
+                  , which almost every table references. Click one to see its links.
                 </>
               )}{' '}
-              <button type="button" className="font-medium text-foreground underline-offset-2 hover:underline" onClick={() => setShowHubs((v) => !v)}>
+              <button
+                type="button"
+                className="font-medium text-foreground underline-offset-2 hover:underline"
+                onClick={() => setShowHubs((v) => !v)}
+              >
                 {showHubs ? 'Hide them' : 'Show them'}
               </button>
             </div>

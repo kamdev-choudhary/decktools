@@ -14,7 +14,13 @@ import {
   AlertDialogTitle,
 } from '@deck/ui/components/alert-dialog';
 import { Button } from '@deck/ui/components/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@deck/ui/components/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@deck/ui/components/dropdown-menu';
 import { openInSqlEditor } from '@/lib/sql-draft';
 import { errorMessage, Spinner } from '../feedback';
 import { formatDuration } from '@/lib/format';
@@ -23,12 +29,26 @@ import { TruncatedText } from '@deck/ui/components/truncated-text';
 
 function StateDot({ state }: { state: string | null }) {
   const tone =
-    state === 'active' ? 'bg-success' : state?.startsWith('idle in transaction') ? 'bg-warning' : 'bg-muted-foreground/40';
+    state === 'active'
+      ? 'bg-success'
+      : state?.startsWith('idle in transaction')
+        ? 'bg-warning'
+        : 'bg-muted-foreground/40';
   return <span className={cn('inline-block size-1.5 shrink-0 rounded-full', tone)} />;
 }
 
 /** Live list of client sessions on this database (pgdeck's own pool excluded). */
-export function ActiveSessions({ db, readonly, activity, ready }: { db: string; readonly: boolean; activity: LiveActivity[]; ready: boolean }) {
+export function ActiveSessions({
+  db,
+  readonly,
+  activity,
+  ready,
+}: {
+  db: string;
+  readonly: boolean;
+  activity: LiveActivity[];
+  ready: boolean;
+}) {
   const [terminating, setTerminating] = useState<LiveActivity | null>(null);
   const signal = useMutation({
     mutationFn: (v: { pid: number; terminate: boolean }) => api.signalSession(db, v.pid, v.terminate),
@@ -48,7 +68,9 @@ export function ActiveSessions({ db, readonly, activity, ready }: { db: string; 
         <span className="text-xs text-muted-foreground">Excludes pgdeck's own connections</span>
       </div>
       {!activity.length ? (
-        <p className="p-6 text-center text-sm text-muted-foreground">{ready ? 'No other sessions connected.' : 'Waiting for data…'}</p>
+        <p className="p-6 text-center text-sm text-muted-foreground">
+          {ready ? 'No other sessions connected.' : 'Waiting for data…'}
+        </p>
       ) : (
         <div className="max-h-80 overflow-auto">
           <table className="w-full table-fixed text-sm">
@@ -76,7 +98,10 @@ export function ActiveSessions({ db, readonly, activity, ready }: { db: string; 
                   <td className="px-4 py-2 font-mono text-xs text-muted-foreground tabular-nums">{a.pid}</td>
                   <td className="px-4 py-2">
                     <TruncatedText text={a.application || a.user || '—'} className="text-[13px]" />
-                    <TruncatedText text={`${a.user ?? ''}${a.client ? ` · ${a.client}` : ''}`} className="text-xs text-muted-foreground" />
+                    <TruncatedText
+                      text={`${a.user ?? ''}${a.client ? ` · ${a.client}` : ''}`}
+                      className="text-xs text-muted-foreground"
+                    />
                   </td>
                   <td className="px-4 py-2">
                     <span className="flex items-center gap-2 text-[13px]">
@@ -86,22 +111,39 @@ export function ActiveSessions({ db, readonly, activity, ready }: { db: string; 
                     {a.waitEvent && <span className="text-xs text-muted-foreground">waiting: {a.waitEvent}</span>}
                   </td>
                   <td className="px-4 py-2 text-right text-xs text-muted-foreground tabular-nums">
-                    {a.durationSeconds !== null ? (a.durationSeconds < 60 ? `${a.durationSeconds.toFixed(1)}s` : formatDuration(a.durationSeconds)) : '—'}
+                    {a.durationSeconds !== null
+                      ? a.durationSeconds < 60
+                        ? `${a.durationSeconds.toFixed(1)}s`
+                        : formatDuration(a.durationSeconds)
+                      : '—'}
                   </td>
                   <td className="px-4 py-2">
-                    <TruncatedText text={a.query.replace(/\s+/g, ' ').trim() || '—'} tooltip={<pre className="font-mono whitespace-pre-wrap">{a.query}</pre>} className="font-mono text-xs" />
+                    <TruncatedText
+                      text={a.query.replace(/\s+/g, ' ').trim() || '—'}
+                      tooltip={<pre className="font-mono whitespace-pre-wrap">{a.query}</pre>}
+                      className="font-mono text-xs"
+                    />
                   </td>
                   <td className="px-2 py-1.5 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon-xs" aria-label={`Actions for session ${a.pid}`} className="text-muted-foreground">
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          aria-label={`Actions for session ${a.pid}`}
+                          className="text-muted-foreground"
+                        >
                           <MoreHorizontal />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-56">
                         {a.query.trim() && (
                           <>
-                            <DropdownMenuItem onSelect={() => void navigator.clipboard.writeText(a.query).then(() => toast.success('Copied query'))}>
+                            <DropdownMenuItem
+                              onSelect={() =>
+                                void navigator.clipboard.writeText(a.query).then(() => toast.success('Copied query'))
+                              }
+                            >
                               <Copy /> Copy query
                             </DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => openInSqlEditor(db, a.query, { explain: true })}>
@@ -115,7 +157,10 @@ export function ActiveSessions({ db, readonly, activity, ready }: { db: string; 
                         {!readonly && (
                           <>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem disabled={a.state !== 'active' || signal.isPending} onSelect={() => signal.mutate({ pid: a.pid, terminate: false })}>
+                            <DropdownMenuItem
+                              disabled={a.state !== 'active' || signal.isPending}
+                              onSelect={() => signal.mutate({ pid: a.pid, terminate: false })}
+                            >
                               <Ban /> Cancel running query
                             </DropdownMenuItem>
                             <DropdownMenuItem variant="destructive" onSelect={() => setTerminating(a)}>
@@ -138,13 +183,17 @@ export function ActiveSessions({ db, readonly, activity, ready }: { db: string; 
             <AlertDialogHeader>
               <AlertDialogTitle>Terminate session {terminating.pid}?</AlertDialogTitle>
               <AlertDialogDescription>
-                Its connection is closed and any open transaction is rolled back. The client ({terminating.application || terminating.user || 'unknown'}) will see a
-                connection error.
+                Its connection is closed and any open transaction is rolled back. The client (
+                {terminating.application || terminating.user || 'unknown'}) will see a connection error.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={signal.isPending}>Cancel</AlertDialogCancel>
-              <Button variant="destructive" disabled={signal.isPending} onClick={() => signal.mutate({ pid: terminating.pid, terminate: true })}>
+              <Button
+                variant="destructive"
+                disabled={signal.isPending}
+                onClick={() => signal.mutate({ pid: terminating.pid, terminate: true })}
+              >
                 {signal.isPending && <Spinner className="text-current" />}
                 Terminate
               </Button>

@@ -15,7 +15,14 @@ import {
 } from '@deck/ui/components/alert-dialog';
 import { Button } from '@deck/ui/components/button';
 import { Checkbox } from '@deck/ui/components/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@deck/ui/components/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +49,9 @@ export function CreateDatabaseDialog({ copyOf, onClose }: { copyOf?: string; onC
   const def = databases.data?.default;
   const options = [
     { value: '', label: 'Empty database' },
-    ...(databases.data?.databases ?? []).filter((d) => d.name !== def).map((d) => ({ value: d.name, label: `Copy of ${d.name}`, hint: d.size })),
+    ...(databases.data?.databases ?? [])
+      .filter((d) => d.name !== def)
+      .map((d) => ({ value: d.name, label: `Copy of ${d.name}`, hint: d.size })),
   ];
 
   const create = useMutation({
@@ -71,14 +80,31 @@ export function CreateDatabaseDialog({ copyOf, onClose }: { copyOf?: string; onC
           </DialogHeader>
           <div className="space-y-1.5">
             <Label htmlFor="db-name">Name</Label>
-            <Input id="db-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. app_staging" autoFocus spellCheck={false} autoComplete="off" className="font-mono" />
+            <Input
+              id="db-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. app_staging"
+              autoFocus
+              spellCheck={false}
+              autoComplete="off"
+              className="font-mono"
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Start from</Label>
-            <Combobox value={template} onChange={setTemplate} options={options} placeholder="Empty database" className="h-9 w-full text-sm" aria-label="Start from" />
+            <Combobox
+              value={template}
+              onChange={setTemplate}
+              options={options}
+              placeholder="Empty database"
+              className="h-9 w-full text-sm"
+              aria-label="Start from"
+            />
             {template && (
               <p className="text-xs text-muted-foreground">
-                Copies schema and data of <span className="font-mono text-foreground">{template}</span>. Postgres needs it to have no other open connections while copying.
+                Copies schema and data of <span className="font-mono text-foreground">{template}</span>. Postgres needs
+                it to have no other open connections while copying.
               </p>
             )}
           </div>
@@ -125,12 +151,21 @@ function RenameDatabaseDialog({ db, onClose }: { db: string; onClose: () => void
           <DialogHeader>
             <DialogTitle>Rename database</DialogTitle>
             <DialogDescription>
-              Other sessions connected to <span className="font-mono text-foreground">{db}</span> must disconnect first, or Postgres will refuse.
+              Other sessions connected to <span className="font-mono text-foreground">{db}</span> must disconnect first,
+              or Postgres will refuse.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
             <Label htmlFor="db-rename">New name</Label>
-            <Input id="db-rename" value={name} onChange={(e) => setName(e.target.value)} autoFocus spellCheck={false} autoComplete="off" className="font-mono" />
+            <Input
+              id="db-rename"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+              spellCheck={false}
+              autoComplete="off"
+              className="font-mono"
+            />
           </div>
           {rename.isError && <p className="text-sm text-destructive">{errorMessage(rename.error)}</p>}
           <DialogFooter>
@@ -168,7 +203,8 @@ function DropDatabaseDialog({ db, fallback, onClose }: { db: string; fallback: s
         <AlertDialogHeader>
           <AlertDialogTitle>Drop database?</AlertDialogTitle>
           <AlertDialogDescription>
-            <span className="font-mono text-foreground">{db}</span> and every table, view and row in it will be permanently deleted. This can't be undone.
+            <span className="font-mono text-foreground">{db}</span> and every table, view and row in it will be
+            permanently deleted. This can't be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-3">
@@ -176,13 +212,23 @@ function DropDatabaseDialog({ db, fallback, onClose }: { db: string; fallback: s
             <Label htmlFor="confirm-db-drop" className="text-xs text-muted-foreground">
               Type <span className="font-mono text-foreground">{db}</span> to confirm
             </Label>
-            <Input id="confirm-db-drop" value={typed} onChange={(e) => setTyped(e.target.value)} autoFocus spellCheck={false} autoComplete="off" className="font-mono" />
+            <Input
+              id="confirm-db-drop"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              autoFocus
+              spellCheck={false}
+              autoComplete="off"
+              className="font-mono"
+            />
           </div>
           <label className="flex cursor-pointer items-start gap-2 text-sm">
             <Checkbox className="mt-0.5" checked={force} onCheckedChange={(v) => setForce(v === true)} />
             <span>
               Disconnect other sessions
-              <span className="block text-xs text-muted-foreground">Terminates anyone still connected (PostgreSQL 13+). Otherwise the drop fails while they are.</span>
+              <span className="block text-xs text-muted-foreground">
+                Terminates anyone still connected (PostgreSQL 13+). Otherwise the drop fails while they are.
+              </span>
             </span>
           </label>
           {drop.isError && <p className="text-sm text-destructive">{errorMessage(drop.error)}</p>}
@@ -223,7 +269,9 @@ export function DatabaseActionsMenu({ db }: { db: string }) {
           <DropdownMenuLabel className="truncate font-mono text-xs font-normal text-muted-foreground" title={db}>
             {db}
           </DropdownMenuLabel>
-          <DropdownMenuItem onSelect={() => void navigator.clipboard.writeText(db).then(() => toast.success('Copied database name'))}>
+          <DropdownMenuItem
+            onSelect={() => void navigator.clipboard.writeText(db).then(() => toast.success('Copied database name'))}
+          >
             <Copy /> Copy name
           </DropdownMenuItem>
           {!readonly && (
@@ -235,14 +283,27 @@ export function DatabaseActionsMenu({ db }: { db: string }) {
               <DropdownMenuItem onSelect={() => setDialog('new-db')}>
                 <Plus /> New database…
               </DropdownMenuItem>
-              <DropdownMenuItem disabled={isDefault} title={isDefault ? defaultNote : undefined} onSelect={() => setDialog('copy')}>
+              <DropdownMenuItem
+                disabled={isDefault}
+                title={isDefault ? defaultNote : undefined}
+                onSelect={() => setDialog('copy')}
+              >
                 <CopyPlus /> Copy database…
               </DropdownMenuItem>
-              <DropdownMenuItem disabled={isDefault} title={isDefault ? defaultNote : undefined} onSelect={() => setDialog('rename')}>
+              <DropdownMenuItem
+                disabled={isDefault}
+                title={isDefault ? defaultNote : undefined}
+                onSelect={() => setDialog('rename')}
+              >
                 <PencilLine /> Rename database…
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" disabled={isDefault} title={isDefault ? defaultNote : undefined} onSelect={() => setDialog('drop')}>
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={isDefault}
+                title={isDefault ? defaultNote : undefined}
+                onSelect={() => setDialog('drop')}
+              >
                 <Trash2 /> Drop database…
               </DropdownMenuItem>
               {isDefault && (

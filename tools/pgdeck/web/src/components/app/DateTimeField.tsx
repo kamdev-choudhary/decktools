@@ -80,7 +80,16 @@ interface DateTimeFieldProps {
 }
 
 /** Free-text date/time input with a calendar + time picker beside it. */
-export function DateTimeField({ id, column, mode, value, disabled, placeholder, className, onChange }: DateTimeFieldProps) {
+export function DateTimeField({
+  id,
+  column,
+  mode,
+  value,
+  disabled,
+  placeholder,
+  className,
+  onChange,
+}: DateTimeFieldProps) {
   const [open, setOpen] = useState(false);
   const parts = parse(value);
   const invalid = value.trim() !== '' && !parts;
@@ -120,7 +129,9 @@ export function DateTimeField({ id, column, mode, value, disabled, placeholder, 
         </PopoverTrigger>
         <PopoverContent align="end" className="w-auto p-0">
           {invalid && (
-            <p className="border-b px-3 py-2 text-xs text-destructive">Couldn't read the current value; picking will replace it.</p>
+            <p className="border-b px-3 py-2 text-xs text-destructive">
+              Couldn't read the current value; picking will replace it.
+            </p>
           )}
           {mode !== 'time' && (
             <Calendar
@@ -148,7 +159,10 @@ export function DateTimeField({ id, column, mode, value, disabled, placeholder, 
                 className="h-8 flex-1 font-mono text-[13px] [&::-webkit-calendar-picker-indicator]:hidden"
               />
               {tzShown && (
-                <span className="rounded border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground" title="Timezone offset kept from the value">
+                <span
+                  className="rounded border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
+                  title="Timezone offset kept from the value"
+                >
                   UTC{tzShown === 'Z' ? '' : tzShown}
                 </span>
               )}

@@ -27,7 +27,13 @@ const PROVIDERS: Record<
   string,
   { name: string; endpoint: string; endpointHint: string; region: string; regionHint: string; regionFrom?: RegExp }
 > = {
-  aws: { name: 'AWS S3', endpoint: '', endpointHint: 'Leave empty for AWS', region: 'us-east-1', regionHint: 'e.g. eu-west-2' },
+  aws: {
+    name: 'AWS S3',
+    endpoint: '',
+    endpointHint: 'Leave empty for AWS',
+    region: 'us-east-1',
+    regionHint: 'e.g. eu-west-2',
+  },
   r2: {
     name: 'Cloudflare R2',
     endpoint: 'https://<account-id>.r2.cloudflarestorage.com',
@@ -159,7 +165,8 @@ export function ConnectionForm({ onConnected, onCancel }: { onConnected?: () => 
         form.reset({ ...form.getValues(), secretAccessKey: '', sessionToken: '' });
         const count = data.bucketCount;
         toast.success('Connected', {
-          description: count === null ? 'Opened your configured buckets.' : `${count} bucket${count === 1 ? '' : 's'} available.`,
+          description:
+            count === null ? 'Opened your configured buckets.' : `${count} bucket${count === 1 ? '' : 's'} available.`,
         });
         onConnected?.();
       },
@@ -199,7 +206,12 @@ export function ConnectionForm({ onConnected, onCancel }: { onConnected?: () => 
         </FormField>
 
         <div className="grid gap-4 sm:grid-cols-[1fr_9rem]">
-          <FormField label="Endpoint" htmlFor="endpoint" description={provider.endpointHint} error={errors.endpoint?.message}>
+          <FormField
+            label="Endpoint"
+            htmlFor="endpoint"
+            description={provider.endpointHint}
+            error={errors.endpoint?.message}
+          >
             <Input
               id="endpoint"
               placeholder={provider.endpoint || 'https://s3.amazonaws.com'}
@@ -226,7 +238,14 @@ export function ConnectionForm({ onConnected, onCancel }: { onConnected?: () => 
         </div>
 
         <FormField label="Access key ID" htmlFor="accessKeyId" error={errors.accessKeyId?.message}>
-          <Input id="accessKeyId" spellCheck={false} autoComplete="off" className="font-mono" aria-invalid={!!errors.accessKeyId} {...form.register('accessKeyId')} />
+          <Input
+            id="accessKeyId"
+            spellCheck={false}
+            autoComplete="off"
+            className="font-mono"
+            aria-invalid={!!errors.accessKeyId}
+            {...form.register('accessKeyId')}
+          />
         </FormField>
         <FormField label="Secret access key" htmlFor="secretAccessKey" error={errors.secretAccessKey?.message}>
           <Input
@@ -249,13 +268,33 @@ export function ConnectionForm({ onConnected, onCancel }: { onConnected?: () => 
           </CollapsibleTrigger>
           <CollapsibleContent>
             <FieldGroup className="mt-2 gap-4 rounded-lg border bg-muted/30 p-4">
-              <FormField label="Name" htmlFor="label" description="Shown in the connection switcher" error={errors.label?.message}>
+              <FormField
+                label="Name"
+                htmlFor="label"
+                description="Shown in the connection switcher"
+                error={errors.label?.message}
+              >
                 <Input id="label" placeholder={`${provider.name} (prod)`} {...form.register('label')} />
               </FormField>
-              <FormField label="Session token" htmlFor="sessionToken" description="Only for temporary (STS) credentials" error={errors.sessionToken?.message}>
-                <Textarea id="sessionToken" rows={2} className="font-mono text-xs" spellCheck={false} {...form.register('sessionToken')} />
+              <FormField
+                label="Session token"
+                htmlFor="sessionToken"
+                description="Only for temporary (STS) credentials"
+                error={errors.sessionToken?.message}
+              >
+                <Textarea
+                  id="sessionToken"
+                  rows={2}
+                  className="font-mono text-xs"
+                  spellCheck={false}
+                  {...form.register('sessionToken')}
+                />
               </FormField>
-              <FormField label="URL style" htmlFor="pathStyle" description="Auto picks path-style for MinIO and unknown endpoints">
+              <FormField
+                label="URL style"
+                htmlFor="pathStyle"
+                description="Auto picks path-style for MinIO and unknown endpoints"
+              >
                 <Controller
                   control={form.control}
                   name="pathStyle"
@@ -281,7 +320,12 @@ export function ConnectionForm({ onConnected, onCancel }: { onConnected?: () => 
               >
                 <Input id="buckets" placeholder="my-app-uploads, logs" {...form.register('buckets')} />
               </FormField>
-              <FormField label="Public URL base" htmlFor="publicUrlBase" description="Custom domain for public objects" error={errors.publicUrlBase?.message}>
+              <FormField
+                label="Public URL base"
+                htmlFor="publicUrlBase"
+                description="Custom domain for public objects"
+                error={errors.publicUrlBase?.message}
+              >
                 <Input id="publicUrlBase" placeholder="https://cdn.example.com" {...form.register('publicUrlBase')} />
               </FormField>
             </FieldGroup>
@@ -293,11 +337,15 @@ export function ConnectionForm({ onConnected, onCancel }: { onConnected?: () => 
             <Controller
               control={form.control}
               name="remember"
-              render={({ field }) => <Checkbox id="remember" checked={field.value} onCheckedChange={(v) => field.onChange(v === true)} />}
+              render={({ field }) => (
+                <Checkbox id="remember" checked={field.value} onCheckedChange={(v) => field.onChange(v === true)} />
+              )}
             />
             <FieldContent>
               <FieldLabel htmlFor="remember">Remember this connection</FieldLabel>
-              <FieldDescription>Saved encrypted on the s3deck server, so it’s still here after a restart. Only you can use it.</FieldDescription>
+              <FieldDescription>
+                Saved encrypted on the s3deck server, so it’s still here after a restart. Only you can use it.
+              </FieldDescription>
             </FieldContent>
           </Field>
         )}

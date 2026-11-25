@@ -2,7 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useInfo } from '@/api/hooks';
 import { Button } from '@deck/ui/components/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@deck/ui/components/command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@deck/ui/components/command';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@deck/ui/components/dialog';
 import { openInSqlEditor } from '@/lib/sql-draft';
 import { errorMessage, Spinner } from './feedback';
@@ -32,7 +39,9 @@ const SECTIONS: { kind: ObjectKind; title: string; icon: LucideIcon }[] = [
 /** Functions, triggers, sequences and extensions under the table list. Collapsed until opened or searched. */
 export function ObjectsNav({ db, filter, route }: { db: string; filter: string; route: Route }) {
   const objects = useQuery({ queryKey: [...keys.db(db), 'objects'], queryFn: () => api.objects(db) });
-  const [open, setOpen] = useState<Set<ObjectKind>>(() => (route.view === 'object' ? new Set([route.kind]) : new Set()));
+  const [open, setOpen] = useState<Set<ObjectKind>>(() =>
+    route.view === 'object' ? new Set([route.kind]) : new Set(),
+  );
   const [installing, setInstalling] = useState(false);
   const readonly = useInfo(db).data?.readonly ?? true;
   const o = objects.data;
@@ -40,9 +49,22 @@ export function ObjectsNav({ db, filter, route }: { db: string; filter: string; 
 
   const needle = filter.trim().toLowerCase();
   const items: Record<ObjectKind, Item[]> = {
-    function: o.functions.map((f) => ({ oid: f.oid, label: f.name, hint: `${f.schema}.${f.name}(${f.args})${f.kind === 'p' ? ' · procedure' : f.kind === 'a' ? ' · aggregate' : ''}` })),
-    trigger: o.triggers.map((t) => ({ oid: t.oid, label: t.name, hint: `on ${t.schema}.${t.table}${t.enabled ? '' : ' · disabled'}`, muted: !t.enabled })),
-    sequence: o.sequences.map((s) => ({ oid: s.oid, label: s.name, hint: s.ownedBy ? `for ${s.ownedBy}` : `${s.schema}.${s.name}` })),
+    function: o.functions.map((f) => ({
+      oid: f.oid,
+      label: f.name,
+      hint: `${f.schema}.${f.name}(${f.args})${f.kind === 'p' ? ' · procedure' : f.kind === 'a' ? ' · aggregate' : ''}`,
+    })),
+    trigger: o.triggers.map((t) => ({
+      oid: t.oid,
+      label: t.name,
+      hint: `on ${t.schema}.${t.table}${t.enabled ? '' : ' · disabled'}`,
+      muted: !t.enabled,
+    })),
+    sequence: o.sequences.map((s) => ({
+      oid: s.oid,
+      label: s.name,
+      hint: s.ownedBy ? `for ${s.ownedBy}` : `${s.schema}.${s.name}`,
+    })),
     extension: o.extensions.map((e) => ({ oid: e.oid, label: e.name, hint: `version ${e.version}` })),
   };
   const activeOid = route.view === 'object' ? route.oid : null;
@@ -50,7 +72,9 @@ export function ObjectsNav({ db, filter, route }: { db: string; filter: string; 
   return (
     <div className="mt-4 border-t pt-3">
       {SECTIONS.map(({ kind, title, icon: Icon }) => {
-        const list = needle ? items[kind].filter((i) => `${i.label} ${i.hint}`.toLowerCase().includes(needle)) : items[kind];
+        const list = needle
+          ? items[kind].filter((i) => `${i.label} ${i.hint}`.toLowerCase().includes(needle))
+          : items[kind];
         if (needle && !list.length) return null;
         const expanded = !!needle || open.has(kind);
         return (
@@ -123,7 +147,10 @@ $$;
 
 function InstallExtensionDialog({ db, onClose }: { db: string; onClose: () => void }) {
   const qc = useQueryClient();
-  const available = useQuery({ queryKey: [...keys.db(db), 'extensions-available'], queryFn: () => api.availableExtensions(db) });
+  const available = useQuery({
+    queryKey: [...keys.db(db), 'extensions-available'],
+    queryFn: () => api.availableExtensions(db),
+  });
   const install = useMutation({
     mutationFn: (name: string) => api.objectAction(db, { kind: 'extension', action: 'create', name }),
     onSuccess: (r) => {
@@ -153,7 +180,13 @@ function InstallExtensionDialog({ db, onClose }: { db: string; onClose: () => vo
             )}
             <CommandGroup>
               {(available.data ?? []).map((e) => (
-                <CommandItem key={e.name} value={e.name} keywords={[e.comment ?? '']} onSelect={() => !install.isPending && install.mutate(e.name)} className="items-start gap-3 py-2">
+                <CommandItem
+                  key={e.name}
+                  value={e.name}
+                  keywords={[e.comment ?? '']}
+                  onSelect={() => !install.isPending && install.mutate(e.name)}
+                  className="items-start gap-3 py-2"
+                >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-[13px]">{e.name}</span>
@@ -161,7 +194,11 @@ function InstallExtensionDialog({ db, onClose }: { db: string; onClose: () => vo
                     </div>
                     {e.comment && <p className="mt-0.5 text-xs text-muted-foreground">{e.comment}</p>}
                   </div>
-                  {install.isPending && install.variables === e.name ? <Spinner /> : <span className="shrink-0 text-xs text-muted-foreground">Install</span>}
+                  {install.isPending && install.variables === e.name ? (
+                    <Spinner />
+                  ) : (
+                    <span className="shrink-0 text-xs text-muted-foreground">Install</span>
+                  )}
                 </CommandItem>
               ))}
             </CommandGroup>

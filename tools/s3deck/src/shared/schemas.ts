@@ -14,7 +14,10 @@ export const newBucketNameSchema = z
   .trim()
   .min(3, 'At least 3 characters')
   .max(63, 'At most 63 characters')
-  .regex(/^[a-z0-9][a-z0-9.-]*[a-z0-9]$/, 'Lowercase letters, digits, dots and hyphens; start and end with a letter or digit')
+  .regex(
+    /^[a-z0-9][a-z0-9.-]*[a-z0-9]$/,
+    'Lowercase letters, digits, dots and hyphens; start and end with a letter or digit',
+  )
   .refine((v) => !/\.\.|\.-|-\./.test(v), 'No adjacent dots, or dots next to hyphens')
   .refine((v) => !/^\d{1,3}(\.\d{1,3}){3}$/.test(v), 'Must not look like an IP address');
 
@@ -113,7 +116,10 @@ export const createFolderSchema = z.object({
 export const deleteSchema = z
   .object({
     keys: z.array(objectKeySchema).max(100_000).default([]),
-    prefixes: z.array(prefixSchema.refine((v) => v.endsWith('/'), 'Folders end with "/"')).max(1000).default([]),
+    prefixes: z
+      .array(prefixSchema.refine((v) => v.endsWith('/'), 'Folders end with "/"'))
+      .max(1000)
+      .default([]),
   })
   .refine((v) => v.keys.length + v.prefixes.length > 0, 'Nothing to delete');
 export type DeleteInput = z.input<typeof deleteSchema>;
@@ -153,7 +159,10 @@ export const presignSchema = z.object({
 });
 export type PresignInput = z.infer<typeof presignSchema>;
 
-const headerValue = z.string().max(2048).regex(/^[^\r\n]*$/, 'No line breaks');
+const headerValue = z
+  .string()
+  .max(2048)
+  .regex(/^[^\r\n]*$/, 'No line breaks');
 const metaKey = z
   .string()
   .min(1)
@@ -248,7 +257,9 @@ export const lifecycleSchema = z.array(lifecycleRuleSchema).max(1000);
 export const policySchema = z
   .looseObject({
     Version: z.string().optional(),
-    Statement: z.array(z.looseObject({ Effect: z.enum(['Allow', 'Deny']) })).min(1, 'A policy needs at least one statement'),
+    Statement: z
+      .array(z.looseObject({ Effect: z.enum(['Allow', 'Deny']) }))
+      .min(1, 'A policy needs at least one statement'),
   })
   .nullable();
 
@@ -325,7 +336,10 @@ export const multipartCompleteSchema = multipartRefSchema.extend({
 
 export const storageClassSchema = z.object({
   keys: z.array(objectKeySchema).min(1).max(1000),
-  storageClass: z.string().regex(/^[A-Z_]+$/, 'Unknown storage class').max(64),
+  storageClass: z
+    .string()
+    .regex(/^[A-Z_]+$/, 'Unknown storage class')
+    .max(64),
 });
 
 export const restoreArchiveSchema = z.object({
@@ -361,7 +375,9 @@ export const syncSchema = compareSchema.extend({
 export type SyncInput = z.input<typeof syncSchema>;
 
 /** Turns a zod error into a short, readable message. */
-export function formatZodError(error: { issues: readonly { path: readonly PropertyKey[]; message: string }[] }): string {
+export function formatZodError(error: {
+  issues: readonly { path: readonly PropertyKey[]; message: string }[];
+}): string {
   return error.issues
     .slice(0, 5)
     .map((i) => (i.path.length ? `${i.path.map(String).join('.')}: ${i.message}` : i.message))

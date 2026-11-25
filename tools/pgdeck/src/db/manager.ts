@@ -75,7 +75,8 @@ export class DatabaseManager {
     // Only open pools for databases that actually exist, so arbitrary names
     // in URLs can't make us hold connections open.
     if (!this.known?.has(name)) await this.list();
-    if (!this.known?.has(name)) throw new UserError(`Database "${name}" does not exist or you cannot connect to it`, 404);
+    if (!this.known?.has(name))
+      throw new UserError(`Database "${name}" does not exist or you cannot connect to it`, 404);
     return this.open(name, { ...this.base, database: name });
   }
 
@@ -96,7 +97,10 @@ export class DatabaseManager {
 
   private guardDefault(name: string, verb: string): void {
     if (name === this.defaultName) {
-      throw new UserError(`"${name}" is the database pgdeck connects through, so it can't be ${verb} from here. Connect pgdeck to another database first.`, 409);
+      throw new UserError(
+        `"${name}" is the database pgdeck connects through, so it can't be ${verb} from here. Connect pgdeck to another database first.`,
+        409,
+      );
     }
   }
 
@@ -112,7 +116,10 @@ export class DatabaseManager {
     }
     await admin.exec(sql);
     this.known = null;
-    return { ok: true, message: opts.template ? `Created ${name} as a copy of ${opts.template}` : `Created database ${name}` };
+    return {
+      ok: true,
+      message: opts.template ? `Created ${name} as a copy of ${opts.template}` : `Created database ${name}`,
+    };
   }
 
   async renameDb(name: string, newName: string): Promise<{ ok: true; message: string }> {

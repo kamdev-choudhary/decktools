@@ -41,7 +41,11 @@ import { formatBytes, formatDate, NO_PUBLIC_URL_HINT } from '@/lib/format';
 /* ------------------------------------------------------------------ */
 
 async function fetchHead(url: string, signal: AbortSignal): Promise<{ text: string; truncated: boolean }> {
-  const res = await fetch(url, { headers: { Range: `bytes=0-${PREVIEW_TEXT_BYTES - 1}` }, signal, credentials: 'same-origin' });
+  const res = await fetch(url, {
+    headers: { Range: `bytes=0-${PREVIEW_TEXT_BYTES - 1}` },
+    signal,
+    credentials: 'same-origin',
+  });
   if (!res.ok) throw await readError(res);
   const buf = await res.arrayBuffer();
   const total = Number(res.headers.get('Content-Range')?.split('/')[1] ?? buf.byteLength);
@@ -80,7 +84,10 @@ function CodeView({ text, language }: { text: string; language?: string }) {
 }
 
 function CsvView({ text, tsv }: { text: string; tsv: boolean }) {
-  const rows = useMemo(() => Papa.parse<string[]>(text, { delimiter: tsv ? '\t' : '', preview: 500, skipEmptyLines: true }).data, [text, tsv]);
+  const rows = useMemo(
+    () => Papa.parse<string[]>(text, { delimiter: tsv ? '\t' : '', preview: 500, skipEmptyLines: true }).data,
+    [text, tsv],
+  );
   const [head, ...body] = rows;
   if (!head) return <EmptyState title="Empty file" />;
   return (
@@ -111,13 +118,25 @@ function CsvView({ text, tsv }: { text: string; tsv: boolean }) {
 }
 
 function MarkdownView({ text }: { text: string }) {
-  const html = useMemo(() => DOMPurify.sanitize(marked.parse(text, { async: false, gfm: true }), { USE_PROFILES: { html: true } }), [text]);
+  const html = useMemo(
+    () => DOMPurify.sanitize(marked.parse(text, { async: false, gfm: true }), { USE_PROFILES: { html: true } }),
+    [text],
+  );
   return <div className="prose-md p-5 text-sm" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 function TextPreview({ url, kind, name }: { url: string; kind: PreviewKind; name: string }) {
-  const q = useQuery({ queryKey: ['preview-text', url], queryFn: ({ signal }) => fetchHead(url, signal), staleTime: 30_000 });
-  if (q.isPending) return <Center><Spinner /></Center>;
+  const q = useQuery({
+    queryKey: ['preview-text', url],
+    queryFn: ({ signal }) => fetchHead(url, signal),
+    staleTime: 30_000,
+  });
+  if (q.isPending)
+    return (
+      <Center>
+        <Spinner />
+      </Center>
+    );
   if (q.isError) return <EmptyState title="Couldn’t load preview">{errorText(q.error)}</EmptyState>;
   const { text, truncated } = q.data;
 
@@ -144,7 +163,9 @@ function TextPreview({ url, kind, name }: { url: string; kind: PreviewKind; name
     <div className="flex h-full flex-col">
       {truncated && (
         <Alert className="rounded-none border-x-0 border-t-0 py-2">
-          <AlertDescription className="text-xs">Large file: showing the first {formatBytes(PREVIEW_TEXT_BYTES)}.</AlertDescription>
+          <AlertDescription className="text-xs">
+            Large file: showing the first {formatBytes(PREVIEW_TEXT_BYTES)}.
+          </AlertDescription>
         </Alert>
       )}
       <div className="min-h-0 flex-1 overflow-auto">{body}</div>
@@ -156,7 +177,15 @@ function Center({ children }: { children: React.ReactNode }) {
   return <div className="grid h-full place-items-center p-6">{children}</div>;
 }
 
-function Preview({ bucket, details, versionId }: { bucket: string; details: ObjectDetails; versionId?: string | null }) {
+function Preview({
+  bucket,
+  details,
+  versionId,
+}: {
+  bucket: string;
+  details: ObjectDetails;
+  versionId?: string | null;
+}) {
   const name = details.key.split('/').pop() ?? details.key;
   const kind = previewKind(name, details.contentType);
   const { readonly, connection } = useApp();
@@ -189,7 +218,13 @@ function Preview({ bucket, details, versionId }: { bucket: string; details: Obje
 
   if (RICH_KINDS.has(kind)) {
     return (
-      <Suspense fallback={<Center><Spinner /></Center>}>
+      <Suspense
+        fallback={
+          <Center>
+            <Spinner />
+          </Center>
+        }
+      >
         <RichPreview key={url} kind={kind as RichKind} url={url} name={name} size={details.size} />
       </Suspense>
     );
@@ -199,7 +234,11 @@ function Preview({ bucket, details, versionId }: { bucket: string; details: Obje
     case 'image':
       return (
         <Center>
-          <img src={url} alt={name} className="max-h-full max-w-full rounded border bg-[conic-gradient(#8881_25%,transparent_0_50%,#8881_0_75%,transparent_0)] bg-[length:16px_16px] object-contain" />
+          <img
+            src={url}
+            alt={name}
+            className="max-h-full max-w-full rounded border bg-[conic-gradient(#8881_25%,transparent_0_50%,#8881_0_75%,transparent_0)] bg-[length:16px_16px] object-contain"
+          />
         </Center>
       );
     case 'video':
@@ -224,7 +263,11 @@ function Preview({ bucket, details, versionId }: { bucket: string; details: Obje
           icon={<Eye />}
           title="No preview for this file type"
           action={
-            <Button variant="outline" size="sm" onClick={() => triggerDownload(downloadUrl(bucket, details.key, { versionId }))}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => triggerDownload(downloadUrl(bucket, details.key, { versionId }))}
+            >
               <Download /> Download
             </Button>
           }
@@ -256,7 +299,8 @@ function DetailsTab({ details }: { details: ObjectDetails }) {
           <span className="font-mono text-xs">{details.key}</span>
         </Row>
         <Row label="Size">
-          {formatBytes(details.size)} <span className="text-muted-foreground">({details.size.toLocaleString()} bytes)</span>
+          {formatBytes(details.size)}{' '}
+          <span className="text-muted-foreground">({details.size.toLocaleString()} bytes)</span>
         </Row>
         <Row label="Last modified">{formatDate(details.lastModified)}</Row>
         <Row label="Content type">{details.contentType ?? '—'}</Row>
@@ -282,8 +326,12 @@ function DetailsTab({ details }: { details: ObjectDetails }) {
           {details.encryption ? (
             <span>
               {details.encryption.algorithm}
-              {details.encryption.kmsKeyId && <span className="block font-mono text-xs text-muted-foreground">{details.encryption.kmsKeyId}</span>}
-              {details.encryption.bucketKeyEnabled && <span className="block text-xs text-muted-foreground">S3 Bucket Key enabled</span>}
+              {details.encryption.kmsKeyId && (
+                <span className="block font-mono text-xs text-muted-foreground">{details.encryption.kmsKeyId}</span>
+              )}
+              {details.encryption.bucketKeyEnabled && (
+                <span className="block text-xs text-muted-foreground">S3 Bucket Key enabled</span>
+              )}
             </span>
           ) : (
             <span className="text-muted-foreground">Not reported</span>
@@ -292,9 +340,13 @@ function DetailsTab({ details }: { details: ObjectDetails }) {
         {details.lock && (
           <Row label="Object lock">
             <span>
-              {details.lock.mode ? `${details.lock.mode} until ${formatDate(details.lock.retainUntil)}` : 'No retention'}
+              {details.lock.mode
+                ? `${details.lock.mode} until ${formatDate(details.lock.retainUntil)}`
+                : 'No retention'}
               {details.lock.legalHold !== null && (
-                <span className="block text-xs text-muted-foreground">Legal hold {details.lock.legalHold ? 'on' : 'off'}</span>
+                <span className="block text-xs text-muted-foreground">
+                  Legal hold {details.lock.legalHold ? 'on' : 'off'}
+                </span>
               )}
             </span>
           </Row>
@@ -338,7 +390,15 @@ function DetailsTab({ details }: { details: ObjectDetails }) {
   );
 }
 
-function VersionsTab({ bucket, objectKey, onPreview }: { bucket: string; objectKey: string; onPreview: (versionId: string) => void }) {
+function VersionsTab({
+  bucket,
+  objectKey,
+  onPreview,
+}: {
+  bucket: string;
+  objectKey: string;
+  onPreview: (versionId: string) => void;
+}) {
   const { readonly } = useApp();
   const qc = useQueryClient();
   const versions = useVersions(bucket, objectKey, true);
@@ -358,11 +418,20 @@ function VersionsTab({ bucket, objectKey, onPreview }: { bucket: string; objectK
     }
   };
 
-  if (versions.isPending) return <Center><Spinner /></Center>;
+  if (versions.isPending)
+    return (
+      <Center>
+        <Spinner />
+      </Center>
+    );
   if (versions.isError) return <EmptyState title="Couldn’t list versions">{errorText(versions.error)}</EmptyState>;
   const list = versions.data.versions;
   if (list.length <= 1 && list[0]?.versionId === 'null') {
-    return <EmptyState icon={<Clock />} title="No versions">Turn on versioning in the bucket settings to keep older versions.</EmptyState>;
+    return (
+      <EmptyState icon={<Clock />} title="No versions">
+        Turn on versioning in the bucket settings to keep older versions.
+      </EmptyState>
+    );
   }
 
   return (
@@ -385,7 +454,10 @@ function VersionsTab({ bucket, objectKey, onPreview }: { bucket: string; objectK
               <IconButton label="Preview this version" onClick={() => onPreview(v.versionId)}>
                 <Eye />
               </IconButton>
-              <IconButton label="Download this version" onClick={() => triggerDownload(downloadUrl(bucket, objectKey, { versionId: v.versionId }))}>
+              <IconButton
+                label="Download this version"
+                onClick={() => triggerDownload(downloadUrl(bucket, objectKey, { versionId: v.versionId }))}
+              >
                 <Download />
               </IconButton>
             </>
@@ -394,13 +466,19 @@ function VersionsTab({ bucket, objectKey, onPreview }: { bucket: string; objectK
             <IconButton
               label="Restore this version"
               disabled={!!busy}
-              onClick={() => act(v.versionId, () => objectApi.restoreVersion(bucket, objectKey, v.versionId), 'Version restored')}
+              onClick={() =>
+                act(v.versionId, () => objectApi.restoreVersion(bucket, objectKey, v.versionId), 'Version restored')
+              }
             >
               <Undo2 />
             </IconButton>
           )}
           {!readonly && (
-            <IconButton label="Permanently delete this version" disabled={!!busy} onClick={() => setConfirmDelete(v.versionId)}>
+            <IconButton
+              label="Permanently delete this version"
+              disabled={!!busy}
+              onClick={() => setConfirmDelete(v.versionId)}
+            >
               <Trash2 className="text-destructive" />
             </IconButton>
           )}
@@ -436,7 +514,15 @@ function VersionsTab({ bucket, objectKey, onPreview }: { bucket: string; objectK
 /* Panel                                                               */
 /* ------------------------------------------------------------------ */
 
-export function PreviewPanel({ bucket, objectKey, onClose }: { bucket: string; objectKey: string; onClose: () => void }) {
+export function PreviewPanel({
+  bucket,
+  objectKey,
+  onClose,
+}: {
+  bucket: string;
+  objectKey: string;
+  onClose: () => void;
+}) {
   const { connection, readonly } = useApp();
   const [versionId, setVersionId] = useState<string | null>(null);
   const [tab, setTab] = useState('preview');
@@ -500,7 +586,9 @@ export function PreviewPanel({ bucket, objectKey, onClose }: { bucket: string; o
         </TabsList>
         <div className="min-h-0 flex-1 overflow-auto">
           {details.isPending ? (
-            <Center><Spinner /></Center>
+            <Center>
+              <Spinner />
+            </Center>
           ) : details.isError ? (
             <EmptyState title="Couldn’t load this object">{errorText(details.error)}</EmptyState>
           ) : (
@@ -532,7 +620,9 @@ export function PreviewPanel({ bucket, objectKey, onClose }: { bucket: string; o
           )}
         </div>
       </Tabs>
-      {sharing && <ShareDialog bucket={bucket} objectKey={objectKey} versionId={versionId} onClose={() => setSharing(false)} />}
+      {sharing && (
+        <ShareDialog bucket={bucket} objectKey={objectKey} versionId={versionId} onClose={() => setSharing(false)} />
+      )}
     </aside>
   );
 }

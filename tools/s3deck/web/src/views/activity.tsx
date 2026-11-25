@@ -35,8 +35,20 @@ export function ActivityView() {
       />
       <div className="space-y-4 p-6">
         <div className="flex flex-wrap gap-2">
-          <Input value={user} onChange={(e) => setUser(e.target.value)} placeholder="Filter by user (exact)" className="h-8 w-56" aria-label="Filter by user" />
-          <Input value={bucket} onChange={(e) => setBucket(e.target.value)} placeholder="Filter by bucket (exact)" className="h-8 w-56" aria-label="Filter by bucket" />
+          <Input
+            value={user}
+            onChange={(e) => setUser(e.target.value)}
+            placeholder="Filter by user (exact)"
+            className="h-8 w-56"
+            aria-label="Filter by user"
+          />
+          <Input
+            value={bucket}
+            onChange={(e) => setBucket(e.target.value)}
+            placeholder="Filter by bucket (exact)"
+            className="h-8 w-56"
+            aria-label="Filter by bucket"
+          />
         </div>
         {activity.isError && <ErrorAlert error={activity.error} />}
         <div className="overflow-hidden rounded-lg border">
@@ -84,7 +96,10 @@ export function ActivityView() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell className={cn('max-w-0 truncate font-mono text-xs', !e.detail && 'text-muted-foreground')} title={e.detail ?? undefined}>
+                  <TableCell
+                    className={cn('max-w-0 truncate font-mono text-xs', !e.detail && 'text-muted-foreground')}
+                    title={e.detail ?? undefined}
+                  >
                     {e.detail ?? '—'}
                     {e.connection && <span className="ml-2 font-sans text-muted-foreground">· {e.connection}</span>}
                   </TableCell>
@@ -95,7 +110,9 @@ export function ActivityView() {
           </Table>
           {activity.data?.entries.length === 0 && (
             <EmptyState icon={<History />} title="Nothing yet">
-              {user || bucket ? 'No changes match these filters.' : 'Uploads, deletes, settings changes and sign-ins show up here.'}
+              {user || bucket
+                ? 'No changes match these filters.'
+                : 'Uploads, deletes, settings changes and sign-ins show up here.'}
             </EmptyState>
           )}
         </div>

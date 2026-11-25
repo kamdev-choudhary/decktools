@@ -28,13 +28,19 @@ describe.skipIf(!endpoint)('against a real S3 endpoint', () => {
   });
 
   it('uploads, lists, previews (range) and downloads', async () => {
-    const up = await c.putRaw(`/api/buckets/${bucket}/upload?key=${encodeURIComponent('docs/hello world.txt')}`, 'hello');
+    const up = await c.putRaw(
+      `/api/buckets/${bucket}/upload?key=${encodeURIComponent('docs/hello world.txt')}`,
+      'hello',
+    );
     expect(up.status).toBe(201);
 
     const list = await c.get(`/api/buckets/${bucket}/objects?prefix=docs/`);
     expect(list.json.objects.map((o: { name: string }) => o.name)).toEqual(['hello world.txt']);
 
-    const range = await c.get(`/api/buckets/${bucket}/download?key=${encodeURIComponent('docs/hello world.txt')}&inline=1`, { range: 'bytes=1-3' });
+    const range = await c.get(
+      `/api/buckets/${bucket}/download?key=${encodeURIComponent('docs/hello world.txt')}&inline=1`,
+      { range: 'bytes=1-3' },
+    );
     expect(range.status).toBe(206);
     expect(range.json).toBe('ell');
     // Inline previews of non-allowlisted types are served as text, sandboxed.
@@ -50,15 +56,22 @@ describe.skipIf(!endpoint)('against a real S3 endpoint', () => {
     const etags: { PartNumber: number; ETag: string }[] = [];
     for (const [i, body] of parts.entries()) {
       // Sent raw, like the browser does.
-      const res = await c.putRaw(`/api/buckets/${bucket}/multipart/part?key=${key}&uploadId=${encodeURIComponent(uploadId)}&partNumber=${i + 1}`, body);
+      const res = await c.putRaw(
+        `/api/buckets/${bucket}/multipart/part?key=${key}&uploadId=${encodeURIComponent(uploadId)}&partNumber=${i + 1}`,
+        body,
+      );
       expect(res.status).toBe(200);
       etags.push({ PartNumber: i + 1, ETag: res.json.etag });
     }
 
-    const listed = await c.get(`/api/buckets/${bucket}/multipart/parts?key=${key}&uploadId=${encodeURIComponent(uploadId)}`);
+    const listed = await c.get(
+      `/api/buckets/${bucket}/multipart/parts?key=${key}&uploadId=${encodeURIComponent(uploadId)}`,
+    );
     expect(listed.json.parts).toHaveLength(3);
 
-    expect((await c.post(`/api/buckets/${bucket}/multipart/complete`, { key, uploadId, parts: etags })).status).toBe(200);
+    expect((await c.post(`/api/buckets/${bucket}/multipart/complete`, { key, uploadId, parts: etags })).status).toBe(
+      200,
+    );
     const details = await c.get(`/api/buckets/${bucket}/details?key=${key}`);
     expect(details.json.size).toBe(parts.reduce((a, p) => a + p.length, 0));
   });
@@ -87,7 +100,9 @@ describe.skipIf(!endpoint)('against a real S3 endpoint', () => {
 
   it('presigned download links work without s3deck', async () => {
     await c.putRaw(`/api/buckets/${bucket}/upload?key=shared.txt`, 'shared');
-    const { url } = (await c.post(`/api/buckets/${bucket}/presign`, { key: 'shared.txt', method: 'GET', expiresIn: 300 })).json;
+    const { url } = (
+      await c.post(`/api/buckets/${bucket}/presign`, { key: 'shared.txt', method: 'GET', expiresIn: 300 })
+    ).json;
     expect(await (await fetch(url)).text()).toBe('shared');
   });
 

@@ -3,7 +3,8 @@ import type { DbContext } from './client.js';
 
 // pg returns bigint/numeric as strings; everything here fits comfortably in a double.
 const num = (v: string | number | null | undefined): number => (v === null || v === undefined ? 0 : Number(v));
-const numOrNull = (v: string | number | null | undefined): number | null => (v === null || v === undefined ? null : Number(v));
+const numOrNull = (v: string | number | null | undefined): number | null =>
+  v === null || v === undefined ? null : Number(v);
 const iso = (v: Date | null): string | null => (v ? v.toISOString() : null);
 
 interface DatabaseRow {
@@ -117,22 +118,20 @@ export async function getStats(ctx: DbContext): Promise<DbStats> {
     tempBytes: num(d.temp_bytes),
     statsSince: iso(d.stats_reset),
     extensions: extensions.rows,
-    tables: tables.rows.map(
-      (t): TableStats => ({
-        schema: t.schema,
-        name: t.name,
-        kind: t.kind,
-        rows: num(t.rows),
-        deadRows: num(t.dead_rows),
-        tableBytes: num(t.table_bytes),
-        indexBytes: num(t.index_bytes),
-        totalBytes: num(t.total_bytes),
-        indexCount: num(t.index_count),
-        seqScans: numOrNull(t.seq_scan),
-        indexScans: numOrNull(t.idx_scan),
-        lastVacuum: iso(t.last_vacuum),
-        lastAnalyze: iso(t.last_analyze),
-      }),
-    ),
+    tables: tables.rows.map((t): TableStats => ({
+      schema: t.schema,
+      name: t.name,
+      kind: t.kind,
+      rows: num(t.rows),
+      deadRows: num(t.dead_rows),
+      tableBytes: num(t.table_bytes),
+      indexBytes: num(t.index_bytes),
+      totalBytes: num(t.total_bytes),
+      indexCount: num(t.index_count),
+      seqScans: numOrNull(t.seq_scan),
+      indexScans: numOrNull(t.idx_scan),
+      lastVacuum: iso(t.last_vacuum),
+      lastAnalyze: iso(t.last_analyze),
+    })),
   };
 }

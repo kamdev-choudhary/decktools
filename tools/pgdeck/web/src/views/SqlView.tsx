@@ -8,7 +8,12 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { QueryResult } from '@shared/types';
 import { api, ApiError } from '@/api/client';
 import { PlanView } from '@/components/app/plan/PlanView';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@deck/ui/components/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@deck/ui/components/dropdown-menu';
 import { autoExplainKey, draftKey as sqlDraftKey } from '@/lib/sql-draft';
 import { useRunQuery, useTables } from '@/api/hooks';
 import { DataGrid } from '@/components/app/DataGrid';
@@ -38,7 +43,9 @@ export function SqlView({ db }: { db: string }) {
   const [lastRunFrom, setLastRunFrom] = useState(0);
   // Which of the two actions produced what's shown below the editor.
   const [output, setOutput] = useState<'run' | 'explain'>('run');
-  const explain = useMutation({ mutationFn: (v: { sql: string; analyze: boolean }) => api.explain(db, v.sql, v.analyze) });
+  const explain = useMutation({
+    mutationFn: (v: { sql: string; analyze: boolean }) => api.explain(db, v.sql, v.analyze),
+  });
 
   useEffect(() => storage.set(draftKey, sql), [draftKey, sql]);
 
@@ -47,7 +54,11 @@ export function SqlView({ db }: { db: string }) {
     const view = viewRef.current;
     const sel = view?.state.selection.main;
     const useSelection = !!view && !!sel && !sel.empty;
-    return { view, text: useSelection ? view.state.sliceDoc(sel.from, sel.to) : (view?.state.doc.toString() ?? sql), from: useSelection ? sel.from : 0 };
+    return {
+      view,
+      text: useSelection ? view.state.sliceDoc(sel.from, sel.to) : (view?.state.doc.toString() ?? sql),
+      from: useSelection ? sel.from : 0,
+    };
   };
 
   const runExplain = (analyze: boolean) => {
@@ -164,7 +175,9 @@ export function SqlView({ db }: { db: string }) {
               <DropdownMenuItem onSelect={() => runExplain(true)} className="items-start">
                 <div>
                   Explain analyze
-                  <p className="text-xs text-muted-foreground">Runs the query for real timings, then rolls back, so writes are undone.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Runs the query for real timings, then rolls back, so writes are undone.
+                  </p>
                 </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -192,7 +205,9 @@ export function SqlView({ db }: { db: string }) {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        {output === 'explain' && explain.isError && <ErrorAlert error={explain.error} title="Explain failed" className="m-4 w-auto md:mx-6" />}
+        {output === 'explain' && explain.isError && (
+          <ErrorAlert error={explain.error} title="Explain failed" className="m-4 w-auto md:mx-6" />
+        )}
         {output === 'explain' && explain.isSuccess && <PlanView key={explain.submittedAt} result={explain.data} />}
         {output === 'explain' && explain.isPending && (
           <div className="flex flex-1 items-center justify-center gap-2 p-10 text-sm text-muted-foreground">

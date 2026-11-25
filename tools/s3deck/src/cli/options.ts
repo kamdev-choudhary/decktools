@@ -80,9 +80,17 @@ export function buildProgram(version: string) {
     .option('--base-path <path>', 'serve under a path prefix such as /s3')
     .option('--open', 'open the UI in your browser')
     .option('--no-browser-connections', "don't let users enter credentials in the browser")
-    .addOption(new Option('--data-dir <dir>', 'where users, remembered connections and the activity log are kept').env('S3DECK_DATA_DIR'))
+    .addOption(
+      new Option('--data-dir <dir>', 'where users, remembered connections and the activity log are kept').env(
+        'S3DECK_DATA_DIR',
+      ),
+    )
     .option('--no-persist', "don't write anything to disk (no users, remembered connections or activity file)")
-    .addOption(new Option('--public-url <url>', 'public URL of this s3deck, for single sign-on redirects').env('S3DECK_PUBLIC_URL'))
+    .addOption(
+      new Option('--public-url <url>', 'public URL of this s3deck, for single sign-on redirects').env(
+        'S3DECK_PUBLIC_URL',
+      ),
+    )
     .addOption(new Option('--dev', 'development mode (UI served by Vite)').hideHelp())
     .version(version, '-v, --version', 'print the version')
     .helpOption('-h, --help', 'show help')
@@ -91,7 +99,8 @@ export function buildProgram(version: string) {
 
 export function parseOptions(program: Command): CliOptions {
   const raw = program.opts();
-  const endpoint = (program.args[0] as string | undefined) ?? process.env.AWS_ENDPOINT_URL_S3 ?? process.env.AWS_ENDPOINT_URL;
+  const endpoint =
+    (program.args[0] as string | undefined) ?? process.env.AWS_ENDPOINT_URL_S3 ?? process.env.AWS_ENDPOINT_URL;
   const result = optionsSchema.safeParse({ ...raw, endpoint: endpoint || undefined });
   if (!result.success) program.error(`error: ${formatZodError(result.error)}`, { exitCode: 2 });
   return result.data;

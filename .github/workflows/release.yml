@@ -1,0 +1,49 @@
+name: Release
+
+# On every push to main, Changesets either opens/updates a "Version packages"
+# pull request (when changesets are pending), or, once that pull request is
+# merged, publishes the bumped decks to npm.
+on:
+  push:
+    branches: [main]
+
+concurrency: release-${{ github.ref }}
+
+permissions:
+  contents: write # push the version commit and tags
+  pull-requests: write # open the "Version packages" pull request
+  id-token: write # npm provenance
+
+jobs:
+  release:
+    name: Version or publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      # Each deck's prepublishOnly runs its tests; redisdeck's need redis-server.
+      # s3deck's S3 integration tests skip without S3DECK_TEST_ENDPOINT (CI covers them).
+      - name: Install redis-server
+        run: sudo apt-get update && sudo apt-get install -y redis-server
+
+      - uses: changesets/action@v1
+        with:
+          version: pnpm version-packages
+          publish: pnpm release
+          title: Version packages
+          commit: 'chore: version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true

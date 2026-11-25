@@ -13,7 +13,11 @@ export const SANS_FONTS = [
 ] as const;
 
 export const MONO_FONTS = [
-  { id: 'jetbrains', label: 'JetBrains Mono', stack: "'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace" },
+  {
+    id: 'jetbrains',
+    label: 'JetBrains Mono',
+    stack: "'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace",
+  },
   { id: 'geist', label: 'Geist Mono', stack: "'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace" },
   { id: 'plex', label: 'IBM Plex Mono', stack: "'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace" },
   { id: 'system', label: 'System', stack: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace" },

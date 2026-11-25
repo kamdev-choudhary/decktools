@@ -14,7 +14,14 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { MetadataInput, PresignInput } from '../shared/schemas';
-import type { DeletedEntry, DeletedListResponse, ObjectDetails, PresignResponse, Tag, VersionEntry } from '../shared/types';
+import type {
+  DeletedEntry,
+  DeletedListResponse,
+  ObjectDetails,
+  PresignResponse,
+  Tag,
+  VersionEntry,
+} from '../shared/types';
 import { UserError } from './errors';
 import { ARCHIVE_CLASSES } from './provider';
 import { copyObject } from './transfers';
@@ -64,7 +71,12 @@ export async function presign(client: S3Client, bucket: string, input: PresignIn
 }
 
 /** Rewrites an object's headers and metadata in place (copy onto itself with REPLACE). */
-export async function updateMetadata(client: S3Client, bucket: string, key: string, input: Omit<MetadataInput, 'keys'>) {
+export async function updateMetadata(
+  client: S3Client,
+  bucket: string,
+  key: string,
+  input: Omit<MetadataInput, 'keys'>,
+) {
   const head = await headObject(client, bucket, key);
   const pick = (next: string | undefined, current: string | undefined) =>
     next === undefined ? current : next === '' ? undefined : next;
@@ -236,10 +248,20 @@ export async function changeStorageClass(client: S3Client, bucket: string, key: 
 }
 
 /** Asks for a temporary readable copy of an archived (Glacier / Deep Archive) object. */
-export async function restoreArchived(client: S3Client, bucket: string, key: string, days: number, tier: 'Expedited' | 'Standard' | 'Bulk') {
+export async function restoreArchived(
+  client: S3Client,
+  bucket: string,
+  key: string,
+  days: number,
+  tier: 'Expedited' | 'Standard' | 'Bulk',
+) {
   try {
     await client.send(
-      new RestoreObjectCommand({ Bucket: bucket, Key: key, RestoreRequest: { Days: days, GlacierJobParameters: { Tier: tier } } }),
+      new RestoreObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        RestoreRequest: { Days: days, GlacierJobParameters: { Tier: tier } },
+      }),
     );
   } catch (err) {
     // Already running: not an error from the user's point of view.
@@ -256,10 +278,16 @@ export async function restoreArchived(client: S3Client, bucket: string, key: str
  * Objects in a folder whose latest version is a delete marker. Removing that marker restores
  * the object. Pages through ListObjectVersions with "/" as delimiter.
  */
-export async function listDeleted(client: S3Client, bucket: string, prefix: string, cursor?: string): Promise<DeletedListResponse> {
+export async function listDeleted(
+  client: S3Client,
+  bucket: string,
+  prefix: string,
+  cursor?: string,
+): Promise<DeletedListResponse> {
   let keyMarker: string | undefined;
   let versionMarker: string | undefined;
-  if (cursor) [keyMarker, versionMarker] = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8')) as [string, string];
+  if (cursor)
+    [keyMarker, versionMarker] = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8')) as [string, string];
 
   const objects: DeletedEntry[] = [];
   let next: string | null = null;

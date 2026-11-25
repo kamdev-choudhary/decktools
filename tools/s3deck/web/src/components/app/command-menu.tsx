@@ -51,7 +51,12 @@ export function CommandMenu() {
   const inBucket = !!route.bucket && route.view === 'browse';
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen} title="Command menu" description="Jump to a bucket or run a command">
+    <CommandDialog
+      open={open}
+      onOpenChange={setOpen}
+      title="Command menu"
+      description="Jump to a bucket or run a command"
+    >
       <CommandInput placeholder="Jump to a bucket or run a command…" />
       <CommandList>
         <CommandEmpty>No results.</CommandEmpty>
@@ -79,7 +84,11 @@ export function CommandMenu() {
 
         <CommandGroup heading="Buckets">
           {(buckets.data?.buckets ?? []).map((b) => (
-            <CommandItem key={b.name} value={`bucket ${b.name}`} onSelect={() => run(() => navigate({ bucket: b.name }))}>
+            <CommandItem
+              key={b.name}
+              value={`bucket ${b.name}`}
+              onSelect={() => run(() => navigate({ bucket: b.name }))}
+            >
               <Database /> {b.name}
             </CommandItem>
           ))}

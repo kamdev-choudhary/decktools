@@ -17,13 +17,13 @@
     "@deck/config": "workspace:*",
     "@deck/logger": "workspace:*",
     "@deck/security": "workspace:*",
-    "@hono/node-server": "^2.1.11",
-    "hono": "^4.13.20",
-    "zod": "^4.6.7"
+    "@hono/node-server": "catalog:",
+    "hono": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^26.6.6",
-    "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

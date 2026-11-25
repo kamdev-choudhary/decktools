@@ -13,7 +13,9 @@ import { qualified, quoteIdent } from './sql.js';
 
 const BATCH = 2000;
 
-export type ExportRequest = Pick<RowsRequest, 'schema' | 'table' | 'filters' | 'match' | 'sort' | 'dir'> & { format: ExportFormat };
+export type ExportRequest = Pick<RowsRequest, 'schema' | 'table' | 'filters' | 'match' | 'sort' | 'dir'> & {
+  format: ExportFormat;
+};
 
 /**
  * Stream every row matching the filters, serialized, using a server-side
@@ -138,7 +140,8 @@ export async function importRows(ctx: DbContext, req: ImportRequest, body: Reada
   for (const c of req.columns) if (!known.has(c)) throw new UserError(`Unknown column "${c}"`);
   if (new Set(req.columns).size !== req.columns.length) throw new UserError('Each column can only be mapped once');
   if (req.delimiter.length !== 1) throw new UserError('Delimiter must be a single character');
-  if (req.keys?.length && req.keys.length !== req.columns.length) throw new UserError('keys and columns must be the same length');
+  if (req.keys?.length && req.keys.length !== req.columns.length)
+    throw new UserError('keys and columns must be the same length');
 
   const rel = qualified(req.schema, req.table);
   const cols = req.columns.map(quoteIdent).join(', ');
@@ -165,8 +168,10 @@ export async function importRows(ctx: DbContext, req: ImportRequest, body: Reada
   } catch (err) {
     await client.query('rollback').catch(() => {});
     // A client that hung up mid-upload shows up as a premature close.
-    if ((err as NodeJS.ErrnoException).code === 'ERR_STREAM_PREMATURE_CLOSE') throw new UserError('Upload was cancelled; nothing was imported.');
-    if ((err as NodeJS.ErrnoException).code === 'Z_DATA_ERROR') throw new UserError('The file is not valid gzip; nothing was imported.');
+    if ((err as NodeJS.ErrnoException).code === 'ERR_STREAM_PREMATURE_CLOSE')
+      throw new UserError('Upload was cancelled; nothing was imported.');
+    if ((err as NodeJS.ErrnoException).code === 'Z_DATA_ERROR')
+      throw new UserError('The file is not valid gzip; nothing was imported.');
     throw err;
   } finally {
     client.release();

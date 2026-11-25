@@ -46,7 +46,14 @@ async function run(urlArg: string | undefined, opts: CliOptions): Promise<void> 
 
   let started;
   try {
-    started = await startServer({ manager, auth: config.auth, basePath: config.basePath, webRoot: config.webRoot, port: config.port, host: config.host });
+    started = await startServer({
+      manager,
+      auth: config.auth,
+      basePath: config.basePath,
+      webRoot: config.webRoot,
+      port: config.port,
+      host: config.host,
+    });
   } catch (err) {
     printFatal(listenErrorMessage(err, config.port));
     await manager.closeAll();

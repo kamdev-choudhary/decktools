@@ -24,12 +24,27 @@ const CONTENTS: { value: Contents; title: string; text: string }[] = [
   { value: 'data', title: 'Data only', text: 'Rows only, for tables that already exist.' },
 ];
 
-function OptionCard({ active, onClick, title, text, icon: Icon }: { active: boolean; onClick: () => void; title: string; text: string; icon?: typeof Database }) {
+function OptionCard({
+  active,
+  onClick,
+  title,
+  text,
+  icon: Icon,
+}: {
+  active: boolean;
+  onClick: () => void;
+  title: string;
+  text: string;
+  icon?: typeof Database;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={cn('flex w-full items-start gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors hover:bg-muted/40', active && 'border-foreground')}
+      className={cn(
+        'flex w-full items-start gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors hover:bg-muted/40',
+        active && 'border-foreground',
+      )}
     >
       {Icon && <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />}
       <span>
@@ -42,7 +57,10 @@ function OptionCard({ active, onClick, title, text, icon: Icon }: { active: bool
 
 export function ExportView({ db }: { db: string }) {
   const stats = useStats(db);
-  const tables = useMemo(() => (stats.data?.tables ?? []).filter((t) => t.kind === 'r' || t.kind === 'p'), [stats.data]);
+  const tables = useMemo(
+    () => (stats.data?.tables ?? []).filter((t) => t.kind === 'r' || t.kind === 'p'),
+    [stats.data],
+  );
   const [selected, setSelected] = useState<Set<string> | null>(null); // null = everything
   const [filter, setFilter] = useState('');
   const [contents, setContents] = useState<Contents>('both');
@@ -86,11 +104,15 @@ export function ExportView({ db }: { db: string }) {
       dataFormat,
       tables: whole ? '[]' : JSON.stringify(chosen.map((t) => ({ schema: t.schema, table: t.name }))),
     });
-    const a = Object.assign(document.createElement('a'), { href: `${BASE}api/db/${encodeURIComponent(db)}/dump?${params}` });
+    const a = Object.assign(document.createElement('a'), {
+      href: `${BASE}api/db/${encodeURIComponent(db)}/dump?${params}`,
+    });
     document.body.append(a);
     a.click();
     a.remove();
-    toast.info('Export started', { description: 'It streams straight to your downloads; your browser shows the progress.' });
+    toast.info('Export started', {
+      description: 'It streams straight to your downloads; your browser shows the progress.',
+    });
   };
 
   if (stats.isPending) return <CenteredSpinner label="Loading tables…" />;
@@ -103,7 +125,8 @@ export function ExportView({ db }: { db: string }) {
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">Export data</h1>
             <p className="text-sm text-muted-foreground">
-              Back up the whole database, or pick tables. Exports stream directly to your computer, so size doesn't matter.
+              Back up the whole database, or pick tables. Exports stream directly to your computer, so size doesn't
+              matter.
             </p>
           </div>
 
@@ -112,7 +135,10 @@ export function ExportView({ db }: { db: string }) {
             <section className="min-w-0 overflow-hidden rounded-lg border">
               <div className="flex flex-wrap items-center gap-3 border-b px-4 py-3">
                 <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-                  <Checkbox checked={allShownSelected ? true : shown.some(isSelected) ? 'indeterminate' : false} onCheckedChange={toggleShown} />
+                  <Checkbox
+                    checked={allShownSelected ? true : shown.some(isSelected) ? 'indeterminate' : false}
+                    onCheckedChange={toggleShown}
+                  />
                   {filter ? 'All matching' : 'All tables'}
                 </label>
                 <span className="text-xs text-muted-foreground tabular-nums">
@@ -120,7 +146,12 @@ export function ExportView({ db }: { db: string }) {
                 </span>
                 <div className="relative ml-auto w-full sm:w-64">
                   <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
-                  <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter tables…" className="h-8 pl-8 text-sm" />
+                  <Input
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    placeholder="Filter tables…"
+                    className="h-8 pl-8 text-sm"
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-[auto_minmax(0,1fr)_6rem_6rem] items-center gap-x-4 border-b bg-grid-header px-4 py-2 text-xs text-muted-foreground">
@@ -157,7 +188,13 @@ export function ExportView({ db }: { db: string }) {
                 <Label className="text-xs text-muted-foreground">Include</Label>
                 <div className="space-y-2">
                   {CONTENTS.map((c) => (
-                    <OptionCard key={c.value} active={contents === c.value} onClick={() => setContents(c.value)} title={c.title} text={c.text} />
+                    <OptionCard
+                      key={c.value}
+                      active={contents === c.value}
+                      onClick={() => setContents(c.value)}
+                      title={c.title}
+                      text={c.text}
+                    />
                   ))}
                 </div>
               </div>
@@ -211,8 +248,12 @@ export function ExportView({ db }: { db: string }) {
                 <div className="tabular-nums">
                   ~{formatCompact(rows)} rows · {formatBytes(bytes)} of table data
                 </div>
-                {whole && contents !== 'data' && <div>Includes schemas, extensions, types, sequences, functions, views and triggers.</div>}
-                {!whole && contents !== 'data' && <div>Views, functions and extensions are only included for the whole database.</div>}
+                {whole && contents !== 'data' && (
+                  <div>Includes schemas, extensions, types, sequences, functions, views and triggers.</div>
+                )}
+                {!whole && contents !== 'data' && (
+                  <div>Views, functions and extensions are only included for the whole database.</div>
+                )}
                 <div>All tables are read from one consistent snapshot.</div>
               </div>
 

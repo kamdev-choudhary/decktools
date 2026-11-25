@@ -59,7 +59,9 @@ export function UploadPanel() {
               </IconButton>
             )}
           </CardAction>
-          {active.length > 0 && <Progress value={total ? (loaded / total) * 100 : 0} className="col-span-full mt-2 h-1" />}
+          {active.length > 0 && (
+            <Progress value={total ? (loaded / total) * 100 : 0} className="col-span-full mt-2 h-1" />
+          )}
         </CardHeader>
         <CollapsibleContent>
           <CardContent className="max-h-72 overflow-y-auto px-0 py-1">
@@ -79,7 +81,12 @@ export function UploadPanel() {
                         </span>
                       </div>
                     ) : (
-                      <p className={cn('truncate text-xs', i.status === 'error' ? 'text-destructive' : 'text-muted-foreground')}>
+                      <p
+                        className={cn(
+                          'truncate text-xs',
+                          i.status === 'error' ? 'text-destructive' : 'text-muted-foreground',
+                        )}
+                      >
                         {i.status === 'error'
                           ? i.error
                           : i.status === 'queued'

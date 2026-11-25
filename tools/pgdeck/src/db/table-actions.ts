@@ -8,9 +8,20 @@ import type { TableAction } from '../shared/types.js';
 
 export type { TableAction };
 
-const KIND_SQL: Record<string, string> = { r: 'TABLE', p: 'TABLE', v: 'VIEW', m: 'MATERIALIZED VIEW', f: 'FOREIGN TABLE' };
+const KIND_SQL: Record<string, string> = {
+  r: 'TABLE',
+  p: 'TABLE',
+  v: 'VIEW',
+  m: 'MATERIALIZED VIEW',
+  f: 'FOREIGN TABLE',
+};
 
-export async function runTableAction(ctx: DbContext, schema: string, table: string, a: TableAction): Promise<{ ok: true; message: string }> {
+export async function runTableAction(
+  ctx: DbContext,
+  schema: string,
+  table: string,
+  a: TableAction,
+): Promise<{ ok: true; message: string }> {
   const meta = await getTableMeta(ctx, schema, table);
   const rel = qualified(schema, table);
   const kind = KIND_SQL[meta.kind] ?? 'TABLE';
@@ -21,7 +32,9 @@ export async function runTableAction(ctx: DbContext, schema: string, table: stri
   switch (a.action) {
     case 'truncate':
       if (!isTable) throw new UserError('Only tables can be truncated');
-      await ctx.pool.query(`TRUNCATE ${rel}${a.restartIdentity ? ' RESTART IDENTITY' : ''}${a.cascade ? ' CASCADE' : ''}`);
+      await ctx.pool.query(
+        `TRUNCATE ${rel}${a.restartIdentity ? ' RESTART IDENTITY' : ''}${a.cascade ? ' CASCADE' : ''}`,
+      );
       return { ok: true, message: `Emptied ${schema}.${table}` };
 
     case 'drop':
@@ -41,7 +54,10 @@ export async function runTableAction(ctx: DbContext, schema: string, table: stri
         // Columns, defaults, constraints (except FKs), indexes, identity, generated columns, comments.
         await client.query(`CREATE TABLE ${target} (LIKE ${rel} INCLUDING ALL)`);
         if (a.withData) {
-          const cols = meta.columns.filter((c) => !c.generated).map((c) => quoteIdent(c.name)).join(', ');
+          const cols = meta.columns
+            .filter((c) => !c.generated)
+            .map((c) => quoteIdent(c.name))
+            .join(', ');
           await client.query(`INSERT INTO ${target} (${cols}) OVERRIDING SYSTEM VALUE SELECT ${cols} FROM ${rel}`);
         }
         await client.query('commit');
@@ -74,11 +90,19 @@ export async function runTableAction(ctx: DbContext, schema: string, table: stri
 export async function relationDdl(ctx: DbContext, schema: string, table: string): Promise<string> {
   const meta = await getTableMeta(ctx, schema, table);
   if (meta.kind === 'v' || meta.kind === 'm') {
-    const { rows } = await ctx.pool.query<{ def: string }>(`select pg_get_viewdef(($1)::regclass, true) as def`, [qualified(schema, table)]);
+    const { rows } = await ctx.pool.query<{ def: string }>(`select pg_get_viewdef(($1)::regclass, true) as def`, [
+      qualified(schema, table),
+    ]);
     return `CREATE ${meta.kind === 'm' ? 'MATERIALIZED VIEW' : 'VIEW'} ${qualified(schema, table)} AS\n${rows[0]!.def.trimEnd().replace(/;$/, '')};\n`;
   }
   let out = '';
-  for await (const chunk of dumpSql(ctx, { tables: [{ schema, table }], structure: true, data: false, keepOutsideForeignKeys: true })) out += chunk.toString();
+  for await (const chunk of dumpSql(ctx, {
+    tables: [{ schema, table }],
+    structure: true,
+    data: false,
+    keepOutsideForeignKeys: true,
+  }))
+    out += chunk.toString();
   // Keep only the object definitions, not the dump preamble/settings.
   return out
     .split('\n')
@@ -106,5 +130,10 @@ export async function runMaintenance(
     }
   }
   const verb = action === 'vacuum' ? 'Vacuumed' : 'Analyzed';
-  return { ok: true, message: `${verb} ${done} table${done === 1 ? '' : 's'}${failed.length ? `, ${failed.length} failed` : ''}`, done, failed };
+  return {
+    ok: true,
+    message: `${verb} ${done} table${done === 1 ? '' : 's'}${failed.length ? `, ${failed.length} failed` : ''}`,
+    done,
+    failed,
+  };
 }

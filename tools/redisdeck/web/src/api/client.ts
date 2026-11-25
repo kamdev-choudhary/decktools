@@ -42,7 +42,9 @@ async function request<T>(path: string, body?: unknown): Promise<T> {
 }
 
 const q = (params: Record<string, string | number | undefined>) =>
-  new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== '') as [string, string][]).toString();
+  new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== '') as [string, string][],
+  ).toString();
 
 export const api = {
   session: () => request<SessionInfo>('auth/session'),

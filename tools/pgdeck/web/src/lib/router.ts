@@ -66,7 +66,8 @@ export const sqlHref = (db: string) => `#/${enc(db)}/sql`;
 export const importHref = (db: string) => `#/${enc(db)}/import`;
 export const exportHref = (db: string) => `#/${enc(db)}/export`;
 export const objectHref = (db: string, kind: ObjectKind, oid: number) => `#/${enc(db)}/obj/${kind}/${oid}`;
-export const diagramHref = (db: string, focus?: string | null) => `#/${enc(db)}/diagram${focus ? `?${new URLSearchParams({ focus })}` : ''}`;
+export const diagramHref = (db: string, focus?: string | null) =>
+  `#/${enc(db)}/diagram${focus ? `?${new URLSearchParams({ focus })}` : ''}`;
 export const rolesHref = (db: string) => `#/${enc(db)}/roles`;
 export const roleHref = (db: string, name: string) => `#/${enc(db)}/roles/${enc(name)}`;
 export const tableHref = (db: string, schema: string, table: string, eq?: Record<string, string>) => {

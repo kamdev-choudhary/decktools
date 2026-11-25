@@ -67,7 +67,8 @@ export function DataGrid({
   };
 
   const selectedCount = selection?.selected.size ?? 0;
-  const headerChecked = rows.length > 0 && selectedCount === rows.length ? true : selectedCount > 0 ? 'indeterminate' : false;
+  const headerChecked =
+    rows.length > 0 && selectedCount === rows.length ? true : selectedCount > 0 ? 'indeterminate' : false;
 
   return (
     <div className={cn('relative min-h-0 flex-1 overflow-auto', className)}>
@@ -79,7 +80,9 @@ export function DataGrid({
                 <Checkbox
                   aria-label="Select all rows"
                   checked={headerChecked}
-                  onCheckedChange={() => selection.onChange(headerChecked === true ? new Set() : new Set(rows.map((_, i) => i)))}
+                  onCheckedChange={() =>
+                    selection.onChange(headerChecked === true ? new Set() : new Set(rows.map((_, i) => i)))
+                  }
                 />
               ) : (
                 '#'
@@ -111,7 +114,9 @@ export function DataGrid({
                       />
                     )}
                   </button>
-                  {types?.[f] && <div className="font-mono text-[10.5px] font-normal text-muted-foreground">{types[f]}</div>}
+                  {types?.[f] && (
+                    <div className="font-mono text-[10.5px] font-normal text-muted-foreground">{types[f]}</div>
+                  )}
                   {db && foreignKeys?.[f] && <FkHeaderLink db={db} fk={foreignKeys[f]} />}
                 </th>
               );

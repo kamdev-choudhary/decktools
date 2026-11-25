@@ -50,10 +50,16 @@ function StringReply({ text, binary, raw }: { text: string; binary?: boolean; ra
   if (formatted && pretty) {
     return (
       <div>
-        <button type="button" onClick={() => setFormatted(false)} className="mb-1 inline-flex items-center gap-1 font-sans text-[11px] text-link hover:underline">
+        <button
+          type="button"
+          onClick={() => setFormatted(false)}
+          className="mb-1 inline-flex items-center gap-1 font-sans text-[11px] text-link hover:underline"
+        >
           <Braces className="size-3" /> Show as stored
         </button>
-        <pre className="rounded-md border bg-background p-3 text-[12px] leading-relaxed whitespace-pre-wrap">{pretty}</pre>
+        <pre className="rounded-md border bg-background p-3 text-[12px] leading-relaxed whitespace-pre-wrap">
+          {pretty}
+        </pre>
       </div>
     );
   }
@@ -61,7 +67,11 @@ function StringReply({ text, binary, raw }: { text: string; binary?: boolean; ra
     <span className="break-all whitespace-pre-wrap" title={binary ? 'Binary value, shown escaped (\\xHH)' : undefined}>
       {raw ? text : `"${text}"`}
       {pretty && (
-        <button type="button" onClick={() => setFormatted(true)} className="ml-2 inline-flex items-center gap-1 align-middle font-sans text-[11px] text-link hover:underline">
+        <button
+          type="button"
+          onClick={() => setFormatted(true)}
+          className="ml-2 inline-flex items-center gap-1 align-middle font-sans text-[11px] text-link hover:underline"
+        >
           <Braces className="size-3" /> Format JSON
         </button>
       )}
@@ -118,7 +128,11 @@ function ReplyView({ reply, raw }: { reply: Reply; raw: boolean }): ReactNode {
     case 'string':
       return <StringReply text={reply.value.text} binary={reply.value.binary} raw={raw} />;
     case 'array':
-      return reply.items.length ? <ArrayReply items={reply.items} raw={raw} /> : raw ? null : <span className="text-muted-foreground">(empty array)</span>;
+      return reply.items.length ? (
+        <ArrayReply items={reply.items} raw={raw} />
+      ) : raw ? null : (
+        <span className="text-muted-foreground">(empty array)</span>
+      );
   }
 }
 
@@ -133,7 +147,8 @@ function Signature({ doc }: { doc: CommandDoc }) {
   return (
     <div className="space-y-1">
       <div className="font-mono text-[12.5px]">
-        <span className="font-semibold">{upper(doc.name)}</span> <span className="text-muted-foreground">{doc.syntax}</span>
+        <span className="font-semibold">{upper(doc.name)}</span>{' '}
+        <span className="text-muted-foreground">{doc.syntax}</span>
       </div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
         {doc.summary && <span>{doc.summary}</span>}
@@ -154,7 +169,13 @@ function Signature({ doc }: { doc: CommandDoc }) {
 /* View                                                                */
 /* ------------------------------------------------------------------ */
 
-const EXAMPLES = ['INFO keyspace', 'SCAN 0 MATCH user:* COUNT 100', 'TYPE mykey', 'MEMORY USAGE mykey', 'CONFIG GET maxmemory*'];
+const EXAMPLES = [
+  'INFO keyspace',
+  'SCAN 0 MATCH user:* COUNT 100',
+  'TYPE mykey',
+  'MEMORY USAGE mykey',
+  'CONFIG GET maxmemory*',
+];
 
 export function ConsoleView({ db }: { db: number }) {
   const run = useCommand(db);
@@ -290,7 +311,8 @@ export function ConsoleView({ db }: { db: number }) {
       <div className="flex h-12 shrink-0 items-center gap-3 border-b px-4">
         <h1 className="text-sm font-medium">Console</h1>
         <span className="hidden truncate text-xs text-muted-foreground lg:inline">
-          <Kbd>Tab</Kbd> complete · <Kbd>↑</Kbd> <Kbd>↓</Kbd> history · <Kbd>Shift ↵</Kbd> new line · <Kbd>Ctrl L</Kbd> clear
+          <Kbd>Tab</Kbd> complete · <Kbd>↑</Kbd> <Kbd>↓</Kbd> history · <Kbd>Shift ↵</Kbd> new line · <Kbd>Ctrl L</Kbd>{' '}
+          clear
         </span>
         <div className="flex-1" />
         <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
@@ -319,14 +341,19 @@ export function ConsoleView({ db }: { db: number }) {
               <p>Run any Redis command, the same as in redis-cli. Start typing for suggestions, or try one of these:</p>
               <div className="flex flex-wrap gap-2">
                 {EXAMPLES.map((ex) => (
-                  <button key={ex} type="button" onClick={() => edit(ex)} className="rounded-md border bg-background px-2 py-1 font-mono text-xs text-foreground hover:bg-accent">
+                  <button
+                    key={ex}
+                    type="button"
+                    onClick={() => edit(ex)}
+                    className="rounded-md border bg-background px-2 py-1 font-mono text-xs text-foreground hover:bg-accent"
+                  >
                     {ex}
                   </button>
                 ))}
               </div>
               <p className="text-xs">
-                Paste several lines to run them in order. Commands that hold the connection (SUBSCRIBE, MONITOR, MULTI, blocking pops) aren't available here; switch databases with
-                the menu at the top instead of SELECT.
+                Paste several lines to run them in order. Commands that hold the connection (SUBSCRIBE, MONITOR, MULTI,
+                blocking pops) aren't available here; switch databases with the menu at the top instead of SELECT.
               </p>
             </div>
           )}
@@ -348,7 +375,13 @@ export function ConsoleView({ db }: { db: number }) {
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon-xs" onClick={() => submit(e.command)} disabled={running} aria-label="Run again">
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => submit(e.command)}
+                          disabled={running}
+                          aria-label="Run again"
+                        >
                           <RotateCw />
                         </Button>
                       </TooltipTrigger>
@@ -356,7 +389,13 @@ export function ConsoleView({ db }: { db: number }) {
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon-xs" onClick={() => copy(e)} disabled={!e.reply && !e.error} aria-label="Copy output">
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => copy(e)}
+                          disabled={!e.reply && !e.error}
+                          aria-label="Copy output"
+                        >
                           <Copy />
                         </Button>
                       </TooltipTrigger>
@@ -371,7 +410,13 @@ export function ConsoleView({ db }: { db: number }) {
                   )}
                 </div>
                 <div className="pl-2">
-                  {e.error ? <span className="text-destructive">{e.error}</span> : e.reply ? <ReplyView reply={e.reply} raw={raw} /> : <Spinner className="size-3.5" />}
+                  {e.error ? (
+                    <span className="text-destructive">{e.error}</span>
+                  ) : e.reply ? (
+                    <ReplyView reply={e.reply} raw={raw} />
+                  ) : (
+                    <Spinner className="size-3.5" />
+                  )}
                 </div>
               </div>
             );
@@ -382,7 +427,11 @@ export function ConsoleView({ db }: { db: number }) {
 
       <div className="relative shrink-0 border-t bg-background">
         {completion && (
-          <div className="absolute inset-x-3 bottom-full mb-2 overflow-hidden rounded-lg border bg-popover shadow-none" role="listbox" aria-label="Command suggestions">
+          <div
+            className="absolute inset-x-3 bottom-full mb-2 overflow-hidden rounded-lg border bg-popover shadow-none"
+            role="listbox"
+            aria-label="Command suggestions"
+          >
             {completion.items.map((d, i) => (
               <button
                 key={d.name}
@@ -394,9 +443,18 @@ export function ConsoleView({ db }: { db: number }) {
                 onMouseEnter={() => setPick(i)}
                 className={cn('flex w-full items-baseline gap-3 px-3 py-1.5 text-left', d === picked && 'bg-accent')}
               >
-                <span className={cn('shrink-0 font-mono text-[12.5px] font-medium', d.refused && 'text-muted-foreground line-through')}>{upper(d.name)}</span>
+                <span
+                  className={cn(
+                    'shrink-0 font-mono text-[12.5px] font-medium',
+                    d.refused && 'text-muted-foreground line-through',
+                  )}
+                >
+                  {upper(d.name)}
+                </span>
                 <span className="min-w-0 truncate font-mono text-[11.5px] text-muted-foreground">{d.syntax}</span>
-                <span className="ml-auto hidden max-w-[40%] shrink-0 truncate text-xs text-muted-foreground md:block">{d.summary}</span>
+                <span className="ml-auto hidden max-w-[40%] shrink-0 truncate text-xs text-muted-foreground md:block">
+                  {d.summary}
+                </span>
               </button>
             ))}
           </div>
@@ -445,10 +503,14 @@ export function ConsoleView({ db }: { db: number }) {
       <AlertDialog open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Run {confirm && confirm.lines.length > 1 ? `these ${confirm.lines.length} commands` : 'this command'}?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Run {confirm && confirm.lines.length > 1 ? `these ${confirm.lines.length} commands` : 'this command'}?
+            </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3">
-                <pre className="max-h-40 overflow-auto rounded-md border bg-muted/40 p-2 font-mono text-xs text-foreground">{confirm?.lines.join('\n')}</pre>
+                <pre className="max-h-40 overflow-auto rounded-md border bg-muted/40 p-2 font-mono text-xs text-foreground">
+                  {confirm?.lines.join('\n')}
+                </pre>
                 <ul className="list-disc space-y-1 pl-4">
                   {confirm?.reasons.map((r) => (
                     <li key={r}>{r}</li>

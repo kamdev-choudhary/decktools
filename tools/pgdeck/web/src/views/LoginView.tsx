@@ -20,7 +20,9 @@ export function LoginView() {
             <Logo className="size-11" />
             <div className="space-y-1.5">
               <h1 className="text-2xl font-semibold tracking-tight">Log in to pgdeck</h1>
-              <p className="text-sm text-muted-foreground">Use the credentials printed in the terminal where pgdeck is running.</p>
+              <p className="text-sm text-muted-foreground">
+                Use the credentials printed in the terminal where pgdeck is running.
+              </p>
             </div>
           </div>
 

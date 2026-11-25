@@ -1,99 +1,24 @@
 ---
-import Corners from '../../../components/Corners.astro';
-import Cross from '../../../components/Cross.astro';
+import Corners from '../Corners.astro';
+import Cross from '../Cross.astro';
+import type { DeployContent } from './types';
 
-const c = (s: string) => `<span class="text-faint">${s}</span>`;
-const k = (s: string) => `<span class="text-pink">${s}</span>`;
-const v = (s: string) => `<span class="text-blue">${s}</span>`;
-const q = (s: string) => `<span class="text-green">${s}</span>`;
-
-const snippets = [
-  {
-    id: 'examples',
-    label: 'Terminal',
-    html: [
-      c('# Local database, opens your browser'),
-      `npx pgdeck ${q('postgres://postgres@localhost:5432')} ${v('--open')}`,
-      '',
-      c('# Production, read-only, with a fixed password'),
-      `PGDECK_PASSWORD=${q("'correct horse battery staple'")} \\`,
-      `  npx pgdeck ${q('"$DATABASE_URL"')} ${v('--readonly')}`,
-      '',
-      c('# Managed Postgres that requires SSL'),
-      `npx pgdeck ${q('"postgres://user:pass@db.example.com/app?sslmode=require"')}`,
-    ].join('\n'),
-  },
-  {
-    id: 'tunnel',
-    label: 'SSH tunnel',
-    html: [
-      c('# On the server: pgdeck stays private on 127.0.0.1'),
-      `npx pgdeck ${q('postgres://postgres@localhost:5432')} ${v('--password')} ${q('"$SECRET"')}`,
-      '',
-      c('# On your laptop: forward the port, then open http://127.0.0.1:47615'),
-      `ssh ${v('-L')} 47615:127.0.0.1:47615 you@your-server`,
-    ].join('\n'),
-  },
-  {
-    id: 'nginx',
-    label: 'nginx',
-    html: [
-      c('# npx pgdeck "$DATABASE_URL" --base-path /db --password "$SECRET"'),
-      `${k('location')} /db/ {`,
-      `    ${k('proxy_pass')} http://127.0.0.1:47615;`,
-      `    ${k('proxy_http_version')} 1.1;`,
-      `    ${k('proxy_set_header')} Upgrade $http_upgrade;`,
-      `    ${k('proxy_set_header')} Connection ${q('"upgrade"')};`,
-      `    ${k('proxy_set_header')} Host $host;`,
-      `    ${k('proxy_set_header')} X-Forwarded-Proto $scheme;`,
-      '',
-      `    ${c('# Large imports: stream uploads, no size limit')}`,
-      `    ${k('client_max_body_size')} 0;`,
-      `    ${k('proxy_request_buffering')} off;`,
-      `    ${k('proxy_read_timeout')} 1h;`,
-      '}',
-    ].join('\n'),
-  },
-  {
-    id: 'caddy',
-    label: 'Caddy',
-    html: [
-      c('# handle_path strips /db, so start pgdeck without --base-path'),
-      `example.com {`,
-      `    ${k('handle_path')} /db/* {`,
-      `        ${k('reverse_proxy')} 127.0.0.1:47615`,
-      '    }',
-      '}',
-    ].join('\n'),
-  },
-];
-
-const safety = [
-  ['Login by default', 'A random password at every start, HTTP-only SameSite=Strict cookies, and rate-limited sign-in.'],
-  ['Private unless you say so', 'Binds to 127.0.0.1. It warns if you expose it without a login.'],
-  ['Cross-site safe', 'API calls need a custom header and WebSockets check their Origin.'],
-  ['Least privilege', 'pgdeck can only do what its role can. Use a read-only role for anything sensitive.'],
-] as const;
+/** Where to run the deck: flags, tabbed setup snippets, and the security defaults. */
+interface Props {
+  content: DeployContent;
+}
+const { title, lede, flags, snippets, safety } = Astro.props.content;
 ---
 
 <section id="deploy" class="section">
   <Corners />
   <div class="pad grid gap-12 py-20 md:py-28 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.2fr)] lg:gap-14">
     <div>
-      <h2 class="h2">Run it next to your database.</h2>
-      <p class="lede mt-5">
-        On your laptop for local work. On a server behind an SSH tunnel or a reverse proxy with HTTPS for everything
-        else. It works at the root of a domain or under a path.
-      </p>
+      <h2 class="h2">{title}</h2>
+      <p class="lede mt-5">{lede}</p>
       <dl class="mt-8 divide-y divide-line border-y border-line text-[0.92rem]">
         {
-          [
-            ['--readonly', 'Read-only sessions, no editing'],
-            ['--password', 'A fixed login instead of a random one'],
-            ['--host 0.0.0.0', 'Listen beyond localhost'],
-            ['--base-path /db', 'Serve under a path prefix'],
-            ['--ssl', 'SSL without certificate checks'],
-          ].map(([flag, what]) => (
+          flags.map(([flag, what]) => (
             <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-3">
               <dt class="font-mono text-[0.82rem] text-blue">{flag}</dt>
               <dd class="text-muted">{what}</dd>

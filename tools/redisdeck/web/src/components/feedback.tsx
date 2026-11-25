@@ -6,7 +6,17 @@ export { CenteredSpinner, Kbd, Slash, Spinner } from '@deck/ui/components/feedba
 
 export const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
-export function ErrorAlert({ error, title, className, children }: { error: unknown; title?: string; className?: string; children?: ReactNode }) {
+export function ErrorAlert({
+  error,
+  title,
+  className,
+  children,
+}: {
+  error: unknown;
+  title?: string;
+  className?: string;
+  children?: ReactNode;
+}) {
   return (
     <Alert variant="destructive" className={className}>
       <AlertCircle />

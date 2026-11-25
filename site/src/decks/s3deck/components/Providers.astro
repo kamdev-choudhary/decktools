@@ -1,0 +1,28 @@
+---
+/** S3-compatible services s3deck works with, from the README's provider table. */
+const providers = [
+  ['AWS S3', 'Every feature'],
+  ['Cloudflare R2', 'Region auto'],
+  ['MinIO', 'Path-style, automatic'],
+  ['Backblaze B2', 'S3 endpoint'],
+  ['DigitalOcean Spaces', 'S3 endpoint'],
+  ['Wasabi', 'S3 endpoint'],
+  ['Ceph RGW', 'Your gateway'],
+  ['Garage', 'Your gateway'],
+  ['LocalStack', 'Local testing'],
+] as const;
+---
+
+<div class="reveal mt-12">
+  <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="Supported storage providers">
+    {
+      providers.map(([name, note]) => (
+        <li class="elevate rounded-xl border border-line-strong bg-surface px-3.5 py-3">
+          <div class="text-sm font-medium">{name}</div>
+          <div class="mt-0.5 text-[0.72rem] text-faint">{note}</div>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="mt-4 text-sm text-faint">Features a provider doesn’t implement, such as versioning on R2, are detected and hidden, not broken.</p>
+</div>

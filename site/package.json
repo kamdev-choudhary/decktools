@@ -9,13 +9,13 @@
     "preview": "astro preview --port 47617"
   },
   "dependencies": {
-    "@fontsource-variable/geist": "^5.3.0",
-    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@fontsource-variable/geist": "catalog:",
+    "@fontsource-variable/geist-mono": "catalog:",
     "@fontsource-variable/schibsted-grotesk": "^5.3.0",
-    "@tailwindcss/vite": "^4.3.5",
+    "@tailwindcss/vite": "catalog:",
     "astro": "7.4.13",
     "sharp": "^0.35.5",
-    "tailwindcss": "^4.3.5"
+    "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",

@@ -20,15 +20,23 @@
     "dev:redisdeck": "pnpm --filter redisdeck dev",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r test",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build",
     "site:dev": "pnpm --filter deck-site dev",
-    "site:build": "pnpm --filter deck-site build"
+    "site:build": "pnpm --filter deck-site build",
+    "changeset": "changeset",
+    "version-packages": "changeset version && pnpm install --lockfile-only",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
-    "oxlint": "^1.95.0",
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.3",
+    "oxlint": "catalog:",
     "pgdeck": "workspace:*",
+    "prettier": "^3.10.1",
     "redisdeck": "workspace:*",
     "s3deck": "workspace:*"
   }
