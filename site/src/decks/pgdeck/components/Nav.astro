@@ -1,7 +1,9 @@
 ---
-import { compact, getMeta, REPO_URL } from '../lib/meta';
-import Logo from './Logo.astro';
-const { stars: count } = await getMeta();
+import { compact, getStars, REPO_URL } from '../../../lib/meta';
+import { DOCS_URL } from '../meta';
+import Logo from '../../../components/Logo.astro';
+const count = await getStars();
+const home = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
 // Show the count once it says something; until then just the label.
 const stars = count !== null && count >= 10 ? count : null;
 ---
@@ -13,11 +15,12 @@ const stars = count !== null && count >= 10 ? count : null;
       pgdeck
     </a>
     <div class="hidden items-center gap-6 text-sm text-muted md:flex">
+      <a href={home} class="transition-colors hover:text-fg">All decks</a>
       <a href="#how" class="transition-colors hover:text-fg">How it works</a>
       <a href="#features" class="transition-colors hover:text-fg">Features</a>
       <a href="#tour" class="transition-colors hover:text-fg">Tour</a>
       <a href="#deploy" class="transition-colors hover:text-fg">Deploy</a>
-      <a href={`${REPO_URL}#readme`} class="transition-colors hover:text-fg">Docs</a>
+      <a href={DOCS_URL} class="transition-colors hover:text-fg">Docs</a>
     </div>
     <div class="ml-auto flex items-center gap-2">
       <a href={REPO_URL} class="btn btn-ghost h-9 px-3.5 text-sm" aria-label={stars === null ? 'pgdeck on GitHub' : `pgdeck on GitHub, ${stars} stars`}>

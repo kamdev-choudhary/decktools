@@ -64,7 +64,11 @@ export function neighbourhood(graph: SchemaGraph, focus: string, depth: number, 
     const next: string[] = [];
     for (const id of frontier) {
       if (id !== focus && hubs.has(id)) continue;
-      for (const n of adj.get(id) ?? []) if (!seen.has(n)) (seen.add(n), next.push(n));
+      for (const n of adj.get(id) ?? []) {
+        if (seen.has(n)) continue;
+        seen.add(n);
+        next.push(n);
+      }
     }
     frontier = next;
   }

@@ -1,11 +1,12 @@
 ---
-import { getMeta, REPO_URL } from '../lib/meta';
-import Corners from './Corners.astro';
-import CopyCommand from './CopyCommand.astro';
-import Cross from './Cross.astro';
+import { REPO_URL } from '../../../lib/meta';
+import { DOCS_URL, getPgdeckVersion } from '../meta';
+import Corners from '../../../components/Corners.astro';
+import CopyCommand from '../../../components/CopyCommand.astro';
+import Cross from '../../../components/Cross.astro';
 import Shot from './Shot.astro';
 
-const { version } = await getMeta();
+const version = await getPgdeckVersion();
 const command = 'npx pgdeck postgres://localhost:5432/shop';
 const stats = [
   ['1M rows', 'imported from CSV in about 3 s'],
@@ -35,7 +36,7 @@ const stats = [
 
     <div id="get-started" class="intro mx-auto mt-10 flex max-w-2xl flex-col items-stretch gap-3 sm:flex-row sm:items-center" style="--d:3">
       <CopyCommand command="npx pgdeck postgres://user:pass@host:5432/db" class="flex-1 text-left" />
-      <a href={`${REPO_URL}#readme`} class="btn btn-ghost h-[3.1rem] shrink-0">Read the docs</a>
+      <a href={DOCS_URL} class="btn btn-ghost h-[3.1rem] shrink-0">Read the docs</a>
     </div>
     <p class="intro mt-4 text-[0.82rem] text-faint" style="--d:4">Free and open source, MIT licensed. Needs Node.js 20 or newer.</p>
   </div>

@@ -1,8 +1,9 @@
 ---
-import { NPM_URL, REPO_URL } from '../lib/meta';
-import Corners from './Corners.astro';
-import CopyCommand from './CopyCommand.astro';
-import Logo from './Logo.astro';
+import { REPO_URL } from '../../../lib/meta';
+import { DOCS_URL, NPM_URL } from '../meta';
+import Corners from '../../../components/Corners.astro';
+import CopyCommand from '../../../components/CopyCommand.astro';
+import Logo from '../../../components/Logo.astro';
 ---
 
 <section class="section relative isolate overflow-hidden">
@@ -25,7 +26,7 @@ import Logo from './Logo.astro';
     <span class="flex items-center gap-2 font-medium text-fg"><Logo class="size-5" /> pgdeck</span>
     <span>Open source under the MIT license.</span>
     <nav class="flex flex-wrap gap-x-6 gap-y-2 md:ml-auto" aria-label="Footer">
-      <a href={`${REPO_URL}#readme`} class="hover:text-fg">Docs</a>
+      <a href={DOCS_URL} class="hover:text-fg">Docs</a>
       <a href={REPO_URL} class="hover:text-fg">GitHub</a>
       <a href={NPM_URL} class="hover:text-fg">npm</a>
       <a href={`${REPO_URL}/releases`} class="hover:text-fg">Releases</a>

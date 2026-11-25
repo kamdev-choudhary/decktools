@@ -48,10 +48,11 @@
     "dev": "concurrently -k -n api,web -c blue,magenta \"pnpm:dev:server\" \"pnpm:dev:web\"",
     "dev:server": "tsx watch src/cli/index.ts --no-auth",
     "dev:web": "vite --config web/vite.config.ts",
+    "lint": "oxlint -c ../../.oxlintrc.json src web test",
     "typecheck": "tsc -p tsconfig.json && tsc -p web/tsconfig.json",
     "test": "tsx --test \"test/**/*.test.ts\"",
     "start": "node dist/cli.js",
-    "prepublishOnly": "pnpm typecheck && pnpm test && pnpm build",
+    "prepublishOnly": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "pack:check": "pnpm build && pnpm pack --dry-run"
   },
   "dependencies": {
@@ -97,6 +98,7 @@
     "concurrently": "^10.0.7",
     "html-to-image": "^1.11.13",
     "lucide-react": "^1.77.0",
+    "oxlint": "^1.95.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "sonner": "^2.0.8",

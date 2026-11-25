@@ -1,13 +1,16 @@
 ---
 import '../styles/global.css';
+import type { ImageMetadata } from 'astro';
 import { getImage } from 'astro:assets';
-import ogSource from '../assets/shots/overview-dark.png';
+import defaultOg from '../decks/pgdeck/assets/shots/overview-dark.png';
 
 interface Props {
   title: string;
   description: string;
+  /** Social preview image; defaults to the pgdeck overview screenshot. */
+  ogImage?: ImageMetadata;
 }
-const { title, description } = Astro.props;
+const { title, description, ogImage: ogSource = defaultOg } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const og = await getImage({ src: ogSource, width: 1200, format: 'png' });
