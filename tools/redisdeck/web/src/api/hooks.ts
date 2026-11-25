@@ -77,6 +77,9 @@ export function useCreateKey(db: number) {
   });
 }
 
+/** The server's command catalog; it only changes with the Redis version. */
+export const useCommandDocs = () => useQuery({ queryKey: ['commands'], queryFn: api.commands, staleTime: Infinity });
+
 export const useCommand = (db: number) => useMutation({ mutationFn: (command: string) => api.command(db, command) });
 
 export const STATS_WINDOW = 60; // samples kept: 2 minutes at one every 2 s

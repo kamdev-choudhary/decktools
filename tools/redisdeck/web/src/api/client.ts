@@ -1,5 +1,6 @@
 import type {
   ApiErrorBody,
+  CommandDoc,
   CommandResult,
   KeyAction,
   KeyDetail,
@@ -51,6 +52,7 @@ export const api = {
   server: () => request<ServerInfo>('server'),
   stats: () => request<StatsSample>('stats'),
   slowlog: () => request<SlowlogEntry[]>('slowlog'),
+  commands: () => request<CommandDoc[]>('commands'),
 
   keys: (db: number, p: { cursor: string; match: string; type?: string }) => request<KeyPage>(`db/${db}/keys?${q(p)}`),
   size: (db: number) => request<{ keys: number }>(`db/${db}/size`),
