@@ -179,6 +179,9 @@ describe('redisdeck against a real Redis', { skip: !hasRedis && 'redis-server no
     assert.deepEqual((await cmd('INCR big')).body.reply, { kind: 'integer', value: '9007199254740994' });
     assert.deepEqual((await cmd('GET "missing key"')).body.reply, { kind: 'nil' });
     assert.deepEqual((await cmd('LRANGE queue 0 -1')).body.reply.kind, 'array');
+    // Scores are strings, as redis-cli shows them (RESP2), not integers.
+    const z = (await cmd('ZRANGE scores 0 0 WITHSCORES')).body.reply;
+    assert.ok(z.kind === 'array' && z.items[1]!.kind === 'string');
     assert.equal((await cmd('NOSUCHCOMMAND')).body.reply.kind, 'error');
     assert.equal((await cmd('SELECT 2')).status, 400);
     assert.equal((await cmd('BLPOP queue 0')).status, 400);

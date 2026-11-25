@@ -1,4 +1,4 @@
-import type { KeyType } from '@shared/types';
+import type { KeyType, NewKey } from '@shared/types';
 
 export const TYPE_LABEL: Record<string, string> = {
   string: 'String',
@@ -27,7 +27,7 @@ export const typeShort = (t: KeyType) => SHORT[t] ?? t.slice(0, 4).toUpperCase()
 export const typeColor = (t: KeyType) => VAR[t] ?? 'var(--type-other)';
 
 /** Types offered when creating a key. JSON needs the RedisJSON module. */
-export const CREATABLE: { type: KeyType; label: string }[] = [
+export const CREATABLE: { type: NewKey['type']; label: string }[] = [
   { type: 'string', label: 'String' },
   { type: 'hash', label: 'Hash' },
   { type: 'list', label: 'List' },

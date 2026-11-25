@@ -51,6 +51,7 @@ export class RedisManager {
     this.base = {
       ...options,
       connectionName: 'redisdeck',
+      protocol: 2,
       lazyConnect: true,
       connectTimeout: 5000,
       // Fail requests fast while Redis is down instead of queueing them forever.
